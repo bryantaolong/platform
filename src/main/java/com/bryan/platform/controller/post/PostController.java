@@ -2,16 +2,25 @@ package com.bryan.platform.controller.post;
 
 import com.bryan.platform.domain.converter.PostConverter;
 import com.bryan.platform.domain.entity.post.Post;
+import com.bryan.platform.domain.enums.HttpStatus;
+import com.bryan.platform.domain.enums.post.CommentAreaStatusEnum;
+import com.bryan.platform.domain.enums.post.PostStatusEnum;
+import com.bryan.platform.domain.request.post.PostCreateRequest;
+import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.post.PostVO;
+import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * PostController
@@ -25,6 +34,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final AuthService authService;
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -46,5 +56,132 @@ public class PostController {
                 .toList();
         return Result.success(PageResult.of(rows, page.getTotal(),
                                                 page.getPageNum(), page.getPageSize()));
+    }
+
+    @GetMapping("/{id}")
+    public Result<PostVO> getPostById(@PathVariable Long id) {
+        Post post = postService.getPostById(id);
+        if (post != null) {
+            return Result.success(PostConverter.toPostVO(post));
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "文章不存在");
+        }
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<PageResult<PostVO>> searchPosts(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String tags,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        PageResult<Post> page = postService.searchPosts(title, author, tags, pageNum, pageSize);
+        List<PostVO> rows = page.getRows().stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(PageResult.of(rows, page.getTotal(),
+                                                page.getPageNum(), page.getPageSize()));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Post> createPost(@RequestBody PostCreateRequest request) {
+        Long currentUserId = authService.getCurrentUserId();
+
+        Post post = Post.builder()
+                .userId(currentUserId)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .status(PostStatusEnum.AUDITING)
+                .categoryId(request.getCategoryId())
+                .tags(translateTags(request.getTags()))
+                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .build();
+
+        Post createdPost = postService.createPost(post);
+        return Result.success(createdPost);
+    }
+
+    @PostMapping("/draft")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
+        Long currentUserId = authService.getCurrentUserId();
+
+        Post post = Post.builder()
+                .userId(currentUserId)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .status(PostStatusEnum.DRAFT)
+                .categoryId(request.getCategoryId())
+                .tags(translateTags(request.getTags()))
+                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .build();
+
+        Post createdPost = postService.createPost(post);
+        return Result.success(createdPost);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
+        // 转换请求为实体，将逗号分隔的标签字符串转换为列表
+        List<String> tagList = null;
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            tagList = Arrays.asList(request.getTags().split(","));
+            // Trim whitespace from each tag
+            tagList = tagList.stream().map(String::trim).collect(Collectors.toList());
+        } else {
+            tagList = new ArrayList<>();
+        }
+
+        Post post = Post.builder()
+                .id(id)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .categoryId(request.getCategoryId())
+                .tags(tagList)
+                .commentAreaStatus(request.getCommentAreaStatus() != null ?
+                                   CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
+                                   null)
+                .weight(request.getWeight())
+                .build();
+
+        Post updatedPost = postService.updatePost(id, post);
+        if (updatedPost != null) {
+            return Result.success(updatedPost);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "更新失败，文章不存在");
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> deletePost(@PathVariable Long id) {
+        boolean deleted = postService.deletePost(id);
+        if (deleted) {
+            return Result.success(true);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "删除失败，文章不存在");
+        }
+    }
+
+    /**
+     *  将前端的 String 类型的 tags 转换为 List<String>
+     *
+     * @param tags 前端发送来的标签
+     * @return List<String>
+     */
+    private List<String> translateTags(String tags) {
+        List<String> tagList = null;
+        if (tags != null && !tags.isEmpty()) {
+            tagList = Arrays.asList(tags.split(","));
+            // Trim whitespace from each tag
+            tagList = tagList.stream().map(String::trim).collect(Collectors.toList());
+        } else {
+            tagList = new ArrayList<>();
+        }
+
+        return tagList;
     }
 }

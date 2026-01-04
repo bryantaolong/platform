@@ -2,6 +2,8 @@ package com.bryan.platform.domain.request.post;
 
 import lombok.Getter;
 
+import java.util.List;
+
 /**
  * PostUpdateRequest
  *
@@ -20,7 +22,7 @@ public class PostUpdateRequest {
 
     private String tags;
 
-    private Integer commentStatus;
+    private String commentAreaStatus;
 
     private Integer weight;
 }

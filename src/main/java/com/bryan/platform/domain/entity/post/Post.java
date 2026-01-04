@@ -32,7 +32,7 @@ public class Post implements Serializable {
 
     private Long categoryId;
 
-    private String tags;
+    private List<String> tags;
 
     private CommentAreaStatusEnum commentAreaStatus;
 

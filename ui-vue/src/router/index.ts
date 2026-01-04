@@ -46,6 +46,39 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, title: '个人中心' }
   },
   {
+    path: '/post',
+    component: () => import('@/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'list',
+        name: 'BlogPostList',
+        component: () => import('@/views/post/BlogPostList.vue'),
+        meta: { title: '博客文章' }
+      },
+      {
+        path: ':id',
+        name: 'BlogPostDetail',
+        component: () => import('@/views/post/BlogPostDetail.vue'),
+        meta: { title: '文章详情' },
+        props: true
+      },
+      {
+        path: ':id/edit',
+        name: 'BlogPostEdit',
+        component: () => import('@/views/post/BlogPostEdit.vue'),
+        meta: { title: '编辑文章' },
+        props: true
+      },
+      {
+        path: 'create',
+        name: 'BlogPostCreate',
+        component: () => import('@/views/post/BlogPostCreate.vue'),
+        meta: { title: '新建文章' }
+      }
+    ]
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue')

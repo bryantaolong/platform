@@ -73,6 +73,15 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <select id="selectByIdList" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="selectByStatus" resultType="com.bryan.platform.domain.entity.user.SysUser">
         SELECT * FROM sys_user WHERE status = #{status} AND deleted = 0
     </select>

@@ -35,8 +35,18 @@ public interface PostMapper {
     List<Post> selectPage(@Param("offset") int offset,
                           @Param("pageSize") int pageSize);
 
+    List<Post> selectBySearch(@Param("title") String title,
+                              @Param("author") String author,
+                              @Param("tags") String tags,
+                              @Param("offset") int offset,
+                              @Param("pageSize") int pageSize);
+
     /* ---------- 计数 ---------- */
     long countByUserId(@Param("userId") Long userId);
 
     long countAll();
+
+    long countBySearch(@Param("title") String title,
+                       @Param("author") String author,
+                       @Param("tags") String tags);
 }
