@@ -23,14 +23,6 @@
           />
         </el-form-item>
 
-        <el-form-item label="作者" prop="author">
-          <el-input
-            v-model="postForm.author"
-            placeholder="请输入作者名称"
-            :readonly="true"
-          />
-        </el-form-item>
-
         <el-form-item label="分类" prop="categoryId">
           <el-select
             v-model="postForm.categoryId"
@@ -83,7 +75,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
 import type { Post } from '@/models/entity/post/Post'
 import type { PostCreateRequest } from '@/models/request/post/PostCreateRequest'
@@ -105,8 +97,7 @@ const postForm = reactive<Post>({
   title: '',
   content: '',
   categoryId: 1,
-  tags: '',
-  author: ''
+  tags: [],
 })
 
 const formRules = {
@@ -192,7 +183,6 @@ const cancel = () => {
 onMounted(() => {
   // In a real implementation, we would get the current user's information
   // For now, we'll use a mock value
-  postForm.author = '当前用户' // TODO 替换为 user store 中当前用户信息中的用户名
 })
 </script>
 

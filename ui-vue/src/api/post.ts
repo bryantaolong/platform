@@ -1,7 +1,8 @@
 import request from '@/utils/request'
-import type { AxiosResponse } from 'axios'
 import type { Post } from '@/models/entity/post/Post'
 import type { PostVO } from '@/models/vo/post/PostVO'
+import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
+import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
 
 // Define response types
 interface ApiResponse<T> {

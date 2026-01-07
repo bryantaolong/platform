@@ -6,27 +6,39 @@
           <h1 class="post-title">{{ post?.title }}</h1>
           <div class="post-meta">
             <div class="meta-item">
-              <el-icon><User /></el-icon>
-              <span>{{ post?.author }}</span>
+              <el-icon>
+                <User/>
+              </el-icon>
+              <span>{{ post?.createdBy }}</span>
             </div>
             <div class="meta-item">
-              <el-icon><Clock /></el-icon>
+              <el-icon>
+                <Clock/>
+              </el-icon>
               <span>{{ formatDateTime(post?.createdAt) }}</span>
             </div>
             <div class="meta-item" v-if="post?.viewCount !== undefined">
-              <el-icon><View /></el-icon>
+              <el-icon>
+                <View/>
+              </el-icon>
               <span>浏览: {{ post?.viewCount }}</span>
             </div>
             <div class="meta-item" v-if="post?.likeCount !== undefined">
-              <el-icon><Star /></el-icon>
+              <el-icon>
+                <Star/>
+              </el-icon>
               <span>点赞: {{ post?.likeCount }}</span>
             </div>
             <div class="meta-item" v-if="post?.commentCount !== undefined">
-              <el-icon><ChatLineRound /></el-icon>
+              <el-icon>
+                <ChatLineRound/>
+              </el-icon>
               <span>评论: {{ post?.commentCount }}</span>
             </div>
             <div class="meta-item" v-if="post?.collectCount !== undefined">
-              <el-icon><Collection /></el-icon>
+              <el-icon>
+                <Collection/>
+              </el-icon>
               <span>收藏: {{ post?.collectCount }}</span>
             </div>
           </div>
@@ -35,60 +47,61 @@
 
       <div class="post-content" v-html="post?.content"></div>
 
-      <div class="post-tags" v-if="post?.tags">
-        <el-tag 
-          v-for="tag in post?.tags.split(',')" 
-          :key="tag" 
-          class="tag-item"
-          type="info"
-          size="small"
+      <!-- 约 91 行 -->
+      <div class="post-tags" v-if="post?.tags && post?.tags.length">
+        <el-tag
+            v-for="tag in post.tags"
+            :key="tag"
+            class="tag-item"
+            type="info"
+            size="small"
         >
-          {{ tag.trim() }}
+          {{ tag }}
         </el-tag>
       </div>
 
       <div class="post-footer">
         <el-button-group class="action-buttons">
-          <el-button 
-            :icon="ArrowUpBold"
-            :type="isLiked ? 'danger' : 'default'" 
-            @click="handleLike"
+          <el-button
+              :icon="ArrowUpBold"
+              :type="isLiked ? 'danger' : 'default'"
+              @click="handleLike"
           >
             点赞 {{ post?.likeCount }}
           </el-button>
-          <el-button 
-            :icon="Collection" 
-            :type="isCollected ? 'warning' : 'default'" 
-            @click="handleCollect"
+          <el-button
+              :icon="Collection"
+              :type="isCollected ? 'warning' : 'default'"
+              @click="handleCollect"
           >
             收藏 {{ post?.collectCount }}
           </el-button>
-          <el-button 
-            :icon="Share" 
-            @click="handleShare"
+          <el-button
+              :icon="Share"
+              @click="handleShare"
           >
             分享
           </el-button>
-          <el-button 
-            :icon="ChatLineRound" 
-            @click="scrollToComments"
+          <el-button
+              :icon="ChatLineRound"
+              @click="scrollToComments"
           >
             评论 {{ post?.commentCount }}
           </el-button>
         </el-button-group>
 
         <div class="post-actions" v-if="canEdit">
-          <el-button 
-            type="primary" 
-            :icon="Edit" 
-            @click="editPost"
+          <el-button
+              type="primary"
+              :icon="Edit"
+              @click="editPost"
           >
             编辑
           </el-button>
-          <el-button 
-            type="danger" 
-            :icon="Delete" 
-            @click="deletePost"
+          <el-button
+              type="danger"
+              :icon="Delete"
+              @click="deletePost"
           >
             删除
           </el-button>
@@ -101,11 +114,11 @@
       <template #header>
         <div class="comments-header">
           <h3>评论</h3>
-          <el-button 
-            type="primary" 
-            size="small" 
-            :icon="Edit"
-            @click="toggleCommentForm"
+          <el-button
+              type="primary"
+              size="small"
+              :icon="Edit"
+              @click="toggleCommentForm"
           >
             写评论
           </el-button>
@@ -116,18 +129,18 @@
       <el-form v-if="showCommentForm" class="comment-form">
         <el-form-item>
           <el-input
-            v-model="newComment"
-            :rows="4"
-            type="textarea"
-            placeholder="请输入您的评论..."
+              v-model="newComment"
+              :rows="4"
+              type="textarea"
+              placeholder="请输入您的评论..."
           />
         </el-form-item>
         <el-form-item>
-          <el-button 
-            type="primary" 
-            :icon="Check" 
-            @click="submitComment"
-            :loading="submittingComment"
+          <el-button
+              type="primary"
+              :icon="Check"
+              @click="submitComment"
+              :loading="submittingComment"
           >
             发表评论
           </el-button>
@@ -139,10 +152,10 @@
 
       <!-- Comments List -->
       <div class="comments-list">
-        <div 
-          v-for="comment in comments" 
-          :key="comment.id" 
-          class="comment-item"
+        <div
+            v-for="comment in comments"
+            :key="comment.id"
+            class="comment-item"
         >
           <div class="comment-header">
             <el-avatar :size="32" :src="comment.avatar">
@@ -159,7 +172,10 @@
               回复
             </el-button>
             <el-button size="small" text @click="likeComment(comment.id)">
-              <el-icon><ArrowUpBold /></el-icon> ({{ comment.likeCount || 0 }})
+              <el-icon>
+                <ArrowUpBold/>
+              </el-icon>
+              ({{ comment.likeCount || 0 }})
             </el-button>
           </div>
         </div>
@@ -168,11 +184,11 @@
       <!-- Pagination for comments -->
       <div class="comments-pagination" v-if="totalComments > pageSize">
         <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="totalComments"
-          layout="prev, pager, next"
-          @current-change="loadComments"
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :total="totalComments"
+            layout="prev, pager, next"
+            @current-change="loadComments"
         />
       </div>
     </el-card>
@@ -180,42 +196,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  User, 
-  Clock, 
-  View, 
-  Star, 
-  ChatLineRound, 
-  Collection, 
-  Share, 
+import {ref, onMounted} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {
+  User,
+  Clock,
+  View,
+  Star,
+  ChatLineRound,
+  Collection,
+  Share,
   ArrowUpBold,
-  Edit, 
-  Delete, 
-  Check 
+  Edit,
+  Delete,
+  Check
 } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
-
-interface Post {
-  id: number
-  userId: number
-  author: string
-  title: string
-  content: string
-  categoryId: number
-  tags: string
-  commentAreaStatus: string
-  viewCount: number
-  likeCount: number
-  commentCount: number
-  collectCount: number
-  shareCount: number
-  status: string
-  createdAt: string
-  updatedAt: string
-}
+import {postApi} from '@/api/post'
+import type {Post} from "@/models/entity/post/Post.ts";
 
 interface Comment {
   id: number
@@ -310,7 +308,7 @@ const handleLike = async () => {
     // Call API to toggle like status
     // In real implementation, this would be an API call
     if (!post.value) return
-    
+
     // Mock implementation
     isLiked.value = !isLiked.value
     if (isLiked.value) {
@@ -330,7 +328,7 @@ const handleLike = async () => {
 const handleCollect = async () => {
   try {
     if (!post.value) return
-    
+
     // Mock implementation
     isCollected.value = !isCollected.value
     if (isCollected.value) {
@@ -349,11 +347,11 @@ const handleCollect = async () => {
 // Handle share action
 const handleShare = () => {
   if (!post.value) return
-  
+
   // Create shareable link
   const url = window.location.href
   const title = `分享文章: ${post.value.title}`
-  
+
   // Try to use the Web Share API if available
   if (navigator.share) {
     navigator.share({
@@ -399,7 +397,7 @@ const submitComment = async () => {
       likeCount: 0,
       createdAt: new Date().toISOString()
     }
-    
+
     comments.value.unshift(newCommentObj as Comment)
     post.value.commentCount = (post.value.commentCount || 0) + 1
     newComment.value = ''
@@ -428,7 +426,7 @@ const likeComment = (commentId: number) => {
 const scrollToComments = () => {
   const commentsEl = document.querySelector('.comments-section')
   if (commentsEl) {
-    commentsEl.scrollIntoView({ behavior: 'smooth' })
+    commentsEl.scrollIntoView({behavior: 'smooth'})
   }
 }
 
@@ -443,9 +441,9 @@ const editPost = () => {
 const deletePost = async () => {
   try {
     await ElMessageBox.confirm(
-      '确定要删除这篇文章吗？此操作不可恢复！', 
-      '危险操作', 
-      { type: 'error' }
+        '确定要删除这篇文章吗？此操作不可恢复！',
+        '危险操作',
+        {type: 'error'}
     )
 
     // Call API to delete post

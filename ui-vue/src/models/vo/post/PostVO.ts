@@ -6,7 +6,7 @@ export interface PostVO {
   title: string
   content: string
   categoryId?: number
-  tags?: string
+  tags?: string[]
   commentAreaStatus?: string
   viewCount?: number
   likeCount?: number

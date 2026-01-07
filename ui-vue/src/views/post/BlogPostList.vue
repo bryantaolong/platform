@@ -9,14 +9,16 @@
     <!-- Search Section -->
     <div class="search-section">
       <el-input
-        v-model="searchForm.title"
-        placeholder="搜索文章标题..."
-        clearable
-        style="width: 300px;"
-        @input="onSearch"
+          v-model="searchForm.title"
+          placeholder="搜索文章标题..."
+          clearable
+          style="width: 300px;"
+          @input="onSearch"
       >
         <template #prefix>
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search/>
+          </el-icon>
         </template>
       </el-input>
     </div>
@@ -24,16 +26,16 @@
     <!-- Posts Grid -->
     <div class="posts-grid" v-loading="loading">
       <div
-        v-for="post in posts"
-        :key="post.id"
-        class="post-card"
-        @click="viewPost(post.id)"
+          v-for="post in posts"
+          :key="post.id"
+          class="post-card"
+          @click="viewPost(post.id)"
       >
         <div class="post-header">
           <h3 class="post-title">{{ post.title }}</h3>
           <div class="post-meta">
-            <span class="author">{{ post.author }}</span>
-            <span class="date">{{ formatDateTime(post.createdAt) }}</span>
+            <span class="author">{{ post.createdBy }}</span>
+            <span class="date">{{ formatDateTime(post.createdBy) }}</span>
           </div>
         </div>
         <div class="post-content">
@@ -42,26 +44,26 @@
         <div class="post-footer">
           <div class="stats">
             <span class="stat-item">
-              <el-icon><View /></el-icon>
+              <el-icon><View/></el-icon>
               {{ post.viewCount }}
             </span>
             <span class="stat-item">
-              <el-icon><Star /></el-icon>
+              <el-icon><Star/></el-icon>
               {{ post.likeCount }}
             </span>
             <span class="stat-item">
-              <el-icon><ChatDotRound /></el-icon>
+              <el-icon><ChatDotRound/></el-icon>
               {{ post.commentCount }}
             </span>
           </div>
-          <div class="tags" v-if="post.tags">
+          <div class="tags" v-if="post.tags && post.tags.length">
             <el-tag
-              v-for="tag in post.tags.split(',')"
-              :key="tag"
-              size="small"
-              type="info"
+                v-for="tag in post.tags"
+                :key="tag"
+                size="small"
+                type="info"
             >
-              {{ tag.trim() }}
+              {{ tag }}
             </el-tag>
           </div>
         </div>
@@ -71,48 +73,30 @@
     <!-- Pagination -->
     <div class="pagination-wrapper">
       <el-pagination
-        v-model:current-page="pagination.currentPage"
-        v-model:page-size="pagination.pageSize"
-        :page-sizes="[10, 20, 50]"
-        :total="pagination.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+          v-model:current-page="pagination.currentPage"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { 
-  Search, 
-  View, 
+import {ref, reactive, onMounted} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {
+  Search,
+  View,
   Star,
   ChatDotRound
 } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
-
-interface Post {
-  id: number
-  userId: number
-  author: string
-  title: string
-  content: string
-  categoryId: number
-  tags: string
-  commentAreaStatus: string
-  viewCount: number
-  likeCount: number
-  commentCount: number
-  collectCount: number
-  shareCount: number
-  status: string
-  createdAt: string
-  updatedAt: string
-}
+import {postApi} from '@/api/post'
+import type { Post } from '@/models/entity/post/Post'
 
 interface SearchFormData {
   title: string
@@ -146,17 +130,17 @@ const loadPosts = async () => {
     if (searchForm.title) {
       // Use search API if title is provided
       response = await postApi.searchPosts(
-        searchForm.title,
-        '',
-        '',
-        pagination.currentPage,
-        pagination.pageSize
+          searchForm.title,
+          '',
+          '',
+          pagination.currentPage,
+          pagination.pageSize
       )
     } else {
       // Otherwise, use the regular API
       response = await postApi.getAllPosts(
-        pagination.currentPage,
-        pagination.pageSize
+          pagination.currentPage,
+          pagination.pageSize
       )
     }
 
