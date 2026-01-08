@@ -100,7 +100,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {ElInput, ElMessage} from 'element-plus'
 import { postApi } from '@/api/post'
-import type { PostVO } from '@/models/vo/post/PostVO'
+import type { Post } from '@/models/entity/post/Post'
 import type { PostUpdateRequest } from '@/models/request/post/PostUpdateRequest'
 
 const route = useRoute()
@@ -111,13 +111,12 @@ const submitting = ref(false)
 const postId = Number(route.params.id)
 
 /* 表单 */
-const postForm = reactive<PostVO>({
+const postForm = reactive<Post>({
   id: undefined,
   title: '',
   content: '',
   categoryId: 1,
   tags: [],
-  author: ''
 })
 
 /* 标签输入临时值 */
@@ -154,7 +153,6 @@ const loadPost = async () => {
       postForm.content = data.content
       postForm.categoryId = data.categoryId || 1
       postForm.tags = data.tags || []
-      postForm.author = data.author || '当前用户'
     } else {
       ElMessage.error(response.message || '获取文章失败')
     }
@@ -197,7 +195,7 @@ const submitForm = async () => {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags, // 直接数组
+          tags: postForm.tags,
           weight: 1
         }
 
