@@ -38,10 +38,16 @@
 
         <!-- 仍用旧输入框，保持用户习惯 -->
         <el-form-item label="标签" prop="tags">
-          <el-input
-              v-model="tagsString"
-              placeholder="例如：技术,前端,Vue"
-          />
+          <div class="tags" v-if="postForm.tags && postForm.tags.length">
+            <el-tag
+                v-for="tag in postForm.tags"
+                :key="tag"
+                size="small"
+                type="info"
+            >
+              {{ tag }}
+            </el-tag>
+          </div>
         </el-form-item>
 
         <el-form-item label="内容" prop="content">
@@ -71,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
@@ -94,17 +100,6 @@ const postForm = reactive<Post>({
   tags: [],
 })
 
-/* 双向绑定：数组 ↔ 逗号字符串 */
-const tagsString = computed({
-  get: () => postForm.tags.join(','),
-  set: (val: string) => {
-    postForm.tags = val
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean)
-  }
-})
-
 /* 校验规则 */
 const formRules = {
   title: [
@@ -119,11 +114,6 @@ const formRules = {
 
 /* 加载文章 */
 const loadPost = async () => {
-  if (!postId || !Number.isFinite(postId)) {
-    ElMessage.error('文章ID不存在')
-    return
-  }
-
   loading.value = true
   try {
     const response = await postApi.getPostById(postId)

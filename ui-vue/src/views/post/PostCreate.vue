@@ -129,12 +129,6 @@ const formRules = {
 
 /* 加载文章 */
 const loadPost = async () => {
-  if (!postId || !Number.isFinite(postId)) {
-    ElMessage.error('非法文章ID')
-    router.replace('/404')
-    return
-  }
-
   loading.value = true
   try {
     const response = await postApi.getPostById(postId)
