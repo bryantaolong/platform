@@ -145,9 +145,6 @@ const submitForm = async () => {
 const saveDraft = async () => {
   if (!formRef.value) return
   
-  // Set status to draft
-  postForm.status = 'DRAFT'
-  
   await formRef.value.validateField(['title', 'content'], (valid: boolean) => {
     if (valid || valid === undefined) {
       submitting.value = true
@@ -161,7 +158,7 @@ const saveDraft = async () => {
           weight: 1 // Default weight
         }
 
-        postApi.createPost(requestData)
+        postApi.saveDraft(requestData)
         ElMessage.success('草稿保存成功')
         router.push('/post/list')
       } catch (error) {
