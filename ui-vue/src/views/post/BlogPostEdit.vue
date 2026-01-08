@@ -23,14 +23,6 @@
           />
         </el-form-item>
 
-        <el-form-item label="作者" prop="author">
-          <el-input
-              v-model="postForm.author"
-              placeholder="请输入作者名称"
-              :readonly="true"
-          />
-        </el-form-item>
-
         <el-form-item label="分类" prop="categoryId">
           <el-select
               v-model="postForm.categoryId"
@@ -194,6 +186,12 @@ const cancel = () => {
 }
 
 onMounted(() => {
+  const postId = Number(route.params.id)
+  if (!postId || !Number.isFinite(postId)) {
+    ElMessage.error('非法文章ID')
+    router.replace('/404')
+  }
+
   loadPost()
 })
 </script>

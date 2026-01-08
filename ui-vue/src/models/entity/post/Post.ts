@@ -6,7 +6,7 @@ export interface Post {
   content: string
   status?: string
   categoryId?: number
-  tags?: string[]
+  tags: string[]
   commentAreaStatus?: string
   viewCount?: number
   likeCount?: number
