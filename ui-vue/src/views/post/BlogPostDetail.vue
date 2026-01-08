@@ -212,8 +212,8 @@ import {
   Delete,
   Check
 } from '@element-plus/icons-vue'
-import {postApi} from '@/api/post'
-import type {Post} from "@/models/entity/post/Post.ts";
+import { postApi } from '@/api/post'
+import type { PostVO } from "@/models/vo/post/PostVO";
 
 interface Comment {
   id: number
@@ -228,7 +228,7 @@ const route = useRoute()
 const router = useRouter()
 const postId = ref(Number(route.params.id))
 const loading = ref(true)
-const post = ref<Post | null>(null)
+const post = ref<PostVO | null>(null)
 const isLiked = ref(false)
 const isCollected = ref(false)
 const canEdit = ref(false)

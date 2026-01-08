@@ -20,7 +20,7 @@ public class PostUpdateRequest {
 
     private Long categoryId;
 
-    private String tags;
+    private List<String> tags;
 
     private String commentAreaStatus;
 

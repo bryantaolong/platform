@@ -34,8 +34,8 @@
         <div class="post-header">
           <h3 class="post-title">{{ post.title }}</h3>
           <div class="post-meta">
-            <span class="author">{{ post.createdBy }}</span>
-            <span class="date">{{ formatDateTime(post.createdBy) }}</span>
+            <span class="author">{{ post.author }}</span>
+            <span class="date">{{ formatDateTime(post.createdAt) }}</span>
           </div>
         </div>
         <div class="post-content">
@@ -96,7 +96,7 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import {postApi} from '@/api/post'
-import type { Post } from '@/models/entity/post/Post'
+import type { PostVO } from '@/models/vo/post/PostVO'
 
 interface SearchFormData {
   title: string
@@ -110,7 +110,7 @@ interface PaginationData {
 
 const router = useRouter()
 const loading = ref(false)
-const posts = ref<Post[]>([])
+const posts = ref<PostVO[]>([])
 
 const searchForm = reactive<SearchFormData>({
   title: ''

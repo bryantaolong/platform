@@ -29,6 +29,8 @@ public class PostConverter {
                 .commentCount(post.getCommentCount())
                 .collectCount(post.getCollectCount())
                 .shareCount(post.getShareCount())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
 }

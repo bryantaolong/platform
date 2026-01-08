@@ -95,7 +95,7 @@ public class PostController {
                 .content(request.getContent())
                 .status(PostStatusEnum.AUDITING)
                 .categoryId(request.getCategoryId())
-                .tags(translateTags(request.getTags()))
+                .tags(request.getTags())
                 .commentAreaStatus(CommentAreaStatusEnum.OPEN)
                 .build();
 
@@ -114,7 +114,7 @@ public class PostController {
                 .content(request.getContent())
                 .status(PostStatusEnum.DRAFT)
                 .categoryId(request.getCategoryId())
-                .tags(translateTags(request.getTags()))
+                .tags(request.getTags())
                 .commentAreaStatus(CommentAreaStatusEnum.OPEN)
                 .build();
 
@@ -125,22 +125,12 @@ public class PostController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
-        // 转换请求为实体，将逗号分隔的标签字符串转换为列表
-        List<String> tagList = null;
-        if (request.getTags() != null && !request.getTags().isEmpty()) {
-            tagList = Arrays.asList(request.getTags().split(","));
-            // Trim whitespace from each tag
-            tagList = tagList.stream().map(String::trim).collect(Collectors.toList());
-        } else {
-            tagList = new ArrayList<>();
-        }
-
         Post post = Post.builder()
                 .id(id)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .categoryId(request.getCategoryId())
-                .tags(tagList)
+                .tags(request.getTags())
                 .commentAreaStatus(request.getCommentAreaStatus() != null ?
                                    CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
                                    null)
@@ -164,24 +154,5 @@ public class PostController {
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "删除失败，文章不存在");
         }
-    }
-
-    /**
-     *  将前端的 String 类型的 tags 转换为 List<String>
-     *
-     * @param tags 前端发送来的标签
-     * @return List<String>
-     */
-    private List<String> translateTags(String tags) {
-        List<String> tagList = null;
-        if (tags != null && !tags.isEmpty()) {
-            tagList = Arrays.asList(tags.split(","));
-            // Trim whitespace from each tag
-            tagList = tagList.stream().map(String::trim).collect(Collectors.toList());
-        } else {
-            tagList = new ArrayList<>();
-        }
-
-        return tagList;
     }
 }

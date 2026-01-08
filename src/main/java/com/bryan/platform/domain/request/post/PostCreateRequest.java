@@ -2,6 +2,8 @@ package com.bryan.platform.domain.request.post;
 
 import lombok.Getter;
 
+import java.util.List;
+
 /**
  * PostCreateRequest
  *
@@ -16,5 +18,5 @@ public class PostCreateRequest {
 
     private Long categoryId;
 
-    private String tags;
+    private List<String> tags;
 }

@@ -8,34 +8,34 @@
       </template>
 
       <el-form
-        :model="postForm"
-        :rules="formRules"
-        ref="formRef"
-        label-width="100px"
-        v-loading="loading"
+          :model="postForm"
+          :rules="formRules"
+          ref="formRef"
+          label-width="100px"
+          v-loading="loading"
       >
         <el-form-item label="标题" prop="title">
           <el-input
-            v-model="postForm.title"
-            placeholder="请输入文章标题"
-            maxlength="100"
-            show-word-limit
+              v-model="postForm.title"
+              placeholder="请输入文章标题"
+              maxlength="100"
+              show-word-limit
           />
         </el-form-item>
 
         <el-form-item label="作者" prop="author">
           <el-input
-            v-model="postForm.author"
-            placeholder="请输入作者名称"
-            :readonly="true"
+              v-model="postForm.author"
+              placeholder="请输入作者名称"
+              :readonly="true"
           />
         </el-form-item>
 
         <el-form-item label="分类" prop="categoryId">
           <el-select
-            v-model="postForm.categoryId"
-            placeholder="请选择分类"
-            style="width: 100%"
+              v-model="postForm.categoryId"
+              placeholder="请选择分类"
+              style="width: 100%"
           >
             <el-option label="技术分享" :value="1" />
             <el-option label="生活感悟" :value="2" />
@@ -44,27 +44,28 @@
           </el-select>
         </el-form-item>
 
+        <!-- 仍用旧输入框，保持用户习惯 -->
         <el-form-item label="标签" prop="tags">
           <el-input
-            v-model="tagsString"
-            placeholder="多个标签请用逗号分隔，例如：技术,前端,Vue"
+              v-model="tagsString"
+              placeholder="例如：技术,前端,Vue"
           />
         </el-form-item>
 
         <el-form-item label="内容" prop="content">
           <el-input
-            v-model="postForm.content"
-            :rows="15"
-            type="textarea"
-            placeholder="请输入文章内容"
+              v-model="postForm.content"
+              :rows="15"
+              type="textarea"
+              placeholder="请输入文章内容"
           />
         </el-form-item>
 
         <el-form-item>
-          <el-button 
-            type="primary" 
-            @click="submitForm" 
-            :loading="submitting"
+          <el-button
+              type="primary"
+              @click="submitForm"
+              :loading="submitting"
           >
             更新文章
           </el-button>
@@ -80,9 +81,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
-import type { Post } from '@/models/entity/post/Post'
+import type { PostVO } from '@/models/vo/post/PostVO'
 import type { PostUpdateRequest } from '@/models/request/post/PostUpdateRequest'
 
 const route = useRoute()
@@ -92,23 +93,28 @@ const loading = ref(false)
 const submitting = ref(false)
 const postId = Number(route.params.id)
 
-// 处理标签的双向绑定
-const tagsString = computed({
-  get: () => Array.isArray(postForm.tags) ? postForm.tags.join(',') : postForm.tags || '',
-  set: (value: string) => {
-    postForm.tags = value ? value.split(',').map(tag => tag.trim()).filter(tag => tag).join(',') : ''
-  }
-})
-
-const postForm = reactive<Post>({
+/* 表单 */
+const postForm = reactive<PostVO>({
   id: undefined,
   title: '',
   content: '',
   categoryId: 1,
-  tags: '',
+  tags: [],              // 保持数组
   author: ''
 })
 
+/* 双向绑定：数组 ↔ 逗号字符串 */
+const tagsString = computed({
+  get: () => postForm.tags.join(','),
+  set: (val: string) => {
+    postForm.tags = val
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+  }
+})
+
+/* 校验规则 */
 const formRules = {
   title: [
     { required: true, message: '请输入文章标题', trigger: 'blur' },
@@ -120,8 +126,9 @@ const formRules = {
   ]
 }
 
+/* 加载文章 */
 const loadPost = async () => {
-  if (!postId) {
+  if (!postId || !Number.isFinite(postId)) {
     ElMessage.error('文章ID不存在')
     return
   }
@@ -135,7 +142,7 @@ const loadPost = async () => {
       postForm.title = data.title
       postForm.content = data.content
       postForm.categoryId = data.categoryId || 1
-      postForm.tags = data.tags || ''
+      postForm.tags = Array.isArray(data.tags) ? data.tags : [] // ← 修复：确保数组
       postForm.author = data.author || '当前用户'
     } else {
       ElMessage.error(response.message || '获取文章失败')
@@ -148,20 +155,20 @@ const loadPost = async () => {
   }
 }
 
+/* 提交更新 */
 const submitForm = async () => {
   if (!formRef.value) return
-  
+
   await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
       submitting.value = true
       try {
-        // Prepare request data using only the fields needed by the API
         const requestData: PostUpdateRequest = {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags,
-          weight: 1 // Default weight
+          tags: postForm.tags, // 直接传数组
+          weight: 1
         }
 
         const response = await postApi.updatePost(postId, requestData)
@@ -183,8 +190,9 @@ const submitForm = async () => {
   })
 }
 
+/* 取消 */
 const cancel = () => {
-  router.go(-1) // Go back to previous page
+  router.go(-1)
 }
 
 onMounted(() => {
