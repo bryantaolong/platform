@@ -53,27 +53,27 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'list',
         name: 'BlogPostList',
-        component: () => import('@/views/post/BlogPostList.vue'),
+        component: () => import('@/views/post/PostList.vue'),
         meta: { title: '博客文章' }
       },
       {
         path: ':id',
         name: 'BlogPostDetail',
-        component: () => import('@/views/post/BlogPostDetail.vue'),
+        component: () => import('@/views/post/PostDetail.vue'),
         meta: { title: '文章详情' },
         props: true
       },
       {
         path: ':id/edit',
         name: 'BlogPostEdit',
-        component: () => import('@/views/post/BlogPostEdit.vue'),
+        component: () => import('@/views/post/PostEdit.vue'),
         meta: { title: '编辑文章' },
         props: true
       },
       {
         path: 'create',
         name: 'BlogPostCreate',
-        component: () => import('@/views/post/BlogPostCreate.vue'),
+        component: () => import('@/views/post/PostCreate.vue'),
         meta: { title: '新建文章' }
       }
     ]

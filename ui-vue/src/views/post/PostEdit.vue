@@ -186,12 +186,6 @@ const cancel = () => {
 }
 
 onMounted(() => {
-  const postId = Number(route.params.id)
-  if (!postId || !Number.isFinite(postId)) {
-    ElMessage.error('非法文章ID')
-    router.replace('/404')
-  }
-
   loadPost()
 })
 </script>
