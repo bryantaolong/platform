@@ -11,11 +11,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum PostStatusEnum {
-    PUBLISHED(1,"已发布"),
-    DRAFT(2,"草稿"),
-    PRIVATE(3,"仅自己可见"),
-    AUDITING(4,"审核中"),
-    RECYCLED(5,"回收站");
+    PUBLISHED(0,"已发布"),
+    DRAFT(1,"草稿"),
+    PRIVATE(2,"仅自己可见"),
+    AUDITING(3,"审核中"),
+    RECYCLED(4,"回收站");
 
     private final int code;
     private final String desc;

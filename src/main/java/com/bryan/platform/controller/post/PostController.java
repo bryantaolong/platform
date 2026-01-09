@@ -9,6 +9,7 @@ import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
+import com.bryan.platform.domain.vo.post.PostAuditVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.post.PostService;
@@ -17,10 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * PostController
@@ -68,6 +66,20 @@ public class PostController {
         }
     }
 
+    @GetMapping("/audit/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<PostAuditVO> getPostAuditById(@PathVariable Long id) {
+        Post post = postService.getPostById(id);
+        if (post != null) {
+            return Result.success(PostConverter.toPostAuditVO(post));
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "文章不存在");
+        }
+    }
+
+    /***
+     * TODO 有待改进
+     */
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<PostVO>> searchPosts(
@@ -140,6 +152,18 @@ public class PostController {
         Post updatedPost = postService.updatePost(id, post);
         if (updatedPost != null) {
             return Result.success(updatedPost);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "更新失败，文章不存在");
+        }
+    }
+
+    @PutMapping("/status/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public Result<Post> updatePostStatus(@PathVariable Long id, @RequestParam PostStatusEnum status) {
+        Post post = postService.getPostById(id);
+        if (post != null) {
+            post.setStatus(status);
+            return Result.success(postService.updatePost(id, post));
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "更新失败，文章不存在");
         }

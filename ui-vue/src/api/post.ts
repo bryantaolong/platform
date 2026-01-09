@@ -3,6 +3,7 @@ import type {Post} from '@/models/entity/post/Post'
 import type {PostVO} from '@/models/vo/post/PostVO'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
+import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
 
 // Define response types
 interface ApiResponse<T> {
@@ -73,6 +74,14 @@ export const postApi = {
         })
     },
 
+    // Get a post audit VO by ID
+    getPostAuditById: (id: number): Promise<ApiResponse<PostVO>> => {
+        return request({
+            url: `/api/posts/audit/${id}`,
+            method: 'get'
+        })
+    },
+
     // Create a new post
     createPost: (data: PostCreateRequest): Promise<ApiResponse<Post>> => {
         return request({
@@ -97,6 +106,15 @@ export const postApi = {
             url: `/api/posts/${id}`,
             method: 'put',
             data
+        })
+    },
+
+    // Update post's status
+    updatePostStatus: (id: number, status: PostStatusEnum): Promise<ApiResponse<Post>> => {
+        return request({
+            url: `/api/posts/status/${id}`,
+            method: 'put',
+            params: { status }
         })
     },
 
