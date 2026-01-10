@@ -146,7 +146,7 @@ const loadPosts = async () => {
       )
     } else {
       // Otherwise, use the regular API
-      response = await postApi.getAllPosts(
+      response = await postApi.getAllPublishedPosts(
           pagination.currentPage,
           pagination.pageSize
       )

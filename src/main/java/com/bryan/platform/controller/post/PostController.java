@@ -43,12 +43,42 @@ public class PostController {
         return Result.success(postService.pageAllPosts(pageNum, pageSize));
     }
 
+    /**
+     * 全站已发布文章分页列表（任何用户可见）
+     */
+    @GetMapping("/published")
+    public Result<PageResult<PostVO>> getAllPublishedPosts(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        PageResult<Post> page = postService.pageAllPublishedPosts(pageNum, pageSize);
+        List<PostVO> rows = page.getRows()
+                .stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(
+                PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
+    }
+
     @GetMapping("/{userId}/all")
     public  Result<PageResult<PostVO>> getAllPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
         PageResult<Post> page = postService.pageUserPosts(userId, pageNum, pageSize);
+        List<PostVO> rows = page.getRows().stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(PageResult.of(rows, page.getTotal(),
+                                                page.getPageNum(), page.getPageSize()));
+    }
+
+    @GetMapping("/{userId}/published")
+    public  Result<PageResult<PostVO>> getPublishedPostsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        PageResult<Post> page = postService.pageUserPublishedPosts(userId, pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)
                 .toList();

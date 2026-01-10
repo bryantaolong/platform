@@ -98,6 +98,17 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- 用户已发布分页 -->
+    <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE user_id = #{userId}
+        AND status = #{status}
+        AND deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
     <!-- 全局分页 -->
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
@@ -112,6 +123,32 @@
         SELECT COUNT(*)
         FROM post
         WHERE user_id = #{userId}
+          AND deleted = 0
+    </select>
+
+    <!-- 全站已发布分页 -->
+    <select id="selectPageByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE status = #{status}
+        AND deleted = 0
+        ORDER BY weight DESC, created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 计数 -->
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM post
+        WHERE status = #{status}
+          AND deleted = 0
+    </select>
+
+    <select id="countByUserIdAndStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM post
+        WHERE user_id = #{userId}
+          AND status = #{status}
           AND deleted = 0
     </select>
 

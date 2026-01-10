@@ -4,19 +4,48 @@
       <template #header>
         <div class="post-header">
           <h1 class="post-title">{{ post?.title }}</h1>
+          <div class="post-author-info">
+            <div class="author-details">
+              <el-avatar
+                :size="48"
+                :src="authorProfile?.avatar"
+                class="author-avatar clickable"
+                @click="goToUserProfile(post?.author)"
+              >
+                {{ post?.author ? post?.author.charAt(0).toUpperCase() : '' }}
+              </el-avatar>
+              <div class="author-text">
+                <div class="author-name clickable" @click="goToUserProfile(post?.author)">
+                  {{ post?.author }}
+                </div>
+                <div class="post-time">
+                  <el-icon><Clock/></el-icon>
+                  <span>{{ formatDateTime(post?.createdAt) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="author-stats" v-if="authorStats.followingCount !== undefined && authorStats.followerCount !== undefined">
+              <div class="stat-item">
+                <span class="stat-number">{{ authorStats.followingCount }}</span>
+                <span class="stat-label">关注</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ authorStats.followerCount }}</span>
+                <span class="stat-label">粉丝</span>
+              </div>
+            </div>
+            <div class="follow-section" v-if="showFollowButton">
+              <el-button
+                :type="isFollowing ? 'danger' : 'primary'"
+                :icon="Star"
+                @click="toggleFollow"
+                :loading="followLoading"
+              >
+                {{ isFollowing ? '取消关注' : '关注' }}
+              </el-button>
+            </div>
+          </div>
           <div class="post-meta">
-            <div class="meta-item">
-              <el-icon>
-                <User/>
-              </el-icon>
-              <span>{{ post?.createdBy }}</span>
-            </div>
-            <div class="meta-item">
-              <el-icon>
-                <Clock/>
-              </el-icon>
-              <span>{{ formatDateTime(post?.createdAt) }}</span>
-            </div>
             <div class="meta-item" v-if="post?.viewCount !== undefined">
               <el-icon>
                 <View/>
@@ -213,7 +242,10 @@ import {
   Check
 } from '@element-plus/icons-vue'
 import { postApi } from '@/api/post'
+import { userApi } from '@/api/user'
+import { userFollowApi } from '@/api/userFollow'
 import type { PostVO } from "@/models/vo/post/PostVO";
+import type { UserProfileVO } from '@/models/vo/UserProfileVO'
 
 interface Comment {
   id: number
@@ -222,6 +254,11 @@ interface Comment {
   avatar?: string
   likeCount: number
   createdAt: string
+}
+
+interface AuthorStats {
+  followingCount: number | null
+  followerCount: number | null
 }
 
 const route = useRoute()
@@ -238,8 +275,13 @@ const newComment = ref('')
 const submittingComment = ref(false)
 const comments = ref<Comment[]>([])
 const totalComments = ref(0)
-const currentPage = ref(1)
 const pageSize = ref(10)
+const currentPage = ref(1)
+const authorProfile = ref<UserProfileVO | null>(null)
+const authorStats = ref<AuthorStats>({ followingCount: null, followerCount: null })
+const isFollowing = ref(false)
+const followLoading = ref(false)
+const showFollowButton = ref(false) // Only show follow button if not viewing own profile
 
 // Load post data
 const loadPost = async () => {
@@ -252,6 +294,12 @@ const loadPost = async () => {
     const response = await postApi.getPostById(postId.value)
     if (response.code === 200) {
       post.value = response.data
+
+      // Load author profile and stats
+      if (post.value.author) {
+        await loadAuthorInfo(post.value.author)
+      }
+
       // Check if current user can edit this post
       // This would require checking the current user's ID against post.userId
       // For now, using a mock value
@@ -264,6 +312,58 @@ const loadPost = async () => {
     ElMessage.error('获取文章失败')
   } finally {
     loading.value = false
+  }
+}
+
+// Load author information
+const loadAuthorInfo = async (username: string) => {
+  try {
+    // Get author user info
+    const userResponse = await userApi.getUserByUsername(username)
+    if (userResponse.code === 200 && userResponse.data) {
+      // Get author profile
+      const profileResponse = await userApi.getUserProfileByUserId(userResponse.data.id)
+      if (profileResponse.code === 200) {
+        authorProfile.value = profileResponse.data
+
+        // Get author stats (following and follower counts)
+        await loadAuthorStats(userResponse.data.id)
+
+        // Check if current user is following this author
+        await checkFollowingStatus(userResponse.data.id)
+      }
+    }
+  } catch (error) {
+    console.error('加载作者信息失败:', error)
+  }
+}
+
+// Load author stats (following and follower counts)
+const loadAuthorStats = async (userId: number) => {
+  try {
+    const response = await userFollowApi.getUserFollowStats(userId)
+    if (response.code === 200) {
+      authorStats.value = {
+        followingCount: response.data.followingCount,
+        followerCount: response.data.followerCount
+      }
+    }
+  } catch (error) {
+    console.error('加载作者统计信息失败:', error)
+  }
+}
+
+// Check if current user is following the author
+const checkFollowingStatus = async (userId: number) => {
+  try {
+    const response = await userFollowApi.checkFollowing(userId)
+    if (response.code === 200) {
+      isFollowing.value = response.data
+      showFollowButton.value = true
+    }
+  } catch (error) {
+    console.error('检查关注状态失败:', error)
+    showFollowButton.value = false
   }
 }
 
@@ -300,6 +400,63 @@ const formatDateTime = (dateStr?: string) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleString('zh-CN')
+}
+
+// Toggle follow/unfollow
+const toggleFollow = async () => {
+  if (!post.value?.author) return
+
+  followLoading.value = true
+  try {
+    let response
+    if (isFollowing.value) {
+      // Unfollow
+      const userResponse = await userApi.getUserByUsername(post.value.author)
+      if (userResponse.code === 200) {
+        response = await userFollowApi.unfollowUser(userResponse.data.id)
+      }
+    } else {
+      // Follow
+      const userResponse = await userApi.getUserByUsername(post.value.author)
+      if (userResponse.code === 200) {
+        response = await userFollowApi.followUser(userResponse.data.id)
+      }
+    }
+
+    if (response && response.code === 200 && response.data) {
+      isFollowing.value = !isFollowing.value
+      ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注')
+
+      // Refresh stats
+      if (authorProfile.value) {
+        await loadAuthorStats(authorProfile.value.userId)
+      }
+    } else {
+      ElMessage.error(response?.message || (isFollowing.value ? '取消关注失败' : '关注失败'))
+    }
+  } catch (error) {
+    console.error('关注操作失败:', error)
+    ElMessage.error('操作失败')
+  } finally {
+    followLoading.value = false
+  }
+}
+
+// Navigate to user profile
+const goToUserProfile = async (username: string | undefined) => {
+  if (!username) return
+
+  try {
+    const userResponse = await userApi.getUserByUsername(username)
+    if (userResponse.code === 200) {
+      router.push(`/user/${userResponse.data.id}`)
+    } else {
+      ElMessage.error('用户不存在')
+    }
+  } catch (error) {
+    console.error('跳转用户页面失败:', error)
+    ElMessage.error('跳转失败')
+  }
 }
 
 // Handle like action
@@ -491,6 +648,80 @@ onMounted(() => {
   font-weight: bold;
   color: #303133;
   line-height: 1.3;
+}
+
+.post-author-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.author-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-avatar {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.author-avatar.clickable:hover {
+  transform: scale(1.05);
+}
+
+.author-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-weight: 600;
+  color: #303133;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.author-name:hover {
+  color: #409eff;
+}
+
+.post-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #909399;
+  font-size: 14px;
+}
+
+.author-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-weight: bold;
+  font-size: 16px;
+  color: #303133;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #909399;
+}
+
+.follow-section {
+  display: flex;
+  align-items: center;
 }
 
 .post-meta {

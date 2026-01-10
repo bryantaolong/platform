@@ -130,12 +130,33 @@ public class PostService {
     }
 
     /**
+     * 分页查询某用户已发布的帖子
+     */
+    public PageResult<Post> pageUserPublishedPosts(Long userId, int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<Post> rows = postMapper.selectByUserIdAndStatus(userId, PostStatusEnum.PUBLISHED, offset, pageSize);
+        long total = postMapper.countByUserIdAndStatus(userId, PostStatusEnum.PUBLISHED);
+
+        return PageResult.of(rows, total, pageNum, pageSize);
+    }
+
+    /**
      * 分页查询全局帖子
      */
     public PageResult<Post> pageAllPosts(int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
         List<Post> rows = postMapper.selectPage(offset, pageSize);
         long total = postMapper.countAll();
+        return PageResult.of(rows, total, pageNum, pageSize);
+    }
+
+    /**
+     * 分页查询全站已发布帖子
+     */
+    public PageResult<Post> pageAllPublishedPosts(int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<Post> rows = postMapper.selectPageByStatus(PostStatusEnum.PUBLISHED, offset, pageSize);
+        long total = postMapper.countByStatus(PostStatusEnum.PUBLISHED);
         return PageResult.of(rows, total, pageNum, pageSize);
     }
 

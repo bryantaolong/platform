@@ -4,25 +4,13 @@ import type {PostVO} from '@/models/vo/post/PostVO'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
 import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
-
-// Define response types
-interface ApiResponse<T> {
-    code: number
-    message: string
-    data: T
-}
-
-interface PageResult<T> {
-    rows: T[]
-    total: number
-    pageNum: number
-    pageSize: number
-}
+import type {Result} from "@/models/response/Result.ts";
+import type {PageResult} from "@/models/response/PageResult.ts";
 
 // Define Post API endpoints
 export const postApi = {
     // Get all posts with pagination
-    getAllPosts: (pageNum: number, pageSize: number): Promise<ApiResponse<PageResult<PostVO>>> => {
+    getAllPosts: (pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/all',
             method: 'get',
@@ -33,6 +21,18 @@ export const postApi = {
         })
     },
 
+    // 全站已发布文章分页（新增）
+    getAllPublishedPosts: (
+        pageNum: number,
+        pageSize: number
+    ): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: '/api/posts/published',
+            method: 'get',
+            params: {pageNum, pageSize}
+        })
+    },
+
     // Search posts with pagination
     searchPosts: (
         title: string,
@@ -40,7 +40,7 @@ export const postApi = {
         tags: string,
         pageNum: number,
         pageSize: number
-    ): Promise<ApiResponse<PageResult<PostVO>>> => {
+    ): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/search',
             method: 'get',
@@ -55,7 +55,7 @@ export const postApi = {
     },
 
     // Get posts by user ID with pagination
-    getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<ApiResponse<PageResult<PostVO>>> => {
+    getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/all`,
             method: 'get',
@@ -66,8 +66,20 @@ export const postApi = {
         })
     },
 
+    // Get published posts by user ID with pagination
+    getPublishedPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: `/api/posts/${userId}/published`,
+            method: 'get',
+            params: {
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
     // Get a single post by ID
-    getPostById: (id: number): Promise<ApiResponse<PostVO>> => {
+    getPostById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/${id}`,
             method: 'get'
@@ -75,7 +87,7 @@ export const postApi = {
     },
 
     // Get a post audit VO by ID
-    getPostAuditById: (id: number): Promise<ApiResponse<PostVO>> => {
+    getPostAuditById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/audit/${id}`,
             method: 'get'
@@ -83,7 +95,7 @@ export const postApi = {
     },
 
     // Create a new post
-    createPost: (data: PostCreateRequest): Promise<ApiResponse<Post>> => {
+    createPost: (data: PostCreateRequest): Promise<Result<Post>> => {
         return request({
             url: '/api/posts',
             method: 'post',
@@ -92,7 +104,7 @@ export const postApi = {
     },
 
     // Save a draft post
-    saveDraft: (data: PostCreateRequest): Promise<ApiResponse<Post>> => {
+    saveDraft: (data: PostCreateRequest): Promise<Result<Post>> => {
         return request({
             url: '/api/posts/draft',
             method: 'post',
@@ -101,7 +113,7 @@ export const postApi = {
     },
 
     // Update an existing post
-    updatePost: (id: number, data: PostUpdateRequest): Promise<ApiResponse<Post>> => {
+    updatePost: (id: number, data: PostUpdateRequest): Promise<Result<Post>> => {
         return request({
             url: `/api/posts/${id}`,
             method: 'put',
@@ -110,16 +122,16 @@ export const postApi = {
     },
 
     // Update post's status
-    updatePostStatus: (id: number, status: PostStatusEnum): Promise<ApiResponse<Post>> => {
+    updatePostStatus: (id: number, status: PostStatusEnum): Promise<Result<Post>> => {
         return request({
             url: `/api/posts/status/${id}`,
             method: 'put',
-            params: { status }
+            params: {status}
         })
     },
 
     // Delete a post
-    deletePost: (id: number): Promise<ApiResponse<boolean>> => {
+    deletePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}`,
             method: 'delete'
@@ -127,7 +139,7 @@ export const postApi = {
     },
 
     // Like a post
-    likePost: (id: number): Promise<ApiResponse<boolean>> => {
+    likePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/like`,
             method: 'post'
@@ -135,7 +147,7 @@ export const postApi = {
     },
 
     // Unlike a post
-    unlikePost: (id: number): Promise<ApiResponse<boolean>> => {
+    unlikePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/unlike`,
             method: 'post'
@@ -143,7 +155,7 @@ export const postApi = {
     },
 
     // Collect a post
-    collectPost: (id: number): Promise<ApiResponse<boolean>> => {
+    collectPost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/collect`,
             method: 'post'
@@ -151,7 +163,7 @@ export const postApi = {
     },
 
     // Uncollect a post
-    uncollectPost: (id: number): Promise<ApiResponse<boolean>> => {
+    uncollectPost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/uncollect`,
             method: 'post'

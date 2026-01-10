@@ -8,6 +8,8 @@ import com.bryan.platform.service.user.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * 用户关注关系控制器
  * 提供用户关注与取消关注、查询关注列表、粉丝列表及关注状态检查的 RESTful API。
@@ -89,5 +91,21 @@ public class UserFollowController {
     public Result<Boolean> isFollowing(@PathVariable Long followingId) {
         Long currentUserId = authService.getCurrentUserId();
         return Result.success(userFollowService.isFollowing(currentUserId, followingId));
+    }
+
+    /**
+     * 获取指定用户的关注数和粉丝数。
+     *
+     * @param userId 用户 ID
+     * @return 包含关注数和粉丝数的对象
+     */
+    @GetMapping("/stats/{userId}")
+    public Result<Object> getUserFollowStats(@PathVariable Long userId) {
+        long followingCount = userFollowService.countFollowing(userId);
+        long followerCount = userFollowService.countFollowers(userId);
+        return Result.success(Map.of(
+            "followingCount", followingCount,
+            "followerCount", followerCount
+        ));
     }
 }

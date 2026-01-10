@@ -1,6 +1,7 @@
 package com.bryan.platform.mapper.post;
 
 import com.bryan.platform.domain.entity.post.Post;
+import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -32,8 +33,17 @@ public interface PostMapper {
                               @Param("offset") int offset,
                               @Param("pageSize") int pageSize);
 
+    List<Post> selectByUserIdAndStatus(@Param("userId") Long userId,
+                                       @Param("status") PostStatusEnum status,
+                                       @Param("offset") int offset,
+                                       @Param("pageSize") int pageSize);
+
     List<Post> selectPage(@Param("offset") int offset,
                           @Param("pageSize") int pageSize);
+
+    List<Post> selectPageByStatus(@Param("status") PostStatusEnum status,
+                                  @Param("offset") int offset,
+                                  @Param("pageSize") int pageSize);
 
     List<Post> selectBySearch(@Param("title") String title,
                               @Param("author") String author,
@@ -43,6 +53,11 @@ public interface PostMapper {
 
     /* ---------- 计数 ---------- */
     long countByUserId(@Param("userId") Long userId);
+
+    long countByStatus(@Param("status") PostStatusEnum status);
+
+    long countByUserIdAndStatus(@Param("userId") Long userId,
+                                @Param("status") PostStatusEnum status);
 
     long countAll();
 

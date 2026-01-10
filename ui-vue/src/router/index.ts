@@ -95,6 +95,13 @@ const routes: RouteRecordRaw[] = [
         ]
     },
     {
+        path: '/user/:userId',
+        name: 'UserProfilePublic',
+        component: () => import('@/views/user/UserProfilePublic.vue'),
+        meta: {requiresAuth: true, title: '用户主页'},
+        props: true
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('@/views/NotFound.vue')

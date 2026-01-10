@@ -69,7 +69,7 @@ public class UserFollowService {
     @Transactional(rollbackFor = Exception.class)
     public int unfollowUser(Long followerId, Long followingId) {
         // 检查是否已关注
-        if (this.isFollowing(followerId, followingId)) {
+        if (!this.isFollowing(followerId, followingId)) {
             throw new BusinessException("您尚未关注该用户");
         }
 
