@@ -6,7 +6,16 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/',
         name: 'Index',
-        redirect: '/profile'
+        component: () => import('@/layouts/HomeLayout.vue'),
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: '',
+                name: 'Home',
+                component: () => import('@/views/Home.vue'),
+                meta: {title: '首页'}
+            }
+        ]
     },
     {
         path: '/login',
@@ -47,38 +56,38 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/post',
-        component: () => import('@/layouts/AdminLayout.vue'),
+        component: () => import('@/layouts/HomeLayout.vue'),
         meta: {requiresAuth: true},
         children: [
             {
                 path: 'list',
                 name: 'BlogPostList',
                 component: () => import('@/views/post/PostList.vue'),
-                meta: {title: '博客文章'}
+                meta: {title: '文章列表'}
             },
             {
                 path: ':id',
-                name: 'BlogPostDetail',
+                name: 'PostDetail',
                 component: () => import('@/views/post/PostDetail.vue'),
                 meta: {title: '文章详情'},
                 props: true
             },
             {
                 path: ':id/edit',
-                name: 'BlogPostEdit',
+                name: 'PostEdit',
                 component: () => import('@/views/post/PostEdit.vue'),
                 meta: {title: '编辑文章'},
                 props: true
             },
             {
                 path: 'create',
-                name: 'BlogPostCreate',
+                name: 'PostCreate',
                 component: () => import('@/views/post/PostCreate.vue'),
                 meta: {title: '新建文章'}
             },
             {
                 path: ':id/audit',
-                name: 'BlogPostAudit',
+                name: 'PostAudit',
                 component: () => import('@/views/post/PostAudit.vue'),
                 meta: {requiresAuth: true, requiresAdmin: true, title: '博文审核'},
                 props: true

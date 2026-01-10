@@ -17,6 +17,10 @@
           text-color="#bfcbd9"
           active-text-color="#409eff"
         >
+          <el-menu-item index="/">
+            <el-icon><House /></el-icon>
+            <span>返回首页</span>
+          </el-menu-item>
           <el-menu-item index="/post/list">
             <el-icon><Document /></el-icon>
             <span>博客文章</span>
@@ -94,7 +98,8 @@ import {
   Setting,
   ArrowDown,
   SwitchButton,
-  Document
+  Document,
+  House
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 

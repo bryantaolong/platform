@@ -1,13 +1,13 @@
 <template>
-  <div class="blog-post-list-container">
-    <!-- Header Section -->
-    <div class="header-section">
-      <h1 class="blog-title">博客文章</h1>
+  <div :class="['blog-post-list-container', {'home-page': isHomePage}]">
+    <!-- Header Section - Only show on home page -->
+    <div v-if="isHomePage" class="header-section">
+      <h1 class="blog-title">欢迎来到文章平台</h1>
       <p class="blog-subtitle">分享知识，发现精彩</p>
     </div>
 
-    <!-- Search Section -->
-    <div class="search-section">
+    <!-- Search Section - Only show on non-home pages -->
+    <div v-if="!isHomePage" class="search-section">
       <el-input
           v-model="searchForm.title"
           placeholder="搜索文章标题..."
@@ -86,8 +86,8 @@
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
+import {ref, reactive, onMounted, computed} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {
   Search,
@@ -109,8 +109,12 @@ interface PaginationData {
 }
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 const posts = ref<PostVO[]>([])
+
+// Determine if we're on the home page
+const isHomePage = computed(() => route.name === 'Home' || route.path === '/')
 
 const searchForm = reactive<SearchFormData>({
   title: ''
@@ -127,10 +131,14 @@ const loadPosts = async () => {
   loading.value = true
   try {
     let response;
-    if (searchForm.title) {
+
+    // Check if there's a search query in the URL
+    const urlSearchQuery = route.query.search as string;
+
+    if (searchForm.title || urlSearchQuery) {
       // Use search API if title is provided
       response = await postApi.searchPosts(
-          searchForm.title,
+          searchForm.title || urlSearchQuery || '',
           '',
           '',
           pagination.currentPage,
@@ -198,6 +206,11 @@ const viewPost = (postId: number) => {
 }
 
 onMounted(() => {
+  // Check if there's a search query in the URL
+  const urlSearchQuery = route.query.search as string;
+  if (urlSearchQuery) {
+    searchForm.title = urlSearchQuery;
+  }
   loadPosts()
 })
 </script>
@@ -208,7 +221,12 @@ onMounted(() => {
   margin: 0 auto;
   padding: 40px 20px;
   background: #f8f9fa;
-  min-height: 100vh;
+  min-height: calc(100vh - 140px); /* Account for header and footer */
+}
+
+/* Home page specific styles */
+.blog-post-list-container.home-page {
+  padding-top: 20px;
 }
 
 .header-section {
