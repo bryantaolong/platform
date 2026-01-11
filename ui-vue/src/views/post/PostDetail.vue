@@ -24,16 +24,6 @@
                 </div>
               </div>
             </div>
-            <div class="author-stats" v-if="authorStats.followingCount !== undefined && authorStats.followerCount !== undefined">
-              <div class="stat-item">
-                <span class="stat-number">{{ authorStats.followingCount }}</span>
-                <span class="stat-label">关注</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ authorStats.followerCount }}</span>
-                <span class="stat-label">粉丝</span>
-              </div>
-            </div>
             <div class="follow-section" v-if="showFollowButton">
               <el-button
                 :type="isFollowing ? 'danger' : 'primary'"
@@ -256,11 +246,6 @@ interface Comment {
   createdAt: string
 }
 
-interface AuthorStats {
-  followingCount: number | null
-  followerCount: number | null
-}
-
 const route = useRoute()
 const router = useRouter()
 const postId = ref(Number(route.params.id))
@@ -278,7 +263,6 @@ const totalComments = ref(0)
 const pageSize = ref(10)
 const currentPage = ref(1)
 const authorProfile = ref<UserProfileVO | null>(null)
-const authorStats = ref<AuthorStats>({ followingCount: null, followerCount: null })
 const isFollowing = ref(false)
 const followLoading = ref(false)
 const showFollowButton = ref(false) // Only show follow button if not viewing own profile
@@ -326,30 +310,12 @@ const loadAuthorInfo = async (username: string) => {
       if (profileResponse.code === 200) {
         authorProfile.value = profileResponse.data
 
-        // Get author stats (following and follower counts)
-        await loadAuthorStats(userResponse.data.id)
-
         // Check if current user is following this author
         await checkFollowingStatus(userResponse.data.id)
       }
     }
   } catch (error) {
     console.error('加载作者信息失败:', error)
-  }
-}
-
-// Load author stats (following and follower counts)
-const loadAuthorStats = async (userId: number) => {
-  try {
-    const response = await userFollowApi.getUserFollowStats(userId)
-    if (response.code === 200) {
-      authorStats.value = {
-        followingCount: response.data.followingCount,
-        followerCount: response.data.followerCount
-      }
-    }
-  } catch (error) {
-    console.error('加载作者统计信息失败:', error)
   }
 }
 
@@ -427,10 +393,6 @@ const toggleFollow = async () => {
       isFollowing.value = !isFollowing.value
       ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注')
 
-      // Refresh stats
-      if (authorProfile.value) {
-        await loadAuthorStats(authorProfile.value.userId)
-      }
     } else {
       ElMessage.error(response?.message || (isFollowing.value ? '取消关注失败' : '关注失败'))
     }
