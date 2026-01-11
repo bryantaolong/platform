@@ -76,7 +76,7 @@
               @click="submitForm"
               :loading="submitting"
           >
-            更新文章
+            发布文章
           </el-button>
           <el-button @click="cancel">
             取消
