@@ -1,10 +1,10 @@
-# User System
+# Platform
 
 [中文说明请见这里 (Chinese README here)](./README_zh.md)
 
 ## Project Overview
 
-This project is a user management system based on Spring Boot 3, supporting user registration, login, information management, role-based access control, and data export. The backend uses PostgreSQL as the main database and Redis for caching and distributed scenarios. JWT is used for stateless authentication and role-based authorization.
+This project is a comprehensive platform system based on Spring Boot 3, supporting user management, content publishing, social features, and data export. The platform includes user registration, login, information management, role-based access control, post management, user follow relationships, post collection, and more. The backend uses PostgreSQL as the main database and Redis for caching and distributed scenarios. JWT is used for stateless authentication and role-based authorization.
 
 ## Tech Stack
 
@@ -24,10 +24,10 @@ This project is a user management system based on Spring Boot 3, supporting user
 ```
 src/
   main/
-    java/com/bryan/system/
+    java/com/bryan/platform/
       config/         # Configuration classes (security, Redis, MyBatis-Plus, etc.)
-      controller/     # RESTful controllers
-      domain/         # Entities, request/response objects, VO
+      controller/     # RESTful controllers (auth, post, user modules)
+      domain/         # Entities, request/response objects, VO, enums, converters
       filter/         # JWT authentication filter
       handler/        # MyBatis auto-fill, global exception handler
       mapper/         # MyBatis mapper interfaces
@@ -39,8 +39,8 @@ src/
       mapper/         # MyBatis mapper xmls
       sql/            # Database schema scripts
   test/
-    java/com/bryan/system/
-      UserSystemApplicationTests.java
+    java/com/bryan/platform/
+      PlatformApplicationTests.java
 ```
 
 ## Requirements
@@ -54,7 +54,7 @@ src/
 
 * Update database and Redis settings in `src/main/resources/application-dev.yaml`.
 * General settings (logging, MyBatis-Plus logic delete, etc.) are in `src/main/resources/application.yaml`.
-* Database schema scripts are in [`src/main/resources/sql/create_table.sql`](src/main/resources/sql/create_table.sql).
+* Database schema scripts are in [`src/main/resources/sql/create_table.sql`](sql/create_table.sql) and related subdirectories.
 
 ## Getting Started
 
@@ -74,7 +74,7 @@ src/
 
    ```sh
    mvn clean package
-   java -jar target/user-system-0.0.1-SNAPSHOT.jar
+   java -jar target/platform-0.0.1-SNAPSHOT.jar
    ```
 
 ## 🐳 Containerized Deployment (Docker)
@@ -101,7 +101,7 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # Copy the built jar into container
-COPY target/user-system-0.0.1-SNAPSHOT.jar app.jar
+COPY target/platform-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose default Spring Boot port
 EXPOSE 8080
@@ -119,11 +119,11 @@ version: "3.9"
 services:
   postgres:
     image: postgres:17
-    container_name: user-postgres
+    container_name: platform-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: user_system
+      POSTGRES_USER: platform_user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: platform
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/main/resources/sql/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
@@ -132,22 +132,25 @@ services:
 
   redis:
     image: redis:6
-    container_name: user-redis
+    container_name: platform-redis
+    environment:
+      REDIS_PASSWORD: 123456
     ports:
       - "6379:6379"
 
   app:
     build: .
-    container_name: user-system
+    container_name: platform
     depends_on:
       - postgres
       - redis
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_system
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/platform
+      SPRING_DATASOURCE_USERNAME: platform_user
+      SPRING_DATASOURCE_PASSWORD: 123456
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: 123456
     ports:
       - "8080:8080"
 
@@ -162,12 +165,13 @@ Edit `src/main/resources/application-dev.yaml` to use container hostnames instea
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/user_system
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://postgres:5432/platform
+    username: platform_user
+    password: 123456
   redis:
     host: redis
     port: 6379
+    password: 123456
 ```
 
 ### 5. Start Services
@@ -181,17 +185,81 @@ docker-compose up -d --build
 ### 6. Access the Application
 
 * Application API: [http://localhost:8080/api](http://localhost:8080/api)
-* PostgreSQL: `localhost:5432` (user: `postgres`, password: `postgres`)
+* PostgreSQL: `localhost:5432` (user: `platform_user`, password: `123456`)
 * Redis: `localhost:6379`
 
-## Main APIs
+## Main Features
 
+### Authentication & Authorization
 * User registration: `POST /api/auth/register`
 * User login: `POST /api/auth/login`
-* Get all users: `GET /api/user/all` (admin only)
-* Search users: `POST /api/user/search`
-* User update, role change, password update, ban/unban, logical delete, etc. are detailed in [`UserController`](src/main/java/com/bryan/platform/controller/UserController.java)
-* Export user data: `GET /api/user/export/all`, `POST /api/user/export/field` (admin only)
+* Get current user: `GET /api/auth/me`
+* Logout: `GET /api/auth/logout`
+* Change password: `PUT /api/auth/password`
+* Delete account: `DELETE /api/auth`
+* Validate token: `GET /api/auth/validate`
+
+### User Management
+* List users: `GET /api/users` (admin only)
+* Get user by ID: `GET /api/users/{userId}` (admin only)
+* Get user by username: `GET /api/users/username/{username}` (admin only)
+* Search users: `POST /api/users/search` (admin only)
+* Update user: `PUT /api/users/{userId}`
+* Change user role: `PUT /api/users/roles/{userId}` (admin only)
+* Reset password: `PUT /api/users/password/{userId}` (admin only)
+* Block user: `PUT /api/users/block/{userId}` (admin only)
+* Unblock user: `PUT /api/users/unblock/{userId}` (admin only)
+* Delete user: `DELETE /api/users/{userId}` (admin only)
+
+### User Profiles
+* Get user profile by user ID: `GET /api/user-profiles/{userId}`
+* Get user profile by real name: `GET /api/user-profiles/name/{realName}`
+* Get current user profile: `GET /api/user-profiles/me`
+* Update current user profile: `PUT /api/user-profiles`
+
+### User Roles
+* List all roles: `GET /api/user-roles` (admin only)
+
+### User Follow System
+* Follow user: `POST /api/user-follows/follow/{followingId}`
+* Unfollow user: `POST /api/user-follows/unfollow/{followingId}`
+* Get following users: `GET /api/user-follows/following/{userId}`
+* Get follower users: `GET /api/user-follows/followers/{userId}`
+* Check following status: `GET /api/user-follows/check/{followingId}`
+* Get user follow stats: `GET /api/user-follows/stats/{userId}`
+
+### Post Management
+* Get all posts: `GET /api/posts/all` (admin only)
+* Get all published posts: `GET /api/posts/published`
+* Get posts by user ID: `GET /api/posts/{userId}/all`
+* Get published posts by user ID: `GET /api/posts/{userId}/published`
+* Get post by ID: `GET /api/posts/{id}`
+* Get post audit by ID: `GET /api/posts/audit/{id}` (admin only)
+* Search posts: `GET /api/posts/search` (admin only)
+* Create post: `POST /api/posts`
+* Save post draft: `POST /api/posts/draft`
+* Update post: `PUT /api/posts/{id}`
+* Update post status: `PUT /api/posts/status/{id}?status={status}` (admin only)
+* Delete post: `DELETE /api/posts/{id}`
+
+### Post Collections & Collects
+* Create collection: `POST /api/user/post-collections?folderName={folderName}`
+* Update collection: `PUT /api/user/post-collections/{collectionId}?folderName={folderName}`
+* Delete collection: `DELETE /api/user/post-collections/{collectionId}`
+* Get user collections: `GET /api/user/post-collections`
+* Get collection by ID: `GET /api/user/post-collections/{collectionId}`
+* Get user collection count: `GET /api/user/post-collections/count`
+* Collect post: `POST /api/user/post-collects`
+* Uncollect post: `DELETE /api/user/post-collects/{postId}`
+* Get user collects: `GET /api/user/post-collects`
+* Get user collects by collection: `GET /api/user/post-collects/collection/{collectionId}`
+* Check collect status: `GET /api/user/post-collects/{postId}/status`
+* Get user collect count: `GET /api/user/post-collects/count`
+
+### Data Export
+* Export all users: `GET /api/users/export/all` (admin only)
+* Export users by fields: `POST /api/users/export/fields` (admin only)
+* Get exportable fields: `GET /api/users/export/fields` (admin only)
 
 ## Notes
 
