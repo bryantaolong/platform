@@ -1,7 +1,130 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.bryan.platform.mapper.post.UserPostCollectMapper">
+
+    <sql id="BaseColumn">
+        id,user_id,post_id,collection_id,post_title,
+        deleted,version,created_at,updated_at,created_by,updated_by
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.post.UserPostCollect">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="post_id" property="postId"/>
+        <result column="collection_id" property="collectionId"/>
+        <result column="post_title" property="postTitle"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <!-- 1. 单条插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_post_collect (
+            user_id,post_id,collection_id,post_title,
+            created_at,updated_at,created_by,updated_by
+        ) VALUES (
+                     #{userId},#{postId},#{collectionId},#{postTitle},
+                     #{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
+                 )
+    </insert>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteById">
+        UPDATE user_post_collect
+        SET deleted = 1,
+            version = version + 1
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!-- 根据用户和博文删除收藏 -->
+    <update id="deleteByUserIdAndPostId">
+        UPDATE user_post_collect
+        SET deleted = 1,
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND post_id = #{postId}
+          AND deleted = 0
+    </update>
+
+    <!-- 整行更新（乐观锁） -->
+    <update id="update">
+        UPDATE user_post_collect
+        SET collection_id = #{collectionId},
+            post_title = #{postTitle},
+            version = version + 1
+        WHERE id = #{id}
+          AND version = #{version}
+          AND deleted = 0
+    </update>
+
+    <!-- 单条查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_post_collect
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <!-- 根据用户和博文查询 -->
+    <select id="selectByUserIdAndPostId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND post_id = #{postId}
+          AND deleted = 0
+    </select>
+
+    <!-- 用户收藏分页 -->
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 用户指定收藏夹分页 -->
+    <select id="selectByUserIdAndCollectionId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND collection_id = #{collectionId}
+          AND deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 计数 -->
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND deleted = 0
+    </select>
+
+    <select id="countByUserIdAndCollectionId" resultType="long">
+        SELECT COUNT(*)
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND collection_id = #{collectionId}
+          AND deleted = 0
+    </select>
+
+    <!-- 检查是否存在 -->
+    <select id="existsByUserIdAndPostId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND post_id = #{postId}
+          AND deleted = 0
+    </select>
 
 </mapper>
