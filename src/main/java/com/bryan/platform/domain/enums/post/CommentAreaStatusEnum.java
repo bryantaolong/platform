@@ -11,8 +11,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CommentAreaStatusEnum {
-    OPEN(1, "开启"),
-    CLOSED(2, "关闭");
+    OPEN(0, "开启"),
+    CLOSED(1, "关闭");
 
     private final int code;
     private final String desc;

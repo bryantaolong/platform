@@ -1,9 +1,11 @@
 package com.bryan.platform.mapper.post;
 
 import com.bryan.platform.domain.entity.post.Post;
+import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,6 +25,9 @@ public interface PostMapper {
     /* ---------- 改 ---------- */
     int update(Post record);
 
+    int updateCollectCount(@Param("id") Long id, @Param("delta") int delta,
+                          @Param("updatedAt") LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+
     /* ---------- 查 ---------- */
     Post selectById(@Param("id") Long id);
 
@@ -32,11 +37,35 @@ public interface PostMapper {
                               @Param("offset") int offset,
                               @Param("pageSize") int pageSize);
 
+    List<Post> selectByUserIdAndStatus(@Param("userId") Long userId,
+                                       @Param("status") PostStatusEnum status,
+                                       @Param("offset") int offset,
+                                       @Param("pageSize") int pageSize);
+
     List<Post> selectPage(@Param("offset") int offset,
                           @Param("pageSize") int pageSize);
+
+    List<Post> selectPageByStatus(@Param("status") PostStatusEnum status,
+                                  @Param("offset") int offset,
+                                  @Param("pageSize") int pageSize);
+
+    List<Post> selectBySearch(@Param("title") String title,
+                              @Param("author") String author,
+                              @Param("tags") String tags,
+                              @Param("offset") int offset,
+                              @Param("pageSize") int pageSize);
 
     /* ---------- 计数 ---------- */
     long countByUserId(@Param("userId") Long userId);
 
+    long countByStatus(@Param("status") PostStatusEnum status);
+
+    long countByUserIdAndStatus(@Param("userId") Long userId,
+                                @Param("status") PostStatusEnum status);
+
     long countAll();
+
+    long countBySearch(@Param("title") String title,
+                       @Param("author") String author,
+                       @Param("tags") String tags);
 }

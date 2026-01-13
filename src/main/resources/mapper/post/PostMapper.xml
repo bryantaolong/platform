@@ -6,7 +6,7 @@
 <mapper namespace="com.bryan.platform.mapper.post.PostMapper">
 
     <sql id="BaseColumn">
-        id,user_id,title,content,status,category_id,tags,comment_status,
+        id,user_id,title,content,status,category_id,tags,comment_area_status,
         view_count,like_count,comment_count,collect_count,share_count,weight,
         deleted,version,created_at,updated_at,created_by,updated_by
     </sql>
@@ -16,10 +16,10 @@
         <result column="user_id" property="userId"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
-        <result column="status" property="status" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="status" property="status"/>
         <result column="category_id" property="categoryId"/>
-        <result column="tags" property="tags"/>
-        <result column="comment_status" property="commentStatus"/>
+        <result column="tags" property="tags" typeHandler="com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler"/>
+        <result column="comment_area_status" property="commentAreaStatus"/>
         <result column="view_count" property="viewCount"/>
         <result column="like_count" property="likeCount"/>
         <result column="comment_count" property="commentCount"/>
@@ -37,13 +37,9 @@
     <!-- 1. 单条插入 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO post (
-            user_id,title,content,status,category_id,tags,comment_status,
-            view_count,like_count,comment_count,collect_count,share_count,weight,
-            deleted,version,created_at,updated_at,created_by,updated_by
+            user_id,title,content,status,category_id,tags,comment_area_status
         ) VALUES (
-                     #{userId},#{title},#{content},#{status},#{categoryId},#{tags},#{commentStatus},
-                     #{viewCount},#{likeCount},#{commentCount},#{collectCount},#{shareCount},#{weight},
-                     0,0,#{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
+                     #{userId},#{title},#{content},#{status},#{categoryId},#{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus}
                  )
     </insert>
 
@@ -63,12 +59,21 @@
             content = #{content},
             status = #{status},
             category_id = #{categoryId},
-            tags = #{tags},
-            comment_status = #{commentStatus},
+            tags = #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},
+            comment_area_status = #{commentAreaStatus},
             weight = #{weight},
             version = version + 1
         WHERE id = #{id}
           AND version = #{version}
+          AND deleted = 0
+    </update>
+
+    <!-- 更新收藏数 -->
+    <update id="updateCollectCount">
+        UPDATE post
+        SET collect_count = collect_count + #{delta},
+            version = version + 1
+        WHERE id = #{id}
           AND deleted = 0
     </update>
 
@@ -100,6 +105,17 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- 用户已发布分页 -->
+    <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE user_id = #{userId}
+        AND status = #{status}
+        AND deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
     <!-- 全局分页 -->
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
@@ -117,10 +133,74 @@
           AND deleted = 0
     </select>
 
+    <!-- 全站已发布分页 -->
+    <select id="selectPageByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE status = #{status}
+        AND deleted = 0
+        ORDER BY weight DESC, created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 计数 -->
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM post
+        WHERE status = #{status}
+          AND deleted = 0
+    </select>
+
+    <select id="countByUserIdAndStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM post
+        WHERE user_id = #{userId}
+          AND status = #{status}
+          AND deleted = 0
+    </select>
+
     <select id="countAll" resultType="long">
         SELECT COUNT(*)
         FROM post
         WHERE deleted = 0
+    </select>
+
+    <!-- 搜索分页 -->
+    <select id="selectBySearch" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        <where>
+            deleted = 0
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="author != null and author != ''">
+                AND created_by LIKE CONCAT('%', #{author}, '%')
+            </if>
+            <if test="tags != null and tags != ''">
+                AND tags LIKE CONCAT('%', #{tags}, '%')
+            </if>
+        </where>
+        ORDER BY weight DESC, created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 搜索计数 -->
+    <select id="countBySearch" resultType="long">
+        SELECT COUNT(*)
+        FROM post
+        <where>
+            deleted = 0
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="author != null and author != ''">
+                AND created_by LIKE CONCAT('%', #{author}, '%')
+            </if>
+            <if test="tags != null and tags != ''">
+                AND tags LIKE CONCAT('%', #{tags}, '%')
+            </if>
+        </where>
     </select>
 
 </mapper>

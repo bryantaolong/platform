@@ -1,55 +1,111 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import type { RouteRecordRaw } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import type {RouteRecordRaw} from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'Index',
-    redirect: '/profile'
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/auth/Login.vue'),
-    meta: { guest: true }
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: () => import('@/views/auth/Register.vue'),
-    meta: { guest: true }
-  },
-  {
-    path: '/admin',
-    component: () => import('@/layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
-    children: [
-      {
-        path: 'users',
-        name: 'UserManagement',
-        component: () => import('@/views/admin/UserManagement.vue'),
-        meta: { title: '用户管理' }
-      },
-      {
-        path: 'profile',
-        name: 'AdminProfile',
+    {
+        path: '/',
+        name: 'Index',
+        component: () => import('@/layouts/HomeLayout.vue'),
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: '',
+                name: 'Home',
+                component: () => import('@/views/Home.vue'),
+                meta: {title: '首页'}
+            }
+        ]
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        component: () => import('@/views/auth/Login.vue'),
+        meta: {guest: true}
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: () => import('@/views/auth/Register.vue'),
+        meta: {guest: true}
+    },
+    {
+        path: '/admin',
+        component: () => import('@/layouts/AdminLayout.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true},
+        children: [
+            {
+                path: 'users',
+                name: 'UserManagement',
+                component: () => import('@/views/admin/UserManagement.vue'),
+                meta: {title: '用户管理'}
+            },
+            {
+                path: 'profile',
+                name: 'AdminProfile',
+                component: () => import('@/views/profile/UserProfile.vue'),
+                meta: {title: '个人中心'}
+            }
+        ]
+    },
+    {
+        path: '/profile',
+        name: 'UserProfile',
         component: () => import('@/views/profile/UserProfile.vue'),
-        meta: { title: '个人中心' }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    name: 'UserProfile',
-    component: () => import('@/views/profile/UserProfile.vue'),
-    meta: { requiresAuth: true, title: '个人中心' }
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/NotFound.vue')
-  }
+        meta: {requiresAuth: true, title: '个人中心'}
+    },
+    {
+        path: '/post',
+        component: () => import('@/layouts/HomeLayout.vue'),
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: 'list',
+                name: 'BlogPostList',
+                component: () => import('@/views/post/PostList.vue'),
+                meta: {title: '文章列表'}
+            },
+            {
+                path: ':id',
+                name: 'PostDetail',
+                component: () => import('@/views/post/PostDetail.vue'),
+                meta: {title: '文章详情'},
+                props: true
+            },
+            {
+                path: ':id/edit',
+                name: 'PostEdit',
+                component: () => import('@/views/post/PostEdit.vue'),
+                meta: {title: '编辑文章'},
+                props: true
+            },
+            {
+                path: 'create',
+                name: 'PostCreate',
+                component: () => import('@/views/post/PostCreate.vue'),
+                meta: {title: '新建文章'}
+            },
+            {
+                path: ':id/audit',
+                name: 'PostAudit',
+                component: () => import('@/views/post/PostAudit.vue'),
+                meta: {requiresAuth: true, requiresAdmin: true, title: '博文审核'},
+                props: true
+            }
+        ]
+    },
+    {
+        path: '/user/:userId',
+        name: 'UserProfilePublic',
+        component: () => import('@/views/user/UserProfilePublic.vue'),
+        meta: {requiresAuth: true, title: '用户主页'},
+        props: true
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('@/views/NotFound.vue')
+    }
 ]
 
 const router = createRouter({

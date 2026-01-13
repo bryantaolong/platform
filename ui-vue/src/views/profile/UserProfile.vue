@@ -1,15 +1,9 @@
 <template>
   <div class="user-profile">
-    <el-card class="profile-card">
-      <template #header>
-        <div class="card-header">
-          <h2>个人信息</h2>
-        </div>
-      </template>
-
-      <div class="profile-content">
-        <!-- 左侧头像 -->
-        <div class="avatar-section">
+    <!-- Profile Header -->
+    <el-card class="profile-header">
+      <div class="profile-main">
+        <div class="profile-avatar">
           <el-upload
               class="avatar-uploader"
               action="/api/upload/avatar"
@@ -30,122 +24,232 @@
               <p>点击更换</p>
             </div>
           </el-upload>
-          <h3>{{ userStore.userInfo?.username }}</h3>
-          <el-tag v-if="userStore.isAdmin" type="danger" size="small">管理员</el-tag>
-          <el-tag v-else type="info" size="small">普通用户</el-tag>
+        </div>
+        <div class="profile-info">
+          <div class="profile-basic">
+            <h2 class="profile-username">{{ userStore.userInfo?.username }}</h2>
+            <div class="profile-stats">
+              <div class="stat-item" @click="showFollowingList()">
+                <span class="stat-number">{{ userStats.followingCount }}</span>
+                <span class="stat-label">关注</span>
+              </div>
+              <div class="stat-item" @click="showFollowerList()">
+                <span class="stat-number">{{ userStats.followerCount }}</span>
+                <span class="stat-label">粉丝</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ postCount }}</span>
+                <span class="stat-label">文章</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <el-button type="primary" @click="showProfileDialog = true">
+              <el-icon><Edit /></el-icon>
+              编辑资料
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- Posts Section -->
+    <el-card class="posts-section">
+      <template #header>
+        <div class="section-header">
+          <h3>我的文章</h3>
+        </div>
+      </template>
+      <div class="posts-container">
+        <el-empty v-if="posts.length === 0" description="暂无文章" />
+        <div v-else class="posts-grid">
+          <el-card
+            v-for="post in posts"
+            :key="post.id"
+            class="post-card"
+            @click="goToPostDetail(post.id)"
+          >
+            <h3 class="post-title">{{ post.title }}</h3>
+            <div class="post-meta">
+              <span class="post-date">{{ formatDate(post.createdAt) }}</span>
+              <span class="post-stats">
+                <el-icon><View /></el-icon> {{ post.viewCount || 0 }}
+                <el-icon><ChatLineRound /></el-icon> {{ post.commentCount || 0 }}
+                <el-icon><Star /></el-icon> {{ post.likeCount || 0 }}
+              </span>
+            </div>
+            <p class="post-summary" v-html="post.summary || post.content?.substring(0, 100) + '...'"></p>
+            <div class="post-tags" v-if="post.tags && post.tags.length">
+              <el-tag
+                v-for="tag in post.tags"
+                :key="tag"
+                size="small"
+                type="info"
+                class="tag"
+              >
+                {{ tag }}
+              </el-tag>
+            </div>
+          </el-card>
         </div>
 
-        <!-- 右侧 Tabs -->
-        <el-tabs v-model="activeTab" class="info-tabs">
-          <!-- 基本信息 -->
-          <el-tab-pane label="基本信息" name="basic">
+        <div class="pagination-wrapper" v-if="totalPosts > pageSize">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :total="totalPosts"
+            :page-sizes="[10, 20, 50]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
+      </div>
+    </el-card>
+
+    <!-- Profile Edit Dialog -->
+    <el-dialog
+      v-model="showProfileDialog"
+      title="编辑个人信息"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <el-tabs v-model="activeTab" class="info-tabs">
+        <!-- 基本信息 -->
+        <el-tab-pane label="基本信息" name="basic">
+          <el-form
+              ref="basicFormRef"
+              :model="basicForm"
+              :rules="basicRules"
+              label-width="100px"
+              class="info-form"
+          >
+            <el-form-item label="用户名">
+              <el-input :value="userStore.userInfo?.username" disabled />
+            </el-form-item>
+
+            <el-form-item label="真实姓名" prop="realName">
+              <el-input v-model="basicForm.realName" placeholder="请输入真实姓名" />
+            </el-form-item>
+
+            <el-form-item label="性别" prop="gender">
+              <el-radio-group v-model="basicForm.gender">
+                <el-radio :label="1">男</el-radio>
+                <el-radio :label="0">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item label="生日" prop="birthday">
+              <el-date-picker
+                  v-model="basicForm.birthday"
+                  type="date"
+                  placeholder="选择生日"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+
+            <el-form-item label="手机号" prop="phone">
+              <el-input v-model="basicForm.phone" placeholder="请输入手机号" />
+            </el-form-item>
+
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="basicForm.email" placeholder="请输入邮箱" />
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" :loading="updating" @click="handleUpdateBasic">
+                保存修改
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 账号安全 -->
+        <el-tab-pane label="账号安全" name="security">
+          <div class="security-section">
+            <h3>修改密码</h3>
             <el-form
-                ref="basicFormRef"
-                :model="basicForm"
-                :rules="basicRules"
-                label-width="100px"
-                class="info-form"
+                ref="passwordFormRef"
+                :model="passwordForm"
+                :rules="passwordRules"
+                label-width="120px"
+                class="security-form"
             >
-              <el-form-item label="用户名">
-                <el-input :value="userStore.userInfo?.username" disabled />
+              <el-form-item label="当前密码" prop="oldPassword">
+                <el-input v-model="passwordForm.oldPassword" type="password" show-password />
               </el-form-item>
-
-              <el-form-item label="真实姓名" prop="realName">
-                <el-input v-model="basicForm.realName" placeholder="请输入真实姓名" />
+              <el-form-item label="新密码" prop="newPassword">
+                <el-input v-model="passwordForm.newPassword" type="password" show-password />
               </el-form-item>
-
-              <el-form-item label="性别" prop="gender">
-                <el-radio-group v-model="basicForm.gender">
-                  <el-radio :label="1">男</el-radio>
-                  <el-radio :label="0">女</el-radio>
-                </el-radio-group>
+              <el-form-item label="确认新密码" prop="confirmPassword">
+                <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
               </el-form-item>
-
-              <el-form-item label="生日" prop="birthday">
-                <el-date-picker
-                    v-model="basicForm.birthday"
-                    type="date"
-                    placeholder="选择生日"
-                    value-format="YYYY-MM-DD"
-                />
-              </el-form-item>
-
-              <el-form-item label="手机号" prop="phone">
-                <el-input v-model="basicForm.phone" placeholder="请输入手机号" />
-              </el-form-item>
-
-              <el-form-item label="邮箱" prop="email">
-                <el-input v-model="basicForm.email" placeholder="请输入邮箱" />
-              </el-form-item>
-
               <el-form-item>
-                <el-button type="primary" :loading="updating" @click="handleUpdateBasic">
-                  保存修改
+                <el-button
+                    type="primary"
+                    :loading="changingPassword"
+                    @click="handleChangePassword"
+                >
+                  修改密码
                 </el-button>
               </el-form-item>
             </el-form>
-          </el-tab-pane>
+          </div>
 
-          <!-- 账号安全 -->
-          <el-tab-pane label="账号安全" name="security">
-            <div class="security-section">
-              <h3>修改密码</h3>
-              <el-form
-                  ref="passwordFormRef"
-                  :model="passwordForm"
-                  :rules="passwordRules"
-                  label-width="120px"
-                  class="security-form"
-              >
-                <el-form-item label="当前密码" prop="oldPassword">
-                  <el-input v-model="passwordForm.oldPassword" type="password" show-password />
-                </el-form-item>
-                <el-form-item label="新密码" prop="newPassword">
-                  <el-input v-model="passwordForm.newPassword" type="password" show-password />
-                </el-form-item>
-                <el-form-item label="确认新密码" prop="confirmPassword">
-                  <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
-                </el-form-item>
-                <el-form-item>
-                  <el-button
-                      type="primary"
-                      :loading="changingPassword"
-                      @click="handleChangePassword"
-                  >
-                    修改密码
-                  </el-button>
-                </el-form-item>
-              </el-form>
+          <el-divider />
+
+          <div class="danger-section">
+            <h3>危险操作</h3>
+            <el-alert
+                title="注销账号是不可逆的操作，请谨慎操作！"
+                type="error"
+                :closable="false"
+                show-icon
+            />
+            <el-button type="danger" plain style="margin-top: 16px" @click="handleDeleteAccount">
+              注销账号
+            </el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 登录历史 -->
+        <el-tab-pane label="登录历史" name="login-history">
+          <el-table :data="loginHistory" style="width: 100%">
+            <el-table-column prop="loginTime" label="登录时间" width="180" />
+            <el-table-column prop="ipAddress" label="IP地址" width="140" />
+            <el-table-column prop="location" label="登录地点" />
+            <el-table-column prop="device" label="设备信息" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
+    <!-- Following/Follower Dialog -->
+    <el-dialog
+      v-model="showFollowDialog"
+      :title="followDialogTitle"
+      width="500px"
+    >
+      <div class="follow-list">
+        <el-empty v-if="followUsers.length === 0" description="暂无数据" />
+        <div v-else class="user-list">
+          <div
+            v-for="user in followUsers"
+            :key="user.id"
+            class="user-item"
+            @click="goToUserProfile(user.id)"
+          >
+            <el-avatar :size="40" :src="user.avatar">
+              {{ user.username?.charAt(0).toUpperCase() }}
+            </el-avatar>
+            <div class="user-info">
+              <div class="username">{{ user.username }}</div>
+              <div class="real-name" v-if="user.realName">{{ user.realName }}</div>
             </div>
-
-            <el-divider />
-
-            <div class="danger-section">
-              <h3>危险操作</h3>
-              <el-alert
-                  title="注销账号是不可逆的操作，请谨慎操作！"
-                  type="error"
-                  :closable="false"
-                  show-icon
-              />
-              <el-button type="danger" plain style="margin-top: 16px" @click="handleDeleteAccount">
-                注销账号
-              </el-button>
-            </div>
-          </el-tab-pane>
-
-          <!-- 登录历史 -->
-          <el-tab-pane label="登录历史" name="login-history">
-            <el-table :data="loginHistory" style="width: 100%">
-              <el-table-column prop="loginTime" label="登录时间" width="180" />
-              <el-table-column prop="ipAddress" label="IP地址" width="140" />
-              <el-table-column prop="location" label="登录地点" />
-              <el-table-column prop="device" label="设备信息" />
-            </el-table>
-          </el-tab-pane>
-        </el-tabs>
+          </div>
+        </div>
       </div>
-    </el-card>
+    </el-dialog>
   </div>
 </template>
 
@@ -153,9 +257,14 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { Camera } from '@element-plus/icons-vue'
+import { Camera, Edit, View, ChatLineRound, Star } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userApi } from '@/api/user'
+import { postApi } from '@/api/post'
+import { userFollowApi } from '@/api/userFollow'
+import type { PostVO } from '@/models/vo/post/PostVO'
+import type { SysUser } from '@/models/entity/SysUser'
 
 /* ----------------- 性别转换 ----------------- */
 function genderToNum(g?: string): 1 | 0 {
@@ -166,6 +275,7 @@ function numToGender(n: 1 | 0): 'MALE' | 'FEMALE' {
 }
 
 /* ----------------- 基础数据 ----------------- */
+const router = useRouter()
 const userStore = useUserStore()
 const activeTab = ref('basic')
 const basicFormRef = ref<FormInstance>()
@@ -173,6 +283,23 @@ const passwordFormRef = ref<FormInstance>()
 
 const updating = ref(false)
 const changingPassword = ref(false)
+const showProfileDialog = ref(false)
+const showFollowDialog = ref(false)
+const followDialogTitle = ref('')
+const followUsers = ref<SysUser[]>([])
+
+// Posts data
+const posts = ref<PostVO[]>([])
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalPosts = ref(0)
+const postCount = ref(0)
+
+// User stats
+const userStats = reactive({
+  followingCount: 0,
+  followerCount: 0
+})
 
 const basicForm = reactive({
   realName: '',
@@ -242,6 +369,93 @@ const loginHistory = ref([
 ])
 
 /* ----------------- 方法 ----------------- */
+
+// Load user posts
+const loadPosts = async () => {
+  if (!userStore.userInfo?.id) return
+  try {
+    const response = await postApi.getPublishedPostsByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
+    if (response.code === 200) {
+      posts.value = response.data.rows
+      totalPosts.value = response.data.total
+    }
+  } catch (error) {
+    console.error('加载文章失败:', error)
+  }
+}
+
+// Load user stats
+const loadUserStats = async () => {
+  if (!userStore.userInfo?.id) return
+  try {
+    const response = await userFollowApi.getUserFollowStats(userStore.userInfo.id)
+    if (response.code === 200) {
+      userStats.followingCount = response.data.followingCount
+      userStats.followerCount = response.data.followerCount
+    }
+  } catch (error) {
+    console.error('加载用户统计失败:', error)
+  }
+}
+
+// Show following list
+const showFollowingList = async () => {
+  if (!userStore.userInfo?.id) return
+  followDialogTitle.value = '我的关注'
+  showFollowDialog.value = true
+  try {
+    const response = await userFollowApi.getFollowingUsers(userStore.userInfo.id)
+    if (response.code === 200) {
+      followUsers.value = response.data.rows
+    }
+  } catch (error) {
+    console.error('加载关注列表失败:', error)
+  }
+}
+
+// Show follower list
+const showFollowerList = async () => {
+  if (!userStore.userInfo?.id) return
+  followDialogTitle.value = '我的粉丝'
+  showFollowDialog.value = true
+  try {
+    const response = await userFollowApi.getFollowerUsers(userStore.userInfo.id)
+    if (response.code === 200) {
+      followUsers.value = response.data.rows
+    }
+  } catch (error) {
+    console.error('加载粉丝列表失败:', error)
+  }
+}
+
+// Go to post detail
+const goToPostDetail = (postId: number) => {
+  router.push(`/post/${postId}`)
+}
+
+// Go to user profile
+const goToUserProfile = (userId: number) => {
+  router.push(`/user/${userId}`)
+}
+
+// Format date
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('zh-CN')
+}
+
+// Handle pagination
+const handleSizeChange = (newSize: number) => {
+  pageSize.value = newSize
+  currentPage.value = 1
+  loadPosts()
+}
+
+const handleCurrentChange = (newPage: number) => {
+  currentPage.value = newPage
+  loadPosts()
+}
+
 const handleAvatarSuccess = (res: any) => {
   if (res.code === 200) {
     ElMessage.success('头像上传成功')
@@ -344,42 +558,45 @@ const loadUserData = () => {
       email: userStore.userProfile.email || ''
     })
   }
+  loadPosts()
+  loadUserStats()
 }
 
 onMounted(() => loadUserData())
 </script>
 
 <style scoped>
-/* 与原文件完全一致，此处省略以节省篇幅 */
 .user-profile {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-.profile-card {
+
+.profile-header {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-.card-header h2 {
-  margin: 0;
-  color: #303133;
-}
-.profile-content {
+
+.profile-main {
   display: flex;
+  align-items: center;
   gap: 40px;
-}
-.avatar-section {
-  flex: 0 0 200px;
-  text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 12px;
 }
+
+.profile-avatar {
+  flex: 0 0 120px;
+}
+
 .avatar-uploader {
   position: relative;
   display: inline-block;
   cursor: pointer;
 }
+
 .avatar-overlay {
   position: absolute;
   top: 0;
@@ -396,37 +613,217 @@ onMounted(() => loadUserData())
   opacity: 0;
   transition: opacity 0.3s;
 }
+
 .avatar-uploader:hover .avatar-overlay {
   opacity: 1;
 }
+
 .avatar-overlay p {
   margin: 4px 0 0 0;
   font-size: 12px;
 }
-.info-tabs {
+
+.profile-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-basic {
   flex: 1;
 }
+
+.profile-username {
+  margin: 0 0 16px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.stat-item:hover {
+  color: #409eff;
+}
+
+.stat-number {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+}
+
+.profile-actions {
+  flex: 0 0 auto;
+}
+
+.posts-section {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.section-header h3 {
+  margin: 0;
+  color: #303133;
+}
+
+.posts-container {
+  padding: 20px;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.post-card {
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.post-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.post-stats {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.post-summary {
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  font-size: 12px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.info-tabs {
+  padding: 20px;
+}
+
 .info-form {
   max-width: 500px;
 }
+
 .security-section h3 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #303133;
 }
+
 .security-form {
   max-width: 500px;
 }
+
 .danger-section {
   margin-top: 40px;
   padding-top: 40px;
   border-top: 1px solid #e4e7ed;
 }
+
 .danger-section h3 {
   margin-top: 0;
   margin-bottom: 16px;
   color: #f56c6c;
 }
+
+.follow-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-item:hover {
+  background-color: #f5f7fa;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.username {
+  font-weight: 500;
+  color: #303133;
+}
+
+.real-name {
+  font-size: 12px;
+  color: #909399;
+}
+
 :deep(.el-input.is-disabled .el-input__wrapper) {
   background-color: #f5f7fa;
 }

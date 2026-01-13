@@ -20,6 +20,8 @@ public class UserPostCollection {
 
     private Long id;
 
+    private Long userId;
+
     private String folderName;
 
     /* ======== 通用字段 ======== */

@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 logs/
 
-
+### Frontend ###
 ui-vue/node_modules/
 ui-vue/logs
 ui-vue/*.log

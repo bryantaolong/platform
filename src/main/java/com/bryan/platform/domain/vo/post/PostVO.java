@@ -1,7 +1,11 @@
 package com.bryan.platform.domain.vo.post;
 
+import com.bryan.platform.domain.enums.post.CommentAreaStatusEnum;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * PostVO
@@ -24,9 +28,9 @@ public class PostVO {
 
     private Long categoryId;
 
-    private String tags;
+    private List<String> tags;
 
-    private String commentAreaStatus;
+    private CommentAreaStatusEnum commentAreaStatus;
 
     // count numbers
     private Long viewCount;
@@ -38,4 +42,8 @@ public class PostVO {
     private Long collectCount;
 
     private Long shareCount;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }
