@@ -118,7 +118,7 @@
           AND deleted = 0
     </select>
 
-    <!-- 检查是否存在 -->
+    <!-- 检查是否存在（包括已删除的） -->
     <select id="existsByUserIdAndPostId" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM user_post_collect
@@ -126,5 +126,24 @@
           AND post_id = #{postId}
           AND deleted = 0
     </select>
+
+    <!-- 检查是否存在（包括已删除的，用于恢复收藏） -->
+    <select id="existsByUserIdAndPostIdIncludeDeleted" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+          AND post_id = #{postId}
+    </select>
+
+    <!-- 恢复收藏（取消逻辑删除） -->
+    <update id="restoreCollect">
+        UPDATE user_post_collect
+        SET deleted = 0,
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE user_id = #{userId}
+          AND post_id = #{postId}
+    </update>
 
 </mapper>

@@ -88,6 +88,36 @@
             </div>
           </div>
         </el-tab-pane>
+        <el-tab-pane label="收藏" name="collects">
+          <div class="collects-container">
+            <el-empty v-if="collects.length === 0" description="暂无收藏" />
+            <div v-else class="collects-grid">
+              <el-card 
+                v-for="collect in collects" 
+                :key="collect.id" 
+                class="collect-card"
+                @click="goToPostDetail(collect.postId)"
+              >
+                <h3 class="collect-title">{{ collect.postTitle }}</h3>
+                <div class="collect-meta">
+                  <span class="collect-date">{{ formatDate(collect.createdAt) }}</span>
+                </div>
+              </el-card>
+            </div>
+            
+            <div class="pagination-wrapper" v-if="totalCollects > collectPageSize">
+              <el-pagination
+                v-model:current-page="collectCurrentPage"
+                v-model:page-size="collectPageSize"
+                :total="totalCollects"
+                :page-sizes="[10, 20, 50]"
+                layout="total, sizes, prev, pager, next, jumper"
+                @size-change="handleCollectSizeChange"
+                @current-change="handleCollectCurrentChange"
+              />
+            </div>
+          </div>
+        </el-tab-pane>
         <el-tab-pane label="个人信息" name="profile">
           <div class="profile-details">
             <el-descriptions :column="1" border>
@@ -144,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Star, View, ChatLineRound } from '@element-plus/icons-vue'
@@ -171,6 +201,10 @@ const postCount = ref(0)
 const totalPosts = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const collects = ref<any[]>([])
+const totalCollects = ref(0)
+const collectCurrentPage = ref(1)
+const collectPageSize = ref(10)
 const activeTab = ref('posts')
 const isFollowing = ref(false)
 const followLoading = ref(false)
@@ -242,6 +276,20 @@ const loadUserPosts = async () => {
   } catch (error) {
     console.error('加载用户文章失败:', error)
     ElMessage.error('加载文章失败')
+  }
+}
+
+// Load user collects
+const loadUserCollects = async () => {
+  try {
+    const response = await postApi.getUserCollects(collectCurrentPage.value, collectPageSize.value)
+    if (response.code === 200) {
+      collects.value = response.data.rows
+      totalCollects.value = response.data.total
+    }
+  } catch (error) {
+    console.error('加载用户收藏失败:', error)
+    ElMessage.error('加载收藏失败')
   }
 }
 
@@ -329,6 +377,26 @@ const handleCurrentChange = (page: number) => {
   currentPage.value = page
   loadUserPosts()
 }
+
+// Handle collect page size change
+const handleCollectSizeChange = (size: number) => {
+  collectPageSize.value = size
+  collectCurrentPage.value = 1
+  loadUserCollects()
+}
+
+// Handle collect current page change
+const handleCollectCurrentChange = (page: number) => {
+  collectCurrentPage.value = page
+  loadUserCollects()
+}
+
+// Watch active tab to load data
+watch(activeTab, (newTab) => {
+  if (newTab === 'collects') {
+    loadUserCollects()
+  }
+})
 
 onMounted(() => {
   loadUserProfile()
@@ -479,6 +547,34 @@ onMounted(() => {
 
 .tag {
   margin-bottom: 5px;
+}
+
+.collects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.collect-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.collect-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.collect-title {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #303133;
+  line-height: 1.4;
+}
+
+.collect-meta {
+  color: #909399;
+  font-size: 14px;
 }
 
 .pagination-wrapper {

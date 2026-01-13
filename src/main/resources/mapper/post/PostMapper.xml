@@ -70,6 +70,17 @@
           AND deleted = 0
     </update>
 
+    <!-- 更新收藏数 -->
+    <update id="updateCollectCount">
+        UPDATE post
+        SET collect_count = collect_count + #{delta},
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
     <!-- 单条查询 -->
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>

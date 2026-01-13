@@ -31,10 +31,29 @@ public class UserPostCollectService {
     /* ---------- 增 ---------- */
     @Transactional
     public UserPostCollect collectPost(Long userId, Long postId, Long collectionId) {
-        // 检查是否已收藏
-        if (userPostCollectMapper.existsByUserIdAndPostId(userId, postId)) {
-            log.warn("用户已收藏该博文，用户ID: {}, 博文ID: {}", userId, postId);
-            throw new RuntimeException("已收藏该博文");
+        // 检查是否已收藏（包括已删除的）
+        boolean existsIncludeDeleted = userPostCollectMapper.existsByUserIdAndPostIdIncludeDeleted(userId, postId);
+
+        if (existsIncludeDeleted) {
+            // 如果存在记录（包括已删除的），检查是否已收藏
+            boolean isCurrentlyCollected = userPostCollectMapper.existsByUserIdAndPostId(userId, postId);
+            if (isCurrentlyCollected) {
+                log.warn("用户已收藏该博文，用户ID: {}, 博文ID: {}", userId, postId);
+                throw new RuntimeException("已收藏该博文");
+            } else {
+                // 存在但已删除，恢复收藏
+                LocalDateTime now = LocalDateTime.now();
+                int rows = userPostCollectMapper.restoreCollect(userId, postId, now, String.valueOf(userId));
+                if (rows > 0) {
+                    // 更新博文收藏数 +1
+                    postMapper.updateCollectCount(postId, 1, now, String.valueOf(userId));
+                    log.info("用户恢复收藏博文成功，用户ID: {}, 博文ID: {}", userId, postId);
+                    return userPostCollectMapper.selectByUserIdAndPostId(userId, postId);
+                } else {
+                    log.warn("恢复收藏失败，用户ID: {}, 博文ID: {}", userId, postId);
+                    throw new RuntimeException("恢复收藏失败");
+                }
+            }
         }
 
         // 验证收藏夹ID（如果不是默认收藏夹0）
@@ -53,18 +72,23 @@ public class UserPostCollectService {
             throw new RuntimeException("博文不存在");
         }
 
+        LocalDateTime now = LocalDateTime.now();
         UserPostCollect collect = UserPostCollect.builder()
                 .userId(userId)
                 .postId(postId)
                 .collectionId(collectionId != null ? collectionId : 0L)
                 .postTitle(post.getTitle())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(now)
+                .updatedAt(now)
                 .createdBy(String.valueOf(userId))
                 .updatedBy(String.valueOf(userId))
                 .build();
 
         userPostCollectMapper.insert(collect);
+
+        // 更新博文收藏数 +1
+        postMapper.updateCollectCount(postId, 1, now, String.valueOf(userId));
+
         log.info("用户收藏博文成功，用户ID: {}, 博文ID: {}, 收藏夹ID: {}, 收藏ID: {}", userId, postId, collectionId, collect.getId());
         return collect;
     }
@@ -74,6 +98,8 @@ public class UserPostCollectService {
     public boolean uncollectPost(Long userId, Long postId) {
         int rows = userPostCollectMapper.deleteByUserIdAndPostId(userId, postId);
         if (rows > 0) {
+            // 更新博文收藏数 -1
+            postMapper.updateCollectCount(postId, -1, LocalDateTime.now(), String.valueOf(userId));
             log.info("用户取消收藏成功，用户ID: {}, 博文ID: {}", userId, postId);
             return true;
         } else {

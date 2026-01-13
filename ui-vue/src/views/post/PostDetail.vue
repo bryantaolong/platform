@@ -284,6 +284,9 @@ const loadPost = async () => {
         await loadAuthorInfo(post.value.author)
       }
 
+      // Check collect status
+      await checkCollectStatus()
+
       // Check if current user can edit this post
       // This would require checking the current user's ID against post.userId
       // For now, using a mock value
@@ -443,23 +446,51 @@ const handleLike = async () => {
   }
 }
 
+// Check collect status
+const checkCollectStatus = async () => {
+  if (!post.value) return
+
+  try {
+    const response = await postApi.checkCollectStatus(post.value.id)
+    if (response.code === 200) {
+      isCollected.value = response.data
+    }
+  } catch (error) {
+    console.error('检查收藏状态失败:', error)
+    // Default to false if check fails
+    isCollected.value = false
+  }
+}
+
 // Handle collect action
 const handleCollect = async () => {
   try {
     if (!post.value) return
 
-    // Mock implementation
-    isCollected.value = !isCollected.value
     if (isCollected.value) {
-      post.value.collectCount = (post.value.collectCount || 0) + 1
-      ElMessage.success('收藏成功')
+      // Uncollect
+      const response = await postApi.uncollectPost(post.value.id)
+      if (response.code === 200) {
+        isCollected.value = false
+        post.value.collectCount = Math.max(0, (post.value.collectCount || 0) - 1)
+        ElMessage.info('已取消收藏')
+      } else {
+        ElMessage.error(response.message || '取消收藏失败')
+      }
     } else {
-      post.value.collectCount = Math.max(0, (post.value.collectCount || 0) - 1)
-      ElMessage.info('已取消收藏')
+      // Collect
+      const response = await postApi.collectPost(post.value.id)
+      if (response.code === 200) {
+        isCollected.value = true
+        post.value.collectCount = (post.value.collectCount || 0) + 1
+        ElMessage.success('收藏成功')
+      } else {
+        ElMessage.error(response.message || '收藏失败')
+      }
     }
   } catch (error) {
+    console.error('收藏操作失败:', error)
     ElMessage.error('操作失败')
-    isCollected.value = !isCollected.value // revert UI change
   }
 }
 

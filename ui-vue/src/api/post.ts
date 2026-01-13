@@ -155,18 +155,42 @@ export const postApi = {
     },
 
     // Collect a post
-    collectPost: (id: number): Promise<Result<boolean>> => {
+    collectPost: (postId: number, collectionId?: number): Promise<Result<any>> => {
         return request({
-            url: `/api/posts/${id}/collect`,
-            method: 'post'
+            url: '/api/user/post-collects',
+            method: 'post',
+            data: {
+                postId,
+                collectionId: collectionId || 0
+            }
         })
     },
 
     // Uncollect a post
-    uncollectPost: (id: number): Promise<Result<boolean>> => {
+    uncollectPost: (postId: number): Promise<Result<boolean>> => {
         return request({
-            url: `/api/posts/${id}/uncollect`,
-            method: 'post'
+            url: `/api/user/post-collects/${postId}`,
+            method: 'delete'
+        })
+    },
+
+    // Check if post is collected
+    checkCollectStatus: (postId: number): Promise<Result<boolean>> => {
+        return request({
+            url: `/api/user/post-collects/${postId}/status`,
+            method: 'get'
+        })
+    },
+
+    // Get user collects
+    getUserCollects: (pageNum: number, pageSize: number): Promise<Result<PageResult<any>>> => {
+        return request({
+            url: '/api/user/post-collects',
+            method: 'get',
+            params: {
+                pageNum,
+                pageSize
+            }
         })
     }
 }
