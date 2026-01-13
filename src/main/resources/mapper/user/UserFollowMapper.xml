@@ -12,8 +12,8 @@
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user_follow(follower_id, following_id, created_at)
-        VALUES (#{followerId}, #{followingId}, #{createdAt})
+        INSERT INTO user_follow(follower_id, following_id)
+        VALUES (#{followerId}, #{followingId})
     </insert>
 
     <select id="selectById" resultMap="BaseResultMap">

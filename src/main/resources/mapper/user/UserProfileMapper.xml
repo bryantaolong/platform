@@ -25,11 +25,10 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_profile (
-            user_id, real_name, gender, birthday, avatar, deleted, version,
-            created_at, created_by, updated_at, updated_by
+            user_id, real_name, gender, birthday, avatar, deleted, version
         ) VALUES (
                      #{userId}, #{realName}, #{gender}, #{birthday}, #{avatar}, #{deleted},
-                     #{version}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy}
+                     #{version}
                  )
     </insert>
 
@@ -67,13 +66,7 @@
             <if test="deleted != null">
                 deleted = #{deleted},
             </if>
-            version = version + 1,
-            <if test="updatedAt != null">
-                updated_at = #{updatedAt},
-            </if>
-            <if test="updatedBy != null and updatedBy != ''">
-                updated_by = #{updatedBy},
-            </if>
+            version = version + 1
         </set>
         WHERE user_id = #{userId}
         AND version = #{version}

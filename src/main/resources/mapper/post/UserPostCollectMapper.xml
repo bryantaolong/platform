@@ -27,11 +27,9 @@
     <!-- 1. 单条插入 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_post_collect (
-            user_id,post_id,collection_id,post_title,
-            created_at,updated_at,created_by,updated_by
+            user_id,post_id,collection_id,post_title
         ) VALUES (
-                     #{userId},#{postId},#{collectionId},#{postTitle},
-                     #{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
+                     #{userId},#{postId},#{collectionId},#{postTitle}
                  )
     </insert>
 

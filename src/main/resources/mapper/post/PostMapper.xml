@@ -37,11 +37,9 @@
     <!-- 1. 单条插入 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO post (
-            user_id,title,content,status,category_id,tags,comment_area_status,
-            created_at,updated_at,created_by,updated_by
+            user_id,title,content,status,category_id,tags,comment_area_status
         ) VALUES (
-                     #{userId},#{title},#{content},#{status},#{categoryId},#{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus},
-                     #{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
+                     #{userId},#{title},#{content},#{status},#{categoryId},#{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus}
                  )
     </insert>
 
@@ -74,9 +72,7 @@
     <update id="updateCollectCount">
         UPDATE post
         SET collect_count = collect_count + #{delta},
-            version = version + 1,
-            updated_at = #{updatedAt},
-            updated_by = #{updatedBy}
+            version = version + 1
         WHERE id = #{id}
           AND deleted = 0
     </update>

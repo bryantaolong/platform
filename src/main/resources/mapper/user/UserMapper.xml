@@ -36,13 +36,11 @@
         INSERT INTO sys_user (
             username, password, phone, email, roles, status,
             login_fail_count, last_login_at, last_login_ip,
-            password_reset_at, locked_at, deleted, version,
-            created_at, created_by, updated_at, updated_by
+            password_reset_at, locked_at, deleted, version
         ) VALUES (
                      #{username}, #{password}, #{phone}, #{email}, #{roles}, #{status},
                      #{loginFailCount}, #{lastLoginAt}, #{lastLoginIp},
-                     #{passwordResetAt}, #{lockedAt}, #{deleted}, #{version},
-                     #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy}
+                     #{passwordResetAt}, #{lockedAt}, #{deleted}, #{version}
                  )
     </insert>
 
@@ -102,8 +100,6 @@
             <if test="lockedAt != null">locked_at = #{lockedAt},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
             <if test="version != null">version = #{version},</if>
-            updated_at = #{updatedAt},
-            updated_by = #{updatedBy}
         </set>
         WHERE id = #{id}
     </update>
