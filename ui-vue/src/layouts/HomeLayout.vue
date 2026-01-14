@@ -20,6 +20,7 @@
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/post/list">文章</el-menu-item>
             <el-menu-item index="/post/create">写文章</el-menu-item>
+            <el-menu-item @click="chatRef.open()">AI对话</el-menu-item>
           </el-menu>
         </div>
 
@@ -64,6 +65,9 @@
       </div>
     </el-header>
 
+    <!-- AI Chat Dialog -->
+    <LlmChatDialog ref="chatRef" />
+
     <!-- Main Content -->
     <el-main class="main-content">
       <router-view />
@@ -80,6 +84,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -91,11 +96,14 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import LlmChatDialog from "@/components/llm/LlmChatDialog.vue";
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const searchQuery = ref('')
+
+const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
 
 const activeMenu = computed(() => {
   if (route.path === '/') return '/'
