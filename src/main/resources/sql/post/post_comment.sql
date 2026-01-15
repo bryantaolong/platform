@@ -12,12 +12,12 @@ CREATE TABLE post_comment (
                               child_count       BIGINT       NOT NULL DEFAULT 0, -- 直接子节点数，用于展示「共X条回复」
                               path              LTREE,                   -- 物化路径，顶级评论值为 id::text::ltree
                               status            SMALLINT     NOT NULL DEFAULT 1, -- 1=正常 2=待审 3=隐藏 4=删除(逻辑删已够用)
+                              deleted           SMALLINT     NOT NULL DEFAULT 0, -- 逻辑删除
+                              version           INTEGER      NOT NULL DEFAULT 0, -- 乐观锁
                               created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               updated_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               created_by        VARCHAR(64),
                               updated_by        VARCHAR(64),
-                              deleted           SMALLINT     NOT NULL DEFAULT 0, -- 逻辑删除
-                              version           INTEGER      NOT NULL DEFAULT 0, -- 乐观锁
                               CONSTRAINT uk_root_floor UNIQUE (root_id, floor) -- 每根楼楼层号唯一
 );
 

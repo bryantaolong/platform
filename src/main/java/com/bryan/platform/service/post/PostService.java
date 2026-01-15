@@ -3,6 +3,7 @@ package com.bryan.platform.service.post;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
+import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,11 +103,28 @@ public class PostService {
         log.info("更新帖子状态成功，帖子ID: {} , 新状态: {}", postId, status);
     }
 
+    public int likePost(Long postId) {
+        return postMapper.updateLikeCount(postId, 1);
+    }
+
+    public int unlikePost(Long postId) {
+        return postMapper.updateLikeCount(postId, -1);
+    }
+
+    public int increaseViewCount(Long postId) {
+        return postMapper.updateViewCount(postId, 1);
+    }
+
     /* ---------- 单查 ---------- */
     public Post getPostById(Long postId) {
         Post post = postMapper.selectById(postId);
         if (post == null) {
             log.warn("查询帖子不存在，ID: {}", postId);
+        }
+
+        int increased = this.increaseViewCount(postId);
+        if (increased <= 0) {
+            throw new BusinessException("博文浏览数自增失败");
         }
         return post;
     }

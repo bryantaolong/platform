@@ -287,6 +287,9 @@ const loadPost = async () => {
       // Check collect status
       await checkCollectStatus()
 
+      // Check like status
+      await checkLikeStatus()
+
       // Check if current user can edit this post
       // This would require checking the current user's ID against post.userId
       // For now, using a mock value
@@ -426,23 +429,48 @@ const goToUserProfile = async (username: string | undefined) => {
 
 // Handle like action
 const handleLike = async () => {
-  try {
-    // Call API to toggle like status
-    // In real implementation, this would be an API call
-    if (!post.value) return
+  if (!post.value) return
 
-    // Mock implementation
-    isLiked.value = !isLiked.value
+  try {
     if (isLiked.value) {
-      post.value.likeCount = (post.value.likeCount || 0) + 1
-      ElMessage.success('点赞成功')
+      const response = await postApi.unlikePost(post.value.id)
+      if (response.code === 200) {
+        isLiked.value = false
+        post.value.likeCount = Math.max(0, (post.value.likeCount || 0) - 1)
+        ElMessage.info('已取消点赞')
+      } else {
+        ElMessage.error(response.message || '取消点赞失败')
+      }
     } else {
-      post.value.likeCount = Math.max(0, (post.value.likeCount || 0) - 1)
-      ElMessage.info('已取消点赞')
+      const response = await postApi.likePost(post.value.id)
+      if (response.code === 200) {
+        isLiked.value = true
+        post.value.likeCount = (post.value.likeCount || 0) + 1
+        ElMessage.success('点赞成功')
+      } else {
+        ElMessage.error(response.message || '点赞失败')
+      }
     }
   } catch (error) {
+    console.error('点赞操作失败:', error)
     ElMessage.error('操作失败')
-    isLiked.value = !isLiked.value // revert UI change
+  }
+}
+
+// Check like status
+const checkLikeStatus = async () => {
+  if (!post.value) return
+
+  try {
+    const response = await postApi.checkLikeStatus(post.value.id)
+    if (response.code === 200) {
+      isLiked.value = response.data
+    } else {
+      isLiked.value = false
+    }
+  } catch (error) {
+    console.error('检查点赞状态失败:', error)
+    isLiked.value = false
   }
 }
 

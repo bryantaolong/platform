@@ -2,7 +2,6 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="com.bryan.platform.mapper.post.PostMapper">
 
     <sql id="BaseColumn">
@@ -18,7 +17,8 @@
         <result column="content" property="content"/>
         <result column="status" property="status"/>
         <result column="category_id" property="categoryId"/>
-        <result column="tags" property="tags" typeHandler="com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler"/>
+        <result column="tags" property="tags"
+                typeHandler="com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler"/>
         <result column="comment_area_status" property="commentAreaStatus"/>
         <result column="view_count" property="viewCount"/>
         <result column="like_count" property="likeCount"/>
@@ -34,25 +34,27 @@
         <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
-    <!-- 1. 单条插入 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO post (
-            user_id,title,content,status,category_id,tags,comment_area_status
+            user_id,title,content,status,category_id,tags,comment_area_status,
+            deleted,version,created_at,updated_at,created_by,updated_by
         ) VALUES (
-                     #{userId},#{title},#{content},#{status},#{categoryId},#{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus}
+                     #{userId},#{title},#{content},#{status},#{categoryId},
+                     #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus},
+                     #{deleted},#{version},#{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
                  )
     </insert>
 
-    <!-- 逻辑删除 -->
     <update id="deleteById">
         UPDATE post
         SET deleted = 1,
-            version = version + 1
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
 
-    <!-- 整行更新（乐观锁） -->
     <update id="update">
         UPDATE post
         SET title = #{title},
@@ -62,29 +64,50 @@
             tags = #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},
             comment_area_status = #{commentAreaStatus},
             weight = #{weight},
-            version = version + 1
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND version = #{version}
           AND deleted = 0
     </update>
 
-    <!-- 更新收藏数 -->
-    <update id="updateCollectCount">
+    <update id="updateLikeCount">
         UPDATE post
-        SET collect_count = collect_count + #{delta},
-            version = version + 1
+        SET like_count = like_count + #{delta},
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
 
-    <!-- 单条查询 -->
+    <update id="updateCollectCount">
+        UPDATE post
+        SET collect_count = collect_count + #{delta},
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updateViewCount">
+        UPDATE post
+        SET view_count = view_count + #{delta},
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
         WHERE id = #{id} AND deleted = 0
     </select>
 
-    <!-- 批量 IDS 查询 -->
     <select id="selectByIds" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -95,7 +118,6 @@
         AND deleted = 0
     </select>
 
-    <!-- 用户分页 -->
     <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -105,7 +127,6 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 用户已发布分页 -->
     <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -116,7 +137,6 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 全局分页 -->
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -125,7 +145,6 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 计数 -->
     <select id="countByUserId" resultType="long">
         SELECT COUNT(*)
         FROM post
@@ -133,7 +152,6 @@
           AND deleted = 0
     </select>
 
-    <!-- 全站已发布分页 -->
     <select id="selectPageByStatus" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -143,7 +161,6 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 计数 -->
     <select id="countByStatus" resultType="long">
         SELECT COUNT(*)
         FROM post
@@ -165,7 +182,6 @@
         WHERE deleted = 0
     </select>
 
-    <!-- 搜索分页 -->
     <select id="selectBySearch" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post
@@ -185,7 +201,6 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 搜索计数 -->
     <select id="countBySearch" resultType="long">
         SELECT COUNT(*)
         FROM post

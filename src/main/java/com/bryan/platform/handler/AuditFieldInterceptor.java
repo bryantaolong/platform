@@ -61,7 +61,7 @@ public class AuditFieldInterceptor implements Interceptor {
     private String currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            return "system";
+            return "SYSTEM";
         }
         return auth.getName();
     }

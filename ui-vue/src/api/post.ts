@@ -154,6 +154,14 @@ export const postApi = {
         })
     },
 
+    // Check if post is liked by current user
+    checkLikeStatus: (postId: number): Promise<Result<boolean>> => {
+        return request({
+            url: `/api/posts/${postId}/like/status`,
+            method: 'get'
+        })
+    },
+
     // Collect a post
     collectPost: (postId: number, collectionId?: number): Promise<Result<any>> => {
         return request({

@@ -33,6 +33,7 @@ public class PostController {
 
     private final PostService postService;
     private final AuthService authService;
+    private final com.bryan.platform.service.post.UserPostLikeService userPostLikeService;
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -208,5 +209,46 @@ public class PostController {
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "删除失败，文章不存在");
         }
+    }
+
+    /**
+     * 点赞博文
+     */
+    @PostMapping("/{id}/like")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> likePost(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        try {
+            boolean ok = userPostLikeService.likePost(currentUserId, id);
+            return Result.success(ok);
+        } catch (RuntimeException e) {
+            return Result.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    /**
+     * 取消点赞
+     */
+    @PostMapping("/{id}/unlike")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> unlikePost(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        boolean ok = userPostLikeService.unlikePost(currentUserId, id);
+        if (ok) {
+            return Result.success(true);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "取消点赞失败，可能未点赞");
+        }
+    }
+
+    /**
+     * 检查是否已点赞
+     */
+    @GetMapping("/{id}/like/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        boolean liked = userPostLikeService.isLiked(currentUserId, id);
+        return Result.success(liked);
     }
 }

@@ -4,7 +4,6 @@ import com.bryan.platform.domain.entity.post.UserPostCollect;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -49,6 +48,5 @@ public interface UserPostCollectMapper {
 
     boolean existsByUserIdAndPostIdIncludeDeleted(@Param("userId") Long userId, @Param("postId") Long postId);
 
-    int restoreCollect(@Param("userId") Long userId, @Param("postId") Long postId,
-                       @Param("updatedAt") LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+    int restoreCollect(@Param("userId") Long userId, @Param("postId") Long postId);
 }

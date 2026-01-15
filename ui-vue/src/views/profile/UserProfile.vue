@@ -78,7 +78,6 @@
                 <el-icon><Star /></el-icon> {{ post.likeCount || 0 }}
               </span>
             </div>
-            <p class="post-summary" v-html="post.summary || post.content?.substring(0, 100) + '...'"></p>
             <div class="post-tags" v-if="post.tags && post.tags.length">
               <el-tag
                 v-for="tag in post.tags"
@@ -239,12 +238,13 @@
             class="user-item"
             @click="goToUserProfile(user.id)"
           >
-            <el-avatar :size="40" :src="user.avatar">
-              {{ user.username?.charAt(0).toUpperCase() }}
-            </el-avatar>
+<!--            TODO: 头像和真实姓名待定-->
+<!--            <el-avatar :size="40" :src="user.avatar">-->
+<!--              {{ user.username?.charAt(0).toUpperCase() }}-->
+<!--            </el-avatar>-->
             <div class="user-info">
               <div class="username">{{ user.username }}</div>
-              <div class="real-name" v-if="user.realName">{{ user.realName }}</div>
+<!--              <div class="real-name" v-if="user.realName">{{ user.realName }}</div>-->
             </div>
           </div>
         </div>
