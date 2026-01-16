@@ -23,10 +23,10 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_follow (
             follower_id, following_id,
-            deleted, version, created_at, updated_at, created_by, updated_by
+            created_at, updated_at, created_by, updated_by
         ) VALUES (
                      #{followerId}, #{followingId},
-                     #{deleted}, #{version}, #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+                     #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
 

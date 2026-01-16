@@ -219,7 +219,6 @@ import {ref, onMounted} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  User,
   Clock,
   View,
   Star,

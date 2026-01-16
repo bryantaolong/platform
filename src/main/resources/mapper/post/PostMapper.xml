@@ -36,12 +36,12 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO post (
-            user_id,title,content,status,category_id,tags,comment_area_status,
-            deleted,version,created_at,updated_at,created_by,updated_by
+            user_id, title, content, status, category_id, tags, comment_area_status,
+            created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{userId},#{title},#{content},#{status},#{categoryId},
-                     #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},#{commentAreaStatus},
-                     #{deleted},#{version},#{createdAt},#{updatedAt},#{createdBy},#{updatedBy}
+                     #{userId}, #{title}, #{content}, #{status}, #{categoryId},
+                     #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler}, #{commentAreaStatus},
+                     #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
 
