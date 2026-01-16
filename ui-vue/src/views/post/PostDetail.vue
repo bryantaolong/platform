@@ -235,6 +235,7 @@ import { userApi } from '@/api/user'
 import { userFollowApi } from '@/api/userFollow'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/UserProfileVO'
+import {userPostCollectApi} from "@/api/userPostCollect.ts";
 
 interface Comment {
   id: number
@@ -478,7 +479,7 @@ const checkCollectStatus = async () => {
   if (!post.value) return
 
   try {
-    const response = await postApi.checkCollectStatus(post.value.id)
+    const response = await userPostCollectApi.checkCollectStatus(post.value.id)
     if (response.code === 200) {
       isCollected.value = response.data
     }
@@ -496,7 +497,7 @@ const handleCollect = async () => {
 
     if (isCollected.value) {
       // Uncollect
-      const response = await postApi.uncollectPost(post.value.id)
+      const response = await userPostCollectApi.uncollectPost(post.value.id)
       if (response.code === 200) {
         isCollected.value = false
         post.value.collectCount = Math.max(0, (post.value.collectCount || 0) - 1)
@@ -506,7 +507,7 @@ const handleCollect = async () => {
       }
     } else {
       // Collect
-      const response = await postApi.collectPost(post.value.id)
+      const response = await userPostCollectApi.collectPost(post.value.id)
       if (response.code === 200) {
         isCollected.value = true
         post.value.collectCount = (post.value.collectCount || 0) + 1
