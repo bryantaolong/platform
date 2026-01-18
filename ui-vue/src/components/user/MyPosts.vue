@@ -1,5 +1,15 @@
 <template>
   <div class="tab-content-container">
+    <div class="filter-bar">
+      <el-select v-model="statusFilter" placeholder="筛选状态" @change="handleStatusChange" clearable>
+        <el-option
+            v-for="option in statusOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+        />
+      </el-select>
+    </div>
     <el-empty v-if="posts.length === 0" description="暂无文章"/>
     <div v-else class="posts-grid">
       <el-card
@@ -45,25 +55,45 @@ import {View, ChatLineRound, Star} from '@element-plus/icons-vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user.ts'
 import {postApi} from '@/api/post.ts'
-import type {PostVO} from '@/models/vo/post/PostVO.ts'
+import type {PostAuditVO} from '@/models/vo/post/PostAuditVO.ts'
+import {PostStatusEnum} from '@/models/enum/PostStatusEnum.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const posts = ref<PostVO[]>([])
+const posts = ref<PostAuditVO[]>([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const totalPosts = ref(0)
+const statusFilter = ref('')
+
+const statusOptions = [
+  { label: '全部', value: '' },
+  { label: '已发布', value: PostStatusEnum.PUBLISHED },
+  { label: '草稿', value: PostStatusEnum.DRAFT },
+  { label: '私密', value: PostStatusEnum.PRIVATE },
+  { label: '审核中', value: PostStatusEnum.AUDITING },
+  { label: '已回收', value: PostStatusEnum.RECYCLED }
+]
 
 const formatDate = (dateStr?: string) => dateStr ? new Date(dateStr).toLocaleDateString('zh-CN') : ''
 
 const loadPosts = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await postApi.getPostsByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
+  const res = await postApi.getPostAuditVosByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
   if (res.code === 200) {
-    posts.value = res.data.rows
-    totalPosts.value = res.data.total
+    let filteredPosts = res.data.rows
+    if (statusFilter.value) {
+      filteredPosts = filteredPosts.filter(post => post.status === statusFilter.value)
+    }
+    posts.value = filteredPosts
+    totalPosts.value = filteredPosts.length
   }
+}
+
+const handleStatusChange = () => {
+  currentPage.value = 1
+  loadPosts()
 }
 
 const handleSizeChange = (s: number) => {
@@ -91,6 +121,12 @@ onMounted(() => {
 <style scoped>
 .tab-content-container {
   padding: 20px 0;
+}
+
+.filter-bar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .posts-grid {

@@ -74,6 +74,14 @@ public class PostController {
                                                 page.getPageNum(), page.getPageSize()));
     }
 
+    @GetMapping("/{userId}/audit/all")
+    public Result<PageResult<PostAuditVO>> getPostAuditVosByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return Result.success(postService.pageUserPostAuditVos(userId, pageNum, pageSize));
+    }
+
     @GetMapping("/{userId}/published")
     public  Result<PageResult<PostVO>> getPublishedPostsByUserId(
             @PathVariable Long userId,

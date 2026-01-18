@@ -1,8 +1,10 @@
 package com.bryan.platform.service.post;
 
+import com.bryan.platform.domain.converter.PostConverter;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
+import com.bryan.platform.domain.vo.post.PostAuditVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
 import lombok.RequiredArgsConstructor;
@@ -145,6 +147,21 @@ public class PostService {
         long total = postMapper.countByUserId(userId);
 
         return PageResult.of(rows, total, pageNum, pageSize);
+    }
+
+    /**
+     * 分页查询某用户的帖子（PostAuditVO，包含status）
+     */
+    public PageResult<PostAuditVO> pageUserPostAuditVos(Long userId, int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<Post> rows = postMapper.selectByUserId(userId, offset, pageSize);
+        long total = postMapper.countByUserId(userId);
+
+        List<PostAuditVO> auditVos = rows.stream()
+                .map(PostConverter::toPostAuditVO)
+                .toList();
+
+        return PageResult.of(auditVos, total, pageNum, pageSize);
     }
 
     /**

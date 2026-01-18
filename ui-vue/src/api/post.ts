@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 import type {Post} from '@/models/entity/post/Post'
 import type {PostVO} from '@/models/vo/post/PostVO'
+import type {PostAuditVO} from '@/models/vo/post/PostAuditVO'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
 import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
@@ -58,6 +59,18 @@ export const postApi = {
     getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/all`,
+            method: 'get',
+            params: {
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
+    // Get post audit VOs by user ID with pagination
+    getPostAuditVosByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostAuditVO>>> => {
+        return request({
+            url: `/api/posts/${userId}/audit/all`,
             method: 'get',
             params: {
                 pageNum,
