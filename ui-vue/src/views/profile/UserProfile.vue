@@ -216,7 +216,7 @@ import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user'
 import {userFollowApi} from '@/api/userFollow'
 import {userPostCollectApi} from "@/api/userPostCollect.ts"
-import UserList from '../user/UserList.vue'
+import UserList from '../../components/user/UserList.vue'
 import MyPosts from '@/components/user/MyPosts.vue'
 
 /* --- 工具方法 --- */

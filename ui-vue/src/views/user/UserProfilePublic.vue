@@ -160,7 +160,7 @@ import {postApi} from '@/api/post'
 import {userPostCollectApi} from "@/api/userPostCollect.ts"
 import type {UserProfileVO} from '@/models/vo/UserProfileVO'
 import type {PostVO} from '@/models/vo/post/PostVO'
-import UserList from './UserList.vue'
+import UserList from '../../components/user/UserList.vue'
 
 const route = useRoute()
 const router = useRouter()

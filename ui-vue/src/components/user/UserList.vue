@@ -39,9 +39,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { userApi } from '@/api/user'
-import type { SysUser } from '@/models/entity/SysUser'
-import type { UserProfileVO } from '@/models/vo/UserProfileVO'
+import { userApi } from '@/api/user.ts'
+import type { SysUser } from '@/models/entity/SysUser.ts'
+import type { UserProfileVO } from '@/models/vo/UserProfileVO.ts'
 
 interface Props {
   userIds: number[]
