@@ -60,44 +60,7 @@
       <el-tabs v-model="activeMainTab" class="main-tabs" @tab-change="handleMainTabChange">
 
         <el-tab-pane label="我的文章" name="posts">
-          <div class="tab-content-container">
-            <el-empty v-if="posts.length === 0" description="暂无文章"/>
-            <div v-else class="posts-grid">
-              <el-card
-                  v-for="post in posts"
-                  :key="post.id"
-                  class="post-card"
-                  @click="goToPostDetail(post.id)"
-              >
-                <h3 class="post-title">{{ post.title }}</h3>
-                <div class="post-meta">
-                  <span class="post-date">{{ formatDate(post.createdAt) }}</span>
-                  <span class="post-stats">
-                    <el-icon><View/></el-icon> {{ post.viewCount || 0 }}
-                    <el-icon><ChatLineRound/></el-icon> {{ post.commentCount || 0 }}
-                    <el-icon><Star/></el-icon> {{ post.likeCount || 0 }}
-                  </span>
-                </div>
-                <div class="post-tags" v-if="post.tags && post.tags.length">
-                  <el-tag v-for="tag in post.tags" :key="tag" size="small" type="info" class="tag">
-                    {{ tag }}
-                  </el-tag>
-                </div>
-              </el-card>
-            </div>
-
-            <div class="pagination-wrapper" v-if="totalPosts > pageSize">
-              <el-pagination
-                  v-model:current-page="currentPage"
-                  v-model:page-size="pageSize"
-                  :total="totalPosts"
-                  :page-sizes="[10, 20, 50]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  @size-change="handleSizeChange"
-                  @current-change="handleCurrentChange"
-              />
-            </div>
-          </div>
+          <MyPosts @post-count-change="postCount = $event"/>
         </el-tab-pane>
 
         <el-tab-pane label="我的收藏" name="collects">
@@ -247,15 +210,14 @@
 import {ref, reactive, onMounted} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import type {FormInstance} from 'element-plus'
-import {Camera, Edit, View, ChatLineRound, Star} from '@element-plus/icons-vue'
+import {Camera, Edit} from '@element-plus/icons-vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user'
-import {postApi} from '@/api/post'
 import {userFollowApi} from '@/api/userFollow'
 import {userPostCollectApi} from "@/api/userPostCollect.ts"
-import type {PostVO} from '@/models/vo/post/PostVO'
-import UserList from '../user/UserList.vue' // 引入组件
+import UserList from '../user/UserList.vue'
+import MyPosts from '@/components/user/MyPosts.vue'
 
 /* --- 工具方法 --- */
 function genderToNum(g?: string): 1 | 0 {
@@ -282,10 +244,6 @@ const changingPassword = ref(false)
 /* --- 数据存储 --- */
 const userStats = reactive({followingCount: 0, followerCount: 0})
 const postCount = ref(0)
-const posts = ref<PostVO[]>([])
-const currentPage = ref(1)
-const pageSize = ref(10)
-const totalPosts = ref(0)
 const collects = ref<any[]>([])
 const totalCollects = ref(0)
 const collectCurrentPage = ref(1)
@@ -327,16 +285,6 @@ const passwordRules = {
 }
 
 /* --- 数据加载逻辑 --- */
-const loadPosts = async () => {
-  if (!userStore.userInfo?.id) return
-  const res = await postApi.getPublishedPostsByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
-  if (res.code === 200) {
-    posts.value = res.data.rows
-    totalPosts.value = res.data.total
-    postCount.value = res.data.total
-  }
-}
-
 const loadCollects = async () => {
   const res = await userPostCollectApi.getUserCollects(collectCurrentPage.value, collectPageSize.value)
   if (res.code === 200) {
@@ -355,8 +303,7 @@ const loadUserStats = async () => {
 }
 
 const handleMainTabChange = (name: string) => {
-  if (name === 'posts') loadPosts()
-  else if (name === 'collects') loadCollects()
+  if (name === 'collects') loadCollects()
 }
 
 /* --- 关注/粉丝列表逻辑 (一致化处理) --- */
@@ -446,14 +393,6 @@ const beforeAvatarUpload = (file: File) => {
   return isLt2M
 }
 
-const handleSizeChange = (s: number) => {
-  pageSize.value = s;
-  loadPosts()
-}
-const handleCurrentChange = (p: number) => {
-  currentPage.value = p;
-  loadPosts()
-}
 const handleCollectCurrentChange = (p: number) => {
   collectCurrentPage.value = p;
   loadCollects()
@@ -475,7 +414,6 @@ onMounted(() => {
       email: userStore.userProfile.email || ''
     })
   }
-  loadPosts()
   loadUserStats()
 })
 </script>

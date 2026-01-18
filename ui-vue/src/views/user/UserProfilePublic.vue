@@ -224,7 +224,7 @@ const checkFollowingStatus = async () => {
 }
 
 const loadUserPosts = async () => {
-  const response = await postApi.getPostsByUserId(userId.value, currentPage.value, pageSize.value)
+  const response = await postApi.getPublishedPostsByUserId(userId.value, currentPage.value, pageSize.value)
   if (response.code === 200) {
     posts.value = response.data.rows
     totalPosts.value = response.data.total
