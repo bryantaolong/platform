@@ -78,6 +78,13 @@
           >
             发布文章
           </el-button>
+          <el-button
+              type="success"
+              @click="saveDraft"
+              :loading="savingDraft"
+          >
+            保存草稿
+          </el-button>
           <el-button @click="cancel">
             取消
           </el-button>
@@ -100,6 +107,7 @@ const router = useRouter()
 const formRef = ref()
 const loading = ref(false)
 const submitting = ref(false)
+const savingDraft = ref(false)
 const postId = Number(route.params.id)
 
 /* 表单 */
@@ -207,6 +215,41 @@ const submitForm = async () => {
 /* 取消 */
 const cancel = () => {
   router.go(-1)
+}
+
+/* 保存草稿 */
+const saveDraft = async () => {
+  if (!formRef.value) return
+
+  await formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      savingDraft.value = true
+      try {
+        const requestData = {
+          title: postForm.title,
+          content: postForm.content,
+          categoryId: postForm.categoryId,
+          tags: postForm.tags,
+          weight: 1
+        }
+
+        const response = await postApi.saveDraft(requestData)
+        if (response.code === 200) {
+          ElMessage.success('草稿保存成功')
+          router.push(`/post/${response.data.id}`)
+        } else {
+          ElMessage.error(response.message || '保存草稿失败')
+        }
+      } catch (error) {
+        console.error('保存草稿失败:', error)
+        ElMessage.error('保存草稿失败')
+      } finally {
+        savingDraft.value = false
+      }
+    } else {
+      ElMessage.error('请完善表单信息')
+    }
+  })
 }
 
 onMounted(() => {
