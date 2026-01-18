@@ -196,6 +196,9 @@
             <if test="tags != null and tags != ''">
                 AND tags LIKE CONCAT('%', #{tags}, '%')
             </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
         </where>
         ORDER BY weight DESC, created_at DESC
         LIMIT #{pageSize} OFFSET #{offset}
@@ -214,6 +217,9 @@
             </if>
             <if test="tags != null and tags != ''">
                 AND tags LIKE CONCAT('%', #{tags}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
             </if>
         </where>
     </select>

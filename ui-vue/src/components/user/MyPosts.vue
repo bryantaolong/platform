@@ -55,13 +55,13 @@ import {View, ChatLineRound, Star} from '@element-plus/icons-vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user.ts'
 import {postApi} from '@/api/post.ts'
-import type {PostAuditVO} from '@/models/vo/post/PostAuditVO.ts'
+import type {PostVO} from '@/models/vo/post/PostVO'
 import {PostStatusEnum} from '@/models/enum/PostStatusEnum.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const posts = ref<PostAuditVO[]>([])
+const posts = ref<PostVO[]>([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const totalPosts = ref(0)
@@ -86,7 +86,7 @@ const loadPosts = async () => {
     if (statusFilter.value) {
       filteredPosts = filteredPosts.filter(post => post.status === statusFilter.value)
     }
-    posts.value = filteredPosts
+    posts.value = filteredPosts as PostVO[]
     totalPosts.value = filteredPosts.length
   }
 }

@@ -4,7 +4,7 @@ import com.bryan.platform.domain.converter.PostConverter;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
-import com.bryan.platform.domain.vo.post.PostAuditVO;
+import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
 import lombok.RequiredArgsConstructor;
@@ -150,15 +150,15 @@ public class PostService {
     }
 
     /**
-     * 分页查询某用户的帖子（PostAuditVO，包含status）
+     * 分页查询某用户的帖子
      */
-    public PageResult<PostAuditVO> pageUserPostAuditVos(Long userId, int pageNum, int pageSize) {
+    public PageResult<PostVO> pageUserPostAuditVos(Long userId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
         List<Post> rows = postMapper.selectByUserId(userId, offset, pageSize);
         long total = postMapper.countByUserId(userId);
 
-        List<PostAuditVO> auditVos = rows.stream()
-                .map(PostConverter::toPostAuditVO)
+        List<PostVO> auditVos = rows.stream()
+                .map(PostConverter::toPostVO)
                 .toList();
 
         return PageResult.of(auditVos, total, pageNum, pageSize);
@@ -198,10 +198,10 @@ public class PostService {
     /**
      * 分页搜索帖子
      */
-    public PageResult<Post> searchPosts(String title, String author, String tags, int pageNum, int pageSize) {
+    public PageResult<Post> searchPosts(String title, String author, String tags, PostStatusEnum status, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
-        List<Post> rows = postMapper.selectBySearch(title, author, tags, offset, pageSize);
-        long total = postMapper.countBySearch(title, author, tags);
+        List<Post> rows = postMapper.selectBySearch(title, author, tags, status, offset, pageSize);
+        long total = postMapper.countBySearch(title, author, tags, status);
 
         return PageResult.of(rows, total, pageNum, pageSize);
     }

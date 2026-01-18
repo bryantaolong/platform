@@ -1,6 +1,7 @@
 package com.bryan.platform.domain.vo.post;
 
 import com.bryan.platform.domain.enums.post.CommentAreaStatusEnum;
+import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,6 +26,8 @@ public class PostVO {
     private String title;
 
     private String content;
+
+    private PostStatusEnum status;
 
     private Long categoryId;
 

@@ -9,7 +9,6 @@ import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
-import com.bryan.platform.domain.vo.post.PostAuditVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.post.PostService;
@@ -75,7 +74,7 @@ public class PostController {
     }
 
     @GetMapping("/{userId}/audit/all")
-    public Result<PageResult<PostAuditVO>> getPostAuditVosByUserId(
+    public Result<PageResult<PostVO>> getPostAuditVosByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -107,10 +106,10 @@ public class PostController {
 
     @GetMapping("/audit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Result<PostAuditVO> getPostAuditById(@PathVariable Long id) {
+    public Result<PostVO> getPostAuditById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         if (post != null) {
-            return Result.success(PostConverter.toPostAuditVO(post));
+            return Result.success(PostConverter.toPostVO(post));
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "文章不存在");
         }
@@ -125,9 +124,10 @@ public class PostController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String tags,
+            @RequestParam(required = false) PostStatusEnum status,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        PageResult<Post> page = postService.searchPosts(title, author, tags, pageNum, pageSize);
+        PageResult<Post> page = postService.searchPosts(title, author, tags, status, pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)
                 .toList();

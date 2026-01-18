@@ -98,14 +98,14 @@ import {
   Collection
 } from '@element-plus/icons-vue'
 import { postApi } from '@/api/post'
-import type { PostAuditVO } from '@/models/vo/post/PostAuditVO'
+import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
 
 const route = useRoute()
 const router = useRouter()
 const postId = Number(route.params.id)
 const loading = ref(true)
-const post = ref<PostAuditVO | null>(null)
+const post = ref<PostVO | null>(null)
 const auditReason = ref('')
 
 const tagMap: Record<string, { label: string; type: any }> = {
@@ -128,7 +128,7 @@ const loadPost = async () => {
     // 关键：用审核接口，而不是普通详情接口
     const res = await postApi.getPostAuditById(postId)
     if (res.code === 200) {
-      post.value = res.data as PostAuditVO
+      post.value = res.data as PostVO
     } else {
       ElMessage.error(res.message || '获取文章失败')
     }

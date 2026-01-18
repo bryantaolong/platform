@@ -21,14 +21,18 @@
             <el-icon><House /></el-icon>
             <span>返回首页</span>
           </el-menu-item>
-          <el-menu-item index="/post/list">
-            <el-icon><Document /></el-icon>
-            <span>博客文章</span>
-          </el-menu-item>
           <el-menu-item index="/admin/users">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
+          <el-sub-menu index="posts">
+            <template #title>
+              <el-icon><Document /></el-icon>
+              <span>内容管理</span>
+            </template>
+            <el-menu-item index="/admin/posts">博文管理</el-menu-item>
+            <el-menu-item index="/admin/audit">博文审核</el-menu-item>
+          </el-sub-menu>
           <el-menu-item index="/admin/profile">
             <el-icon><Avatar /></el-icon>
             <span>个人中心</span>
