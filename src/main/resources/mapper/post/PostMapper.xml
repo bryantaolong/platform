@@ -57,16 +57,18 @@
 
     <update id="update">
         UPDATE post
-        SET title = #{title},
-            content = #{content},
-            status = #{status},
-            category_id = #{categoryId},
-            tags = #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},
-            comment_area_status = #{commentAreaStatus},
-            weight = #{weight},
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="tags != null">tags = #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},</if>
+            <if test="commentAreaStatus != null">comment_area_status = #{commentAreaStatus},</if>
+            <if test="weight != null">weight = #{weight},</if>
             version = version + 1,
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
+        </set>
         WHERE id = #{id}
           AND version = #{version}
           AND deleted = 0

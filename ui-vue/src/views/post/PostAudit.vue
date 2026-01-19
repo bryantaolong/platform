@@ -66,7 +66,18 @@
         </div>
       </template>
 
-      <div class="post-content" v-html="post?.content"></div>
+      <div class="post-content-wrapper">
+        <div class="markdown-viewer">
+          <div class="source-pane">
+            <div class="pane-title">源码</div>
+            <pre class="source-code">{{ post?.content }}</pre>
+          </div>
+          <div class="preview-pane">
+            <div class="pane-title">预览</div>
+            <div class="markdown-body" v-html="renderedContent"></div>
+          </div>
+        </div>
+      </div>
 
       <div class="post-tags" v-if="post?.tags && post.tags.length">
         <el-tag
@@ -84,6 +95,7 @@
 </template>
 
 <script setup lang="ts">
+import { marked } from 'marked'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -107,6 +119,10 @@ const postId = Number(route.params.id)
 const loading = ref(true)
 const post = ref<PostVO | null>(null)
 const auditReason = ref('')
+
+const renderedContent = computed(() => {
+  return marked.parse(post.value?.content || '')
+})
 
 const tagMap: Record<string, { label: string; type: any }> = {
   [PostStatusEnum.PUBLISHED]: { label: '已发布', type: 'success' },
@@ -169,7 +185,153 @@ onMounted(loadPost)
 
 <style scoped>
 /* 与你原有 PostDetail.vue 完全一致，仅补一个窄间距 */
-.audit-card {
+.blog-post-detail-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.post-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
+}
+
+.post-title {
+  margin: 0 0 15px 0;
+  font-weight: bold;
+  color: #303133;
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #909399;
+  font-size: 14px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-content-wrapper {
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
+}
+
+.markdown-viewer {
+  display: flex;
+  gap: 20px;
+  height: 600px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.source-pane, .preview-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.source-pane {
+  border-right: 1px solid #ebeef5;
+}
+
+.pane-title {
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ebeef5;
+  font-size: 12px;
+  font-weight: bold;
+  color: #909399;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.source-code {
+  flex: 1;
+  margin: 0;
+  padding: 15px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: #fafafa;
+  color: #476582;
+}
+
+.markdown-body {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  background-color: #fff;
+  color: #24292f;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Markdown Styles (Soft & Intuitive) */
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body :deep(h1) { font-size: 1.8em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+.markdown-body :deep(h2) { font-size: 1.4em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+
+.markdown-body :deep(p) { margin-bottom: 1em; }
+
+.markdown-body :deep(code) {
+  padding: 0.2em 0.4em;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-size: 85%;
+}
+
+.markdown-body :deep(pre) {
+  padding: 16px;
+  background-color: #f6f8fa;
+  border-radius: 8px;
+  margin-bottom: 1em;
+  overflow: auto;
+}
+
+.markdown-body :deep(blockquote) {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+  margin: 0 0 1em 0;
+}
+
+.markdown-body :deep(img) {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.tag-item {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.post-tags {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
 }
 </style>

@@ -109,7 +109,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/user/:userId',
         name: 'UserProfilePublic',
-        component: () => import('@/views/user/UserProfilePublic.vue'),
+        component: () => import('@/views/profile/UserProfilePublic.vue'),
         meta: {requiresAuth: true, title: '用户主页'},
         props: true
     },

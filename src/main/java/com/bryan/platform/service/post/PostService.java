@@ -72,13 +72,30 @@ public class PostService {
         }
 
         // Update fields
-        existingPost.setUserId(post.getUserId());
-        existingPost.setTitle(post.getTitle());
-        existingPost.setContent(post.getContent());
-        existingPost.setStatus(post.getStatus());
-        existingPost.setCategoryId(post.getCategoryId());
-        existingPost.setTags(post.getTags());
-        existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
+        if (post.getUserId() != null) {
+            existingPost.setUserId(post.getUserId());
+        }
+        if (post.getTitle() != null) {
+            existingPost.setTitle(post.getTitle());
+        }
+        if (post.getContent() != null) {
+            existingPost.setContent(post.getContent());
+        }
+        if (post.getStatus() != null) {
+            existingPost.setStatus(post.getStatus());
+        }
+        if (post.getCategoryId() != null) {
+            existingPost.setCategoryId(post.getCategoryId());
+        }
+        if (post.getTags() != null) {
+            existingPost.setTags(post.getTags());
+        }
+        if (post.getCommentAreaStatus() != null) {
+            existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
+        }
+        if (post.getWeight() != null) {
+            existingPost.setWeight(post.getWeight());
+        }
 
         int rows = postMapper.update(existingPost);
         if (rows == 0) {
@@ -87,22 +104,6 @@ public class PostService {
         }
         log.info("更新帖子成功，帖子ID: {}", existingPost.getId());
         return existingPost;
-    }
-
-    @Transactional
-    public void updatePostStatus(Long postId, PostStatusEnum status) {
-        Post post = postMapper.selectById(postId);
-        if (post == null) {
-            log.warn("更新帖子状态失败，帖子不存在，ID: {}", postId);
-            throw new RuntimeException("帖子不存在");
-        }
-        post.setStatus(status);
-        int rows = postMapper.update(post);
-        if (rows == 0) {
-            log.warn("更新帖子状态失败，ID: {} , 可能已被修改或不存在", post.getId());
-            throw new RuntimeException("更新失败，数据已被修改或不存在");
-        }
-        log.info("更新帖子状态成功，帖子ID: {} , 新状态: {}", postId, status);
     }
 
     public int likePost(Long postId) {

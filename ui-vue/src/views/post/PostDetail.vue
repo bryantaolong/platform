@@ -64,7 +64,7 @@
         </div>
       </template>
 
-      <div class="post-content" v-html="post?.content"></div>
+      <div class="post-content markdown-body" v-html="renderedContent"></div>
 
       <!-- 约 91 行 -->
       <div class="post-tags" v-if="post?.tags && post?.tags.length">
@@ -215,7 +215,8 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
+import { marked } from 'marked'
+import {ref, onMounted, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
@@ -266,6 +267,11 @@ const authorProfile = ref<UserProfileVO | null>(null)
 const isFollowing = ref(false)
 const followLoading = ref(false)
 const showFollowButton = ref(false) // Only show follow button if not viewing own profile
+
+// Computed property for rendered markdown content
+const renderedContent = computed(() => {
+  return marked.parse(post.value?.content || '')
+})
 
 // Load post data
 const loadPost = async () => {
@@ -771,25 +777,103 @@ onMounted(() => {
   border-top: 1px solid #ebeef5;
 }
 
-.post-content :deep(p) {
+/* Markdown Styles */
+.markdown-body {
+  color: #24292f;
+}
+
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body :deep(h1) { padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; font-size: 2em; }
+.markdown-body :deep(h2) { padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; font-size: 1.5em; }
+
+.markdown-body :deep(p) {
+  margin-top: 0;
   margin-bottom: 16px;
 }
 
-.post-content :deep(h1),
-.post-content :deep(h2),
-.post-content :deep(h3),
-.post-content :deep(h4),
-.post-content :deep(h5),
-.post-content :deep(h6) {
-  margin: 24px 0 12px 0;
-  font-weight: bold;
+.markdown-body :deep(code) {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.post-content :deep(img) {
-  max-width: 100%;
-  height: auto;
+.markdown-body :deep(pre) {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
   border-radius: 6px;
-  margin: 10px 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(pre code) {
+  display: inline;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body :deep(blockquote) {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+  margin: 0 0 16px 0;
+}
+
+.markdown-body :deep(ul), .markdown-body :deep(ol) {
+  padding-left: 2em;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(img) {
+  max-width: 100%;
+  box-sizing: content-box;
+}
+
+.markdown-body :deep(table) {
+  display: block;
+  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(table th),
+.markdown-body :deep(table td) {
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-body :deep(table tr) {
+  background-color: #ffffff;
+  border-top: 1px solid #d0d7de;
+}
+
+.markdown-body :deep(table tr:nth-child(2n)) {
+  background-color: #f6f8fa;
 }
 
 .post-tags {
