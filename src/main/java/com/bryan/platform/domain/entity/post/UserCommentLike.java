@@ -1,6 +1,5 @@
 package com.bryan.platform.domain.entity.post;
 
-import com.bryan.platform.domain.enums.post.CommentStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * PostComment
+ * UserCommentLike
  *
  * @author Bryan Long
  */
@@ -18,41 +17,13 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostComment implements Serializable {
+public class UserCommentLike implements Serializable {
 
     private Long id;
 
-    private Long postId;
-
     private Long userId;
 
-    private String username;
-
-    private String avatar;
-
-    private Long rootId;
-
-    private Long parentId;
-
-    private Integer type;
-
-    private String content;
-
-    private Long replyToUserId;
-
-    private String replyToUsername;
-
-    private Integer floor;
-
-    private Long likeCount;
-
-    private Long dislikeCount;
-
-    private Long childCount;
-
-    private String path;
-
-    private CommentStatusEnum status;
+    private Long commentId;
 
     /* ======== 通用字段 ======== */
     private Integer deleted;

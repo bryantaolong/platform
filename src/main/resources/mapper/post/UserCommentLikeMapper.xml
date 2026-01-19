@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bryan.platform.mapper.post.UserCommentLikeMapper">
+
+    <sql id="BaseColumn">
+        id, user_id, comment_id, deleted, version, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.post.UserCommentLike">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="comment_id" property="commentId"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_comment_like (
+            user_id, comment_id,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{userId}, #{commentId},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="deleteByUserIdAndCommentId">
+        UPDATE user_comment_like
+        SET deleted = 1,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+          AND deleted = 0
+    </update>
+
+    <select id="selectByUserIdAndCommentId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_comment_like
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+          AND deleted = 0
+    </select>
+
+    <select id="selectByUserIdAndCommentIdIncludeDeleted" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_comment_like
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+    </select>
+
+    <select id="existsByUserIdAndCommentId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_comment_like
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+          AND deleted = 0
+    </select>
+
+    <select id="existsByUserIdAndCommentIdIncludeDeleted" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_comment_like
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+    </select>
+
+    <update id="restoreLike">
+        UPDATE user_comment_like
+        SET deleted = 0,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+          AND comment_id = #{commentId}
+    </update>
+
+</mapper>

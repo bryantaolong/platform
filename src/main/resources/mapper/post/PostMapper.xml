@@ -104,6 +104,15 @@
           AND deleted = 0
     </update>
 
+    <update id="updateCommentCount">
+        UPDATE post
+        SET comment_count = comment_count + #{delta},
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM post

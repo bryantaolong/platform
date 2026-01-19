@@ -30,6 +30,8 @@ public interface PostMapper {
 
     int updateViewCount(@Param("id") Long id, @Param("delta") int delta);
 
+    int updateCommentCount(@Param("id") Long id, @Param("delta") int delta);
+
     /* ---------- 查 ---------- */
     Post selectById(@Param("id") Long id);
 

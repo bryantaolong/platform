@@ -1,34 +1,24 @@
-package com.bryan.platform.domain.entity.post;
+package com.bryan.platform.domain.vo.post;
 
 import com.bryan.platform.domain.enums.post.CommentStatusEnum;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * PostComment
+ * CommentVO
  *
  * @author Bryan Long
  */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PostComment implements Serializable {
+public class CommentVO {
 
     private Long id;
 
     private Long postId;
-
-    private Long userId;
-
-    private String username;
-
-    private String avatar;
 
     private Long rootId;
 
@@ -50,20 +40,17 @@ public class PostComment implements Serializable {
 
     private Long childCount;
 
-    private String path;
-
     private CommentStatusEnum status;
-
-    /* ======== 通用字段 ======== */
-    private Integer deleted;
-
-    private Integer version;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    private String createdBy;
+    private Long userId;
 
-    private String updatedBy;
+    private String username;
+
+    private String avatar;
+
+    private List<CommentVO> replies;
 }

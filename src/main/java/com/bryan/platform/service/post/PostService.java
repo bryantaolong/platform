@@ -118,6 +118,10 @@ public class PostService {
         return postMapper.updateViewCount(postId, 1);
     }
 
+    public int updateCommentCount(Long postId, int delta) {
+        return postMapper.updateCommentCount(postId, delta);
+    }
+
     /* ---------- 单查 ---------- */
     public Post getPostById(Long postId) {
         Post post = postMapper.selectById(postId);

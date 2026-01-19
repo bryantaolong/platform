@@ -4,4 +4,230 @@
 
 <mapper namespace="com.bryan.platform.mapper.post.PostCommentMapper">
 
+    <sql id="BaseColumn">
+        id, user_id, post_id, root_id, parent_id, type, content, reply_to_user_id, floor,
+        like_count, dislike_count, child_count, path, status, deleted, version,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.post.PostComment">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="post_id" property="postId"/>
+        <result column="root_id" property="rootId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="type" property="type"/>
+        <result column="content" property="content"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="floor" property="floor"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="dislike_count" property="dislikeCount"/>
+        <result column="child_count" property="childCount"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <resultMap id="CommentWithUserResultMap" type="com.bryan.platform.domain.entity.post.PostComment">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="post_id" property="postId"/>
+        <result column="root_id" property="rootId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="type" property="type"/>
+        <result column="content" property="content"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="floor" property="floor"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="dislike_count" property="dislikeCount"/>
+        <result column="child_count" property="childCount"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="reply_to_username" property="replyToUsername"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO post_comment (
+            user_id, post_id, root_id, parent_id, type, content, reply_to_user_id, floor,
+            like_count, dislike_count, child_count, path, status,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{userId}, #{postId}, #{rootId}, #{parentId}, #{type}, #{content}, #{replyToUserId}, #{floor},
+            #{likeCount}, #{dislikeCount}, #{childCount}, #{path}, #{status},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="increaseLikeCount">
+        UPDATE post_comment
+        SET like_count = like_count + 1,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="increaseDislikeCount">
+        UPDATE post_comment
+        SET dislike_count = dislike_count + 1,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="increaseChildCount">
+        UPDATE post_comment
+        SET child_count = child_count + 1,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{rootId}
+          AND deleted = 0
+    </update>
+
+    <update id="updateById">
+        UPDATE post_comment
+        <set>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="rootId != null">root_id = #{rootId},</if>
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id}
+          AND version = #{version}
+          AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE post_comment
+        SET deleted = 1,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByPostId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE post_id = #{postId}
+          AND deleted = 0
+          AND type = 1
+        ORDER BY floor ASC
+    </select>
+
+    <select id="selectByPostIdWithPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE post_id = #{postId}
+          AND deleted = 0
+          AND type = 1
+        ORDER BY floor ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="selectByRootId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE root_id = #{rootId}
+          AND deleted = 0
+          AND id != #{rootId}
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE parent_id = #{parentId}
+          AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="countByPostId" resultType="long">
+        SELECT COUNT(*)
+        FROM post_comment
+        WHERE post_id = #{postId}
+          AND deleted = 0
+          AND type = 1
+    </select>
+
+    <select id="countByRootId" resultType="long">
+        SELECT COUNT(*)
+        FROM post_comment
+        WHERE root_id = #{rootId}
+          AND deleted = 0
+          AND id != #{rootId}
+    </select>
+
+    <select id="selectMaxFloorByRootId" resultType="int">
+        SELECT COALESCE(MAX(floor), 0)
+        FROM post_comment
+        WHERE root_id = #{rootId}
+          AND deleted = 0
+          AND type = 1
+    </select>
+
+    <select id="selectHotCommentsByPostId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE post_id = #{postId}
+          AND deleted = 0
+          AND type = 1
+        ORDER BY like_count DESC, created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectLatestCommentsByPostId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE post_id = #{postId}
+          AND deleted = 0
+          AND type = 1
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectRepliesByCommentId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post_comment
+        WHERE root_id = #{commentId}
+          AND deleted = 0
+          AND id != #{commentId}
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByPostIdWithUser" resultMap="CommentWithUserResultMap">
+        SELECT pc.*, u.username, up.avatar, 
+               ru.username as reply_to_username
+        FROM post_comment pc
+        LEFT JOIN sys_user u ON pc.user_id = u.id
+        LEFT JOIN user_profile up ON u.id = up.user_id
+        LEFT JOIN sys_user ru ON pc.reply_to_user_id = ru.id
+        WHERE pc.post_id = #{postId}
+          AND pc.deleted = 0
+        ORDER BY pc.floor ASC, pc.created_at ASC
+    </select>
+
 </mapper>
