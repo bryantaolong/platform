@@ -63,18 +63,38 @@ public class UserPostCollectController {
     }
 
     /**
-     * 获取用户收藏列表
+     * 获取指定用户的收藏列表
+     */
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<PageResult<UserPostCollect>> getUserCollectsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Long collectionId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        
+        PageResult<UserPostCollect> page;
+        if (collectionId != null && collectionId != 0L) {
+            page = userPostCollectService.pageUserCollectsByCollection(userId, collectionId, pageNum, pageSize);
+        } else {
+            page = userPostCollectService.pageUserCollects(userId, pageNum, pageSize);
+        }
+        return Result.success(page);
+    }
+
+    /**
+     * 获取当前用户收藏列表
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<PageResult<UserPostCollect>> getUserCollects(
+            @RequestParam(required = false) Long collectionId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
         Long currentUserId = authService.getCurrentUserId();
-
-        PageResult<UserPostCollect> page = userPostCollectService.pageUserCollects(currentUserId, pageNum, pageSize);
-        return Result.success(page);
+        return getUserCollectsByUserId(currentUserId, collectionId, pageNum, pageSize);
     }
+
 
     /**
      * 获取用户指定收藏夹的收藏

@@ -41,7 +41,7 @@
     </el-card>
 
     <el-card class="profile-content">
-      <el-tabs v-model="activeTab" class="profile-tabs" @tab-change="handleTabChange">
+      <el-tabs v-model="activeTab" class="profile-tabs">
 
         <el-tab-pane label="文章" name="posts">
           <div class="tab-pane-container">
@@ -91,34 +91,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="收藏" name="collects">
-          <div class="tab-pane-container">
-            <el-empty v-if="collects.length === 0" description="暂无收藏"/>
-            <div v-else class="collects-grid">
-              <el-card
-                  v-for="collect in collects"
-                  :key="collect.id"
-                  class="post-card"
-                  @click="goToPostDetail(collect.postId)"
-              >
-                <h3 class="post-title">{{ collect.postTitle }}</h3>
-                <div class="post-meta">
-                  <span class="post-date">收藏时间：{{ formatDate(collect.createdAt) }}</span>
-                </div>
-              </el-card>
-            </div>
-
-            <div class="pagination-wrapper" v-if="totalCollects > collectPageSize">
-              <el-pagination
-                  v-model:current-page="collectCurrentPage"
-                  v-model:page-size="collectPageSize"
-                  :total="totalCollects"
-                  :page-sizes="[10, 20, 50]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  @size-change="handleCollectSizeChange"
-                  @current-change="handleCollectCurrentChange"
-              />
-            </div>
-          </div>
+          <UserCollectList :user-id="userId" :is-owner="false" />
         </el-tab-pane>
 
         <el-tab-pane label="个人信息" name="profile">
@@ -157,10 +130,10 @@ import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
 import {userApi} from '@/api/user'
 import {userFollowApi} from '@/api/userFollow'
 import {postApi} from '@/api/post'
-import {userPostCollectApi} from "@/api/userPostCollect.ts"
 import type {UserProfileVO} from '@/models/vo/UserProfileVO'
 import type {PostVO} from '@/models/vo/post/PostVO'
 import UserList from '../../components/user/UserList.vue'
+import UserCollectList from '@/components/user/UserCollectList.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -182,11 +155,6 @@ const postCount = ref(0)
 const totalPosts = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
-
-const collects = ref<any[]>([])
-const totalCollects = ref(0)
-const collectCurrentPage = ref(1)
-const collectPageSize = ref(10)
 
 const followingIds = ref<number[]>([])
 const followerIds = ref<number[]>([])
@@ -232,23 +200,7 @@ const loadUserPosts = async () => {
   }
 }
 
-const loadUserCollects = async () => {
-  try {
-    const response = await userPostCollectApi.getUserCollects(collectCurrentPage.value, collectPageSize.value)
-    if (response.code === 200) {
-      collects.value = response.data.rows
-      totalCollects.value = response.data.total
-    }
-  } catch (error) {
-    ElMessage.error('加载收藏失败')
-  }
-}
-
 // 事件处理
-const handleTabChange = (tabName: string) => {
-  if (tabName === 'collects') loadUserCollects()
-  if (tabName === 'posts') loadUserPosts()
-}
 
 const toggleFollow = async () => {
   followLoading.value = true
@@ -293,14 +245,6 @@ const handleSizeChange = (s: number) => {
 const handleCurrentChange = (p: number) => {
   currentPage.value = p;
   loadUserPosts()
-}
-const handleCollectSizeChange = (s: number) => {
-  collectPageSize.value = s;
-  loadUserCollects()
-}
-const handleCollectCurrentChange = (p: number) => {
-  collectCurrentPage.value = p;
-  loadUserCollects()
 }
 
 onMounted(() => loadUserProfile())

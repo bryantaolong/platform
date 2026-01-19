@@ -57,41 +57,16 @@
     </el-card>
 
     <el-card class="main-content-card">
-      <el-tabs v-model="activeMainTab" class="main-tabs" @tab-change="handleMainTabChange">
-
+      <el-tabs v-model="activeMainTab" class="main-tabs">
+    
         <el-tab-pane label="我的文章" name="posts">
           <MyPosts @post-count-change="postCount = $event"/>
         </el-tab-pane>
-
+    
         <el-tab-pane label="我的收藏" name="collects">
-          <div class="tab-content-container">
-            <el-empty v-if="collects.length === 0" description="暂无收藏"/>
-            <div v-else class="posts-grid">
-              <el-card
-                  v-for="collect in collects"
-                  :key="collect.id"
-                  class="post-card"
-                  @click="goToPostDetail(collect.postId)"
-              >
-                <h3 class="post-title">{{ collect.postTitle }}</h3>
-                <div class="post-meta">
-                  <span class="post-date">收藏于 {{ formatDate(collect.createdAt) }}</span>
-                </div>
-              </el-card>
-            </div>
-
-            <div class="pagination-wrapper" v-if="totalCollects > collectPageSize">
-              <el-pagination
-                  v-model:current-page="collectCurrentPage"
-                  v-model:page-size="collectPageSize"
-                  :total="totalCollects"
-                  layout="total, prev, pager, next"
-                  @current-change="handleCollectCurrentChange"
-              />
-            </div>
-          </div>
+          <UserCollectList :user-id="userStore.userInfo?.id" :is-owner="true" />
         </el-tab-pane>
-
+        
         <el-tab-pane label="详细资料" name="profile-detail">
           <div class="tab-content-container">
             <el-descriptions :column="1" border style="max-width: 800px">
@@ -215,9 +190,9 @@ import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user'
 import {userFollowApi} from '@/api/userFollow'
-import {userPostCollectApi} from "@/api/userPostCollect.ts"
 import UserList from '../../components/user/UserList.vue'
 import MyPosts from '@/components/user/MyPosts.vue'
+import UserCollectList from '@/components/user/UserCollectList.vue'
 
 /* --- 工具方法 --- */
 function genderToNum(g?: string): 1 | 0 {
@@ -244,10 +219,6 @@ const changingPassword = ref(false)
 /* --- 数据存储 --- */
 const userStats = reactive({followingCount: 0, followerCount: 0})
 const postCount = ref(0)
-const collects = ref<any[]>([])
-const totalCollects = ref(0)
-const collectCurrentPage = ref(1)
-const collectPageSize = ref(10)
 
 // 关注和粉丝的 ID 列表，传给 UserList 组件
 const followingIds = ref<number[]>([])
@@ -285,14 +256,6 @@ const passwordRules = {
 }
 
 /* --- 数据加载逻辑 --- */
-const loadCollects = async () => {
-  const res = await userPostCollectApi.getUserCollects(collectCurrentPage.value, collectPageSize.value)
-  if (res.code === 200) {
-    collects.value = res.data.rows
-    totalCollects.value = res.data.total
-  }
-}
-
 const loadUserStats = async () => {
   if (!userStore.userInfo?.id) return
   const res = await userFollowApi.getUserFollowStats(userStore.userInfo.id)
@@ -300,10 +263,6 @@ const loadUserStats = async () => {
     userStats.followingCount = res.data.followingCount
     userStats.followerCount = res.data.followerCount
   }
-}
-
-const handleMainTabChange = (name: string) => {
-  if (name === 'collects') loadCollects()
 }
 
 /* --- 关注/粉丝列表逻辑 (一致化处理) --- */
@@ -391,11 +350,6 @@ const beforeAvatarUpload = (file: File) => {
   const isLt2M = file.size / 1024 / 1024 < 2
   if (!isLt2M) ElMessage.error('大小不能超过 2MB!')
   return isLt2M
-}
-
-const handleCollectCurrentChange = (p: number) => {
-  collectCurrentPage.value = p;
-  loadCollects()
 }
 
 const goToPostDetail = (id: number) => router.push(`/post/${id}`)

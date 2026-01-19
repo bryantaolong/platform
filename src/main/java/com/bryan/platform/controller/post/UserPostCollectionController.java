@@ -89,6 +89,16 @@ public class UserPostCollectionController {
     }
 
     /**
+     * 获取指定用户的收藏夹列表（用于在用户主页展示其收藏夹）
+     */
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<List<UserPostCollection>> getUserCollectionsByUserId(@PathVariable Long userId) {
+        List<UserPostCollection> collections = userPostCollectionService.getUserCollections(userId);
+        return Result.success(collections);
+    }
+
+    /**
      * 获取收藏夹详情
      */
     @GetMapping("/{collectionId}")

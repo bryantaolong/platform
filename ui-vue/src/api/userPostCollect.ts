@@ -2,7 +2,7 @@ import request from '@/utils/request'
 import type {Result} from "@/models/response/Result.ts";
 import type {PageResult} from "@/models/response/PageResult.ts";
 
-// Define Post API endpoints
+// User post collect API endpoints
 export const userPostCollectApi = {
     // Collect a post
     collectPost: (postId: number, collectionId?: number): Promise<Result<any>> => {
@@ -32,14 +32,28 @@ export const userPostCollectApi = {
         })
     },
 
-    // Get user collects
-    getUserCollects: (pageNum: number, pageSize: number): Promise<Result<PageResult<any>>> => {
+    // Get current user's collects, optionally filtered by collectionId
+    getUserCollects: (pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> => {
         return request({
             url: '/api/user/post-collects',
             method: 'get',
             params: {
                 pageNum,
-                pageSize
+                pageSize,
+                ...(collectionId !== undefined ? { collectionId } : {})
+            }
+        })
+    },
+
+    // Get collects of specified user, optionally filtered by collectionId
+    getUserCollectsByUser: (userId: number, pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> => {
+        return request({
+            url: `/api/user/post-collects/user/${userId}`,
+            method: 'get',
+            params: {
+                pageNum,
+                pageSize,
+                ...(collectionId !== undefined ? { collectionId } : {})
             }
         })
     }
