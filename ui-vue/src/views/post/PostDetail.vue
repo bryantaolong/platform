@@ -64,7 +64,7 @@
         </div>
       </template>
 
-      <div class="post-content" v-html="post?.content"></div>
+      <div class="post-content markdown-body" v-html="renderedContent"></div>
 
       <!-- 约 91 行 -->
       <div class="post-tags" v-if="post?.tags && post?.tags.length">
@@ -132,94 +132,45 @@
     <el-card class="comments-section" v-if="showComments">
       <template #header>
         <div class="comments-header">
-          <h3>评论</h3>
-          <el-button
-              type="primary"
-              size="small"
-              :icon="Edit"
-              @click="toggleCommentForm"
-          >
-            写评论
-          </el-button>
+          <h3>评论 ({{ post?.commentCount || 0 }})</h3>
         </div>
       </template>
 
       <!-- Add Comment Form -->
-      <el-form v-if="showCommentForm" class="comment-form">
-        <el-form-item>
-          <el-input
-              v-model="newComment"
-              :rows="4"
-              type="textarea"
-              placeholder="请输入您的评论..."
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-              type="primary"
-              :icon="Check"
-              @click="submitComment"
-              :loading="submittingComment"
-          >
-            发表评论
-          </el-button>
-          <el-button @click="toggleCommentForm">
-            取消
-          </el-button>
-        </el-form-item>
-      </el-form>
+      <CommentForm
+          v-if="showCommentForm"
+          :post-id="postId"
+          @submit="handleCommentSubmit"
+          @cancel="showCommentForm = false"
+      />
+
+      <el-button
+          v-if="!showCommentForm"
+          type="primary"
+          size="large"
+          :icon="Edit"
+          @click="showCommentForm = true"
+          class="write-comment-btn"
+      >
+        写评论
+      </el-button>
 
       <!-- Comments List -->
-      <div class="comments-list">
-        <div
-            v-for="comment in comments"
-            :key="comment.id"
-            class="comment-item"
-        >
-          <div class="comment-header">
-            <el-avatar :size="32" :src="comment.avatar">
-              {{ comment.author ? comment.author.charAt(0).toUpperCase() : '' }}
-            </el-avatar>
-            <div class="comment-user-info">
-              <div class="comment-author">{{ comment.author }}</div>
-              <div class="comment-time">{{ formatDateTime(comment.createdAt) }}</div>
-            </div>
-          </div>
-          <div class="comment-content">{{ comment.content }}</div>
-          <div class="comment-actions">
-            <el-button size="small" text @click="replyToComment(comment.id)">
-              回复
-            </el-button>
-            <el-button size="small" text @click="likeComment(comment.id)">
-              <el-icon>
-                <ArrowUpBold/>
-              </el-icon>
-              ({{ comment.likeCount || 0 }})
-            </el-button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pagination for comments -->
-      <div class="comments-pagination" v-if="totalComments > pageSize">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :total="totalComments"
-            layout="prev, pager, next"
-            @current-change="loadComments"
-        />
-      </div>
+      <CommentList
+          ref="commentListRef"
+          :post-id="postId"
+          @update:total="handleCommentCountUpdate"
+      />
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
+import { marked } from 'marked'
+import {ref, onMounted, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  User,
   Clock,
   View,
   Star,
@@ -228,23 +179,16 @@ import {
   Share,
   ArrowUpBold,
   Edit,
-  Delete,
-  Check
+  Delete
 } from '@element-plus/icons-vue'
 import { postApi } from '@/api/post'
 import { userApi } from '@/api/user'
 import { userFollowApi } from '@/api/userFollow'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/UserProfileVO'
-
-interface Comment {
-  id: number
-  author: string
-  content: string
-  avatar?: string
-  likeCount: number
-  createdAt: string
-}
+import {userPostCollectApi} from "@/api/userPostCollect.ts";
+import CommentForm from '@/components/post/CommentForm.vue'
+import CommentList from '@/components/post/CommentList.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -256,16 +200,16 @@ const isCollected = ref(false)
 const canEdit = ref(false)
 const showComments = ref(true)
 const showCommentForm = ref(false)
-const newComment = ref('')
-const submittingComment = ref(false)
-const comments = ref<Comment[]>([])
-const totalComments = ref(0)
-const pageSize = ref(10)
-const currentPage = ref(1)
+const commentListRef = ref()
 const authorProfile = ref<UserProfileVO | null>(null)
 const isFollowing = ref(false)
 const followLoading = ref(false)
-const showFollowButton = ref(false) // Only show follow button if not viewing own profile
+const showFollowButton = ref(false)
+
+// Computed property for rendered markdown content
+const renderedContent = computed(() => {
+  return marked.parse(post.value?.content || '')
+})
 
 // Load post data
 const loadPost = async () => {
@@ -286,6 +230,9 @@ const loadPost = async () => {
 
       // Check collect status
       await checkCollectStatus()
+
+      // Check like status
+      await checkLikeStatus()
 
       // Check if current user can edit this post
       // This would require checking the current user's ID against post.userId
@@ -336,41 +283,6 @@ const checkFollowingStatus = async (userId: number) => {
   }
 }
 
-// Load comments
-const loadComments = async () => {
-  try {
-    // Mock implementation for comments
-    // In real implementation, we would call the API to get comments
-    comments.value = [
-      {
-        id: 1,
-        author: '张三',
-        content: '这是一篇很棒的文章，感谢分享！',
-        likeCount: 3,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 2,
-        author: '李四',
-        content: '我有一些不同的观点，想和您进一步讨论。',
-        likeCount: 1,
-        createdAt: new Date(Date.now() - 3600000).toISOString()
-      }
-    ]
-    totalComments.value = 2
-  } catch (error) {
-    console.error('加载评论失败:', error)
-    ElMessage.error('加载评论失败')
-  }
-}
-
-// Format datetime for display
-const formatDateTime = (dateStr?: string) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return date.toLocaleString('zh-CN')
-}
-
 // Toggle follow/unfollow
 const toggleFollow = async () => {
   if (!post.value?.author) return
@@ -379,13 +291,11 @@ const toggleFollow = async () => {
   try {
     let response
     if (isFollowing.value) {
-      // Unfollow
       const userResponse = await userApi.getUserByUsername(post.value.author)
       if (userResponse.code === 200) {
         response = await userFollowApi.unfollowUser(userResponse.data.id)
       }
     } else {
-      // Follow
       const userResponse = await userApi.getUserByUsername(post.value.author)
       if (userResponse.code === 200) {
         response = await userFollowApi.followUser(userResponse.data.id)
@@ -395,7 +305,6 @@ const toggleFollow = async () => {
     if (response && response.code === 200 && response.data) {
       isFollowing.value = !isFollowing.value
       ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注')
-
     } else {
       ElMessage.error(response?.message || (isFollowing.value ? '取消关注失败' : '关注失败'))
     }
@@ -426,23 +335,48 @@ const goToUserProfile = async (username: string | undefined) => {
 
 // Handle like action
 const handleLike = async () => {
-  try {
-    // Call API to toggle like status
-    // In real implementation, this would be an API call
-    if (!post.value) return
+  if (!post.value) return
 
-    // Mock implementation
-    isLiked.value = !isLiked.value
+  try {
     if (isLiked.value) {
-      post.value.likeCount = (post.value.likeCount || 0) + 1
-      ElMessage.success('点赞成功')
+      const response = await postApi.unlikePost(post.value.id)
+      if (response.code === 200) {
+        isLiked.value = false
+        post.value.likeCount = Math.max(0, (post.value.likeCount || 0) - 1)
+        ElMessage.info('已取消点赞')
+      } else {
+        ElMessage.error(response.message || '取消点赞失败')
+      }
     } else {
-      post.value.likeCount = Math.max(0, (post.value.likeCount || 0) - 1)
-      ElMessage.info('已取消点赞')
+      const response = await postApi.likePost(post.value.id)
+      if (response.code === 200) {
+        isLiked.value = true
+        post.value.likeCount = (post.value.likeCount || 0) + 1
+        ElMessage.success('点赞成功')
+      } else {
+        ElMessage.error(response.message || '点赞失败')
+      }
     }
   } catch (error) {
+    console.error('点赞操作失败:', error)
     ElMessage.error('操作失败')
-    isLiked.value = !isLiked.value // revert UI change
+  }
+}
+
+// Check like status
+const checkLikeStatus = async () => {
+  if (!post.value) return
+
+  try {
+    const response = await postApi.checkLikeStatus(post.value.id)
+    if (response.code === 200) {
+      isLiked.value = response.data
+    } else {
+      isLiked.value = false
+    }
+  } catch (error) {
+    console.error('检查点赞状态失败:', error)
+    isLiked.value = false
   }
 }
 
@@ -451,13 +385,12 @@ const checkCollectStatus = async () => {
   if (!post.value) return
 
   try {
-    const response = await postApi.checkCollectStatus(post.value.id)
+    const response = await userPostCollectApi.checkCollectStatus(post.value.id)
     if (response.code === 200) {
       isCollected.value = response.data
     }
   } catch (error) {
     console.error('检查收藏状态失败:', error)
-    // Default to false if check fails
     isCollected.value = false
   }
 }
@@ -468,8 +401,7 @@ const handleCollect = async () => {
     if (!post.value) return
 
     if (isCollected.value) {
-      // Uncollect
-      const response = await postApi.uncollectPost(post.value.id)
+      const response = await userPostCollectApi.uncollectPost(post.value.id)
       if (response.code === 200) {
         isCollected.value = false
         post.value.collectCount = Math.max(0, (post.value.collectCount || 0) - 1)
@@ -478,8 +410,7 @@ const handleCollect = async () => {
         ElMessage.error(response.message || '取消收藏失败')
       }
     } else {
-      // Collect
-      const response = await postApi.collectPost(post.value.id)
+      const response = await userPostCollectApi.collectPost(post.value.id)
       if (response.code === 200) {
         isCollected.value = true
         post.value.collectCount = (post.value.collectCount || 0) + 1
@@ -498,11 +429,9 @@ const handleCollect = async () => {
 const handleShare = () => {
   if (!post.value) return
 
-  // Create shareable link
   const url = window.location.href
   const title = `分享文章: ${post.value.title}`
 
-  // Try to use the Web Share API if available
   if (navigator.share) {
     navigator.share({
       title: post.value.title,
@@ -510,11 +439,9 @@ const handleShare = () => {
       url: url
     })
   } else {
-    // Fallback: copy link to clipboard
     navigator.clipboard.writeText(url).then(() => {
       ElMessage.success('链接已复制到剪贴板')
     }).catch(() => {
-      // Fallback: show message to user
       ElMessageBox.alert(`复制以下链接分享:\n${url}`, '分享文章', {
         confirmButtonText: '确定'
       })
@@ -522,54 +449,22 @@ const handleShare = () => {
   }
 }
 
-// Toggle comment form visibility
-const toggleCommentForm = () => {
-  showCommentForm.value = !showCommentForm.value
-}
-
-// Submit new comment
-const submitComment = async () => {
-  if (!newComment.value.trim()) {
-    ElMessage.warning('请输入评论内容')
-    return
+// Handle comment submit
+const handleCommentSubmit = () => {
+  showCommentForm.value = false
+  if (commentListRef.value) {
+    commentListRef.value.refresh()
   }
-
-  if (!post.value) return
-
-  submittingComment.value = true
-  try {
-    // Call API to submit comment
-    // Mock implementation
-    const newCommentObj: Partial<Comment> = {
-      id: comments.value.length + 1,
-      author: '当前用户', // In real implementation, get from user store
-      content: newComment.value,
-      likeCount: 0,
-      createdAt: new Date().toISOString()
-    }
-
-    comments.value.unshift(newCommentObj as Comment)
+  if (post.value) {
     post.value.commentCount = (post.value.commentCount || 0) + 1
-    newComment.value = ''
-    showCommentForm.value = false
-    ElMessage.success('评论发表成功')
-  } catch (error) {
-    ElMessage.error('发表评论失败')
-  } finally {
-    submittingComment.value = false
   }
 }
 
-// Reply to a comment
-const replyToComment = (commentId: number) => {
-  console.log('Reply to comment:', commentId)
-  ElMessage.info('回复功能开发中...')
-}
-
-// Like a comment
-const likeComment = (commentId: number) => {
-  console.log('Like comment:', commentId)
-  ElMessage.info('评论点赞功能开发中...')
+// Handle comment count update
+const handleCommentCountUpdate = (count: number) => {
+  if (post.value) {
+    post.value.commentCount = count
+  }
 }
 
 // Scroll to comments section
@@ -596,22 +491,26 @@ const deletePost = async () => {
         {type: 'error'}
     )
 
-    // Call API to delete post
     const response = await postApi.deletePost(postId.value)
     if (response.code === 200) {
       ElMessage.success('文章已删除')
-      router.push('/post/list') // Navigate back to list
+      router.push('/post/list')
     } else {
       ElMessage.error(response.message || '删除失败')
     }
   } catch {
-    // User canceled the operation
   }
+}
+
+// Format datetime for display
+const formatDateTime = (dateStr?: string) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleString('zh-CN')
 }
 
 onMounted(() => {
   loadPost()
-  loadComments()
 })
 </script>
 
@@ -743,25 +642,103 @@ onMounted(() => {
   border-top: 1px solid #ebeef5;
 }
 
-.post-content :deep(p) {
+/* Markdown Styles */
+.markdown-body {
+  color: #24292f;
+}
+
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body :deep(h1) { padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; font-size: 2em; }
+.markdown-body :deep(h2) { padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; font-size: 1.5em; }
+
+.markdown-body :deep(p) {
+  margin-top: 0;
   margin-bottom: 16px;
 }
 
-.post-content :deep(h1),
-.post-content :deep(h2),
-.post-content :deep(h3),
-.post-content :deep(h4),
-.post-content :deep(h5),
-.post-content :deep(h6) {
-  margin: 24px 0 12px 0;
-  font-weight: bold;
+.markdown-body :deep(code) {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.post-content :deep(img) {
-  max-width: 100%;
-  height: auto;
+.markdown-body :deep(pre) {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
   border-radius: 6px;
-  margin: 10px 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(pre code) {
+  display: inline;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body :deep(blockquote) {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+  margin: 0 0 16px 0;
+}
+
+.markdown-body :deep(ul), .markdown-body :deep(ol) {
+  padding-left: 2em;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(img) {
+  max-width: 100%;
+  box-sizing: content-box;
+}
+
+.markdown-body :deep(table) {
+  display: block;
+  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.markdown-body :deep(table th),
+.markdown-body :deep(table td) {
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-body :deep(table tr) {
+  background-color: #ffffff;
+  border-top: 1px solid #d0d7de;
+}
+
+.markdown-body :deep(table tr:nth-child(2n)) {
+  background-color: #f6f8fa;
 }
 
 .post-tags {
@@ -809,57 +786,9 @@ onMounted(() => {
   font-size: 18px;
 }
 
-.comment-form {
+.write-comment-btn {
+  width: 100%;
   margin-bottom: 20px;
-  padding: 20px;
-  background-color: #fafafa;
-  border-radius: 8px;
-}
-
-.comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.comment-item {
-  padding: 16px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background-color: #fff;
-}
-
-.comment-header {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.comment-user-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.comment-author {
-  font-weight: 600;
-  color: #303133;
-}
-
-.comment-time {
-  font-size: 12px;
-  color: #909399;
-}
-
-.comment-content {
-  margin-bottom: 12px;
-  color: #606266;
-  line-height: 1.6;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 16px;
 }
 
 .comments-pagination {

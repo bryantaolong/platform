@@ -24,6 +24,12 @@ public class PostComment implements Serializable {
 
     private Long postId;
 
+    private Long userId;
+
+    private String username;
+
+    private String avatar;
+
     private Long rootId;
 
     private Long parentId;
@@ -33,6 +39,8 @@ public class PostComment implements Serializable {
     private String content;
 
     private Long replyToUserId;
+
+    private String replyToUsername;
 
     private Integer floor;
 

@@ -9,7 +9,6 @@ import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
-import com.bryan.platform.domain.vo.post.PostAuditVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.post.PostService;
@@ -33,6 +32,7 @@ public class PostController {
 
     private final PostService postService;
     private final AuthService authService;
+    private final com.bryan.platform.service.post.UserPostLikeService userPostLikeService;
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,6 +73,14 @@ public class PostController {
                                                 page.getPageNum(), page.getPageSize()));
     }
 
+    @GetMapping("/{userId}/audit/all")
+    public Result<PageResult<PostVO>> getPostAuditVosByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return Result.success(postService.pageUserPostAuditVos(userId, pageNum, pageSize));
+    }
+
     @GetMapping("/{userId}/published")
     public  Result<PageResult<PostVO>> getPublishedPostsByUserId(
             @PathVariable Long userId,
@@ -98,10 +106,10 @@ public class PostController {
 
     @GetMapping("/audit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Result<PostAuditVO> getPostAuditById(@PathVariable Long id) {
+    public Result<PostVO> getPostAuditById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         if (post != null) {
-            return Result.success(PostConverter.toPostAuditVO(post));
+            return Result.success(PostConverter.toPostVO(post));
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "文章不存在");
         }
@@ -116,9 +124,10 @@ public class PostController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String tags,
+            @RequestParam(required = false) PostStatusEnum status,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        PageResult<Post> page = postService.searchPosts(title, author, tags, pageNum, pageSize);
+        PageResult<Post> page = postService.searchPosts(title, author, tags, status, pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)
                 .toList();
@@ -208,5 +217,46 @@ public class PostController {
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "删除失败，文章不存在");
         }
+    }
+
+    /**
+     * 点赞博文
+     */
+    @PostMapping("/{id}/like")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> likePost(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        try {
+            boolean ok = userPostLikeService.likePost(currentUserId, id);
+            return Result.success(ok);
+        } catch (RuntimeException e) {
+            return Result.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    /**
+     * 取消点赞
+     */
+    @PostMapping("/{id}/unlike")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> unlikePost(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        boolean ok = userPostLikeService.unlikePost(currentUserId, id);
+        if (ok) {
+            return Result.success(true);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "取消点赞失败，可能未点赞");
+        }
+    }
+
+    /**
+     * 检查是否已点赞
+     */
+    @GetMapping("/{id}/like/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
+        Long currentUserId = authService.getCurrentUserId();
+        boolean liked = userPostLikeService.isLiked(currentUserId, id);
+        return Result.success(liked);
     }
 }

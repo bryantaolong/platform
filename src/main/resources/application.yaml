@@ -26,3 +26,10 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+
+# 第三方 API 配置（通用）
+llm:
+  api:
+    key: "${DEEPSEEK_API_KEY}" # Set your own api key as environment variable
+    url: "https://api.deepseek.com/chat/completions"
+    model: "deepseek-chat"

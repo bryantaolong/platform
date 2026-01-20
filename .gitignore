@@ -1,3 +1,8 @@
+### Custom ###
+.claude/
+.model/
+
+### Java ###
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -5,7 +10,7 @@ target/
 !**/src/test/**/target/
 logs/
 
-### Frontend ###
+### Vue ###
 ui-vue/node_modules/
 ui-vue/logs
 ui-vue/*.log

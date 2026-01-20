@@ -5,7 +5,6 @@ import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,8 +24,13 @@ public interface PostMapper {
     /* ---------- 改 ---------- */
     int update(Post record);
 
-    int updateCollectCount(@Param("id") Long id, @Param("delta") int delta,
-                          @Param("updatedAt") LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+    int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
+
+    int updateCollectCount(@Param("id") Long id, @Param("delta") int delta);
+
+    int updateViewCount(@Param("id") Long id, @Param("delta") int delta);
+
+    int updateCommentCount(@Param("id") Long id, @Param("delta") int delta);
 
     /* ---------- 查 ---------- */
     Post selectById(@Param("id") Long id);
@@ -52,6 +56,7 @@ public interface PostMapper {
     List<Post> selectBySearch(@Param("title") String title,
                               @Param("author") String author,
                               @Param("tags") String tags,
+                              @Param("status") PostStatusEnum status,
                               @Param("offset") int offset,
                               @Param("pageSize") int pageSize);
 
@@ -67,5 +72,6 @@ public interface PostMapper {
 
     long countBySearch(@Param("title") String title,
                        @Param("author") String author,
-                       @Param("tags") String tags);
+                       @Param("tags") String tags,
+                       @Param("status") PostStatusEnum status);
 }

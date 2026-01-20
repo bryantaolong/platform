@@ -2,7 +2,6 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="com.bryan.platform.mapper.post.UserPostCollectMapper">
 
     <sql id="BaseColumn">
@@ -24,83 +23,82 @@
         <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
-    <!-- 1. 单条插入 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_post_collect (
-            user_id,post_id,collection_id,post_title
+            user_id, post_id, collection_id, post_title,
+            created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{userId},#{postId},#{collectionId},#{postTitle}
+                     #{userId}, #{postId}, #{collectionId}, #{postTitle},
+                     #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
 
-    <!-- 逻辑删除 -->
     <update id="deleteById">
         UPDATE user_post_collect
         SET deleted = 1,
-            version = version + 1
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
 
-    <!-- 根据用户和博文删除收藏 -->
     <update id="deleteByUserIdAndPostId">
         UPDATE user_post_collect
         SET deleted = 1,
-            version = version + 1
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE user_id = #{userId}
           AND post_id = #{postId}
           AND deleted = 0
     </update>
 
-    <!-- 整行更新（乐观锁） -->
     <update id="update">
         UPDATE user_post_collect
         SET collection_id = #{collectionId},
             post_title = #{postTitle},
-            version = version + 1
+            version = version + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND version = #{version}
           AND deleted = 0
     </update>
 
-    <!-- 单条查询 -->
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM user_post_collect
         WHERE id = #{id} AND deleted = 0
     </select>
 
-    <!-- 根据用户和博文查询 -->
     <select id="selectByUserIdAndPostId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM user_post_collect
         WHERE user_id = #{userId}
-          AND post_id = #{postId}
-          AND deleted = 0
+        AND post_id = #{postId}
+        AND deleted = 0
     </select>
 
-    <!-- 用户收藏分页 -->
     <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM user_post_collect
         WHERE user_id = #{userId}
-          AND deleted = 0
+        AND deleted = 0
         ORDER BY created_at DESC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 用户指定收藏夹分页 -->
     <select id="selectByUserIdAndCollectionId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumn"/>
         FROM user_post_collect
         WHERE user_id = #{userId}
-          AND collection_id = #{collectionId}
-          AND deleted = 0
+        AND collection_id = #{collectionId}
+        AND deleted = 0
         ORDER BY created_at DESC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <!-- 计数 -->
     <select id="countByUserId" resultType="long">
         SELECT COUNT(*)
         FROM user_post_collect
@@ -116,7 +114,6 @@
           AND deleted = 0
     </select>
 
-    <!-- 检查是否存在（包括已删除的） -->
     <select id="existsByUserIdAndPostId" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM user_post_collect
@@ -125,7 +122,6 @@
           AND deleted = 0
     </select>
 
-    <!-- 检查是否存在（包括已删除的，用于恢复收藏） -->
     <select id="existsByUserIdAndPostIdIncludeDeleted" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM user_post_collect
@@ -133,7 +129,6 @@
           AND post_id = #{postId}
     </select>
 
-    <!-- 恢复收藏（取消逻辑删除） -->
     <update id="restoreCollect">
         UPDATE user_post_collect
         SET deleted = 0,

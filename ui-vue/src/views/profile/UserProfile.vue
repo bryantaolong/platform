@@ -1,6 +1,5 @@
 <template>
   <div class="user-profile">
-    <!-- Profile Header -->
     <el-card class="profile-header">
       <div class="profile-main">
         <div class="profile-avatar">
@@ -20,7 +19,9 @@
               {{ userStore.userInfo?.username?.charAt(0).toUpperCase() }}
             </el-avatar>
             <div class="avatar-overlay">
-              <el-icon :size="24"><Camera /></el-icon>
+              <el-icon :size="24">
+                <Camera/>
+              </el-icon>
               <p>点击更换</p>
             </div>
           </el-upload>
@@ -45,7 +46,9 @@
           </div>
           <div class="profile-actions">
             <el-button type="primary" @click="showProfileDialog = true">
-              <el-icon><Edit /></el-icon>
+              <el-icon>
+                <Edit/>
+              </el-icon>
               编辑资料
             </el-button>
           </div>
@@ -53,449 +56,252 @@
       </div>
     </el-card>
 
-    <!-- Posts Section -->
-    <el-card class="posts-section">
-      <template #header>
-        <div class="section-header">
-          <h3>我的文章</h3>
-        </div>
-      </template>
-      <div class="posts-container">
-        <el-empty v-if="posts.length === 0" description="暂无文章" />
-        <div v-else class="posts-grid">
-          <el-card
-            v-for="post in posts"
-            :key="post.id"
-            class="post-card"
-            @click="goToPostDetail(post.id)"
-          >
-            <h3 class="post-title">{{ post.title }}</h3>
-            <div class="post-meta">
-              <span class="post-date">{{ formatDate(post.createdAt) }}</span>
-              <span class="post-stats">
-                <el-icon><View /></el-icon> {{ post.viewCount || 0 }}
-                <el-icon><ChatLineRound /></el-icon> {{ post.commentCount || 0 }}
-                <el-icon><Star /></el-icon> {{ post.likeCount || 0 }}
-              </span>
-            </div>
-            <p class="post-summary" v-html="post.summary || post.content?.substring(0, 100) + '...'"></p>
-            <div class="post-tags" v-if="post.tags && post.tags.length">
-              <el-tag
-                v-for="tag in post.tags"
-                :key="tag"
-                size="small"
-                type="info"
-                class="tag"
-              >
-                {{ tag }}
-              </el-tag>
-            </div>
-          </el-card>
-        </div>
-
-        <div class="pagination-wrapper" v-if="totalPosts > pageSize">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :total="totalPosts"
-            :page-sizes="[10, 20, 50]"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
-        </div>
-      </div>
+    <el-card class="main-content-card">
+      <el-tabs v-model="activeMainTab" class="main-tabs">
+    
+        <el-tab-pane label="我的文章" name="posts">
+          <MyPosts @post-count-change="postCount = $event"/>
+        </el-tab-pane>
+    
+        <el-tab-pane label="我的收藏" name="collects">
+          <UserCollectList :user-id="userStore.userInfo?.id" :is-owner="true" />
+        </el-tab-pane>
+        
+        <el-tab-pane label="详细资料" name="profile-detail">
+          <div class="tab-content-container">
+            <el-descriptions :column="1" border style="max-width: 800px">
+              <el-descriptions-item label="用户名">{{ userStore.userInfo?.username }}</el-descriptions-item>
+              <el-descriptions-item label="真实姓名">{{ userStore.userProfile?.realName || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="性别">
+                {{ userStore.userProfile?.gender === 'FEMALE' ? '女' : '男' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="生日">
+                {{ userStore.userProfile?.birthday ? userStore.userProfile.birthday.slice(0, 10) : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="手机号">{{ userStore.userProfile?.phone || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="邮箱">{{ userStore.userProfile?.email || '-' }}</el-descriptions-item>
+            </el-descriptions>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
 
-    <!-- Profile Edit Dialog -->
-    <el-dialog
-      v-model="showProfileDialog"
-      title="编辑个人信息"
-      width="600px"
-      :close-on-click-modal="false"
-    >
-      <el-tabs v-model="activeTab" class="info-tabs">
-        <!-- 基本信息 -->
+    <el-dialog v-model="showProfileDialog" title="编辑个人信息" width="650px" :close-on-click-modal="false">
+      <el-tabs v-model="editActiveTab" class="info-tabs">
         <el-tab-pane label="基本信息" name="basic">
-          <el-form
-              ref="basicFormRef"
-              :model="basicForm"
-              :rules="basicRules"
-              label-width="100px"
-              class="info-form"
-          >
+          <el-form ref="basicFormRef" :model="basicForm" :rules="basicRules" label-width="100px" class="info-form">
             <el-form-item label="用户名">
-              <el-input :value="userStore.userInfo?.username" disabled />
+              <el-input :value="userStore.userInfo?.username" disabled/>
             </el-form-item>
-
             <el-form-item label="真实姓名" prop="realName">
-              <el-input v-model="basicForm.realName" placeholder="请输入真实姓名" />
+              <el-input v-model="basicForm.realName" placeholder="请输入真实姓名"/>
             </el-form-item>
-
             <el-form-item label="性别" prop="gender">
               <el-radio-group v-model="basicForm.gender">
                 <el-radio :label="1">男</el-radio>
                 <el-radio :label="0">女</el-radio>
               </el-radio-group>
             </el-form-item>
-
             <el-form-item label="生日" prop="birthday">
-              <el-date-picker
-                  v-model="basicForm.birthday"
-                  type="date"
-                  placeholder="选择生日"
-                  value-format="YYYY-MM-DD"
-              />
+              <el-date-picker v-model="basicForm.birthday" type="date" placeholder="选择生日"
+                              value-format="YYYY-MM-DD"/>
             </el-form-item>
-
             <el-form-item label="手机号" prop="phone">
-              <el-input v-model="basicForm.phone" placeholder="请输入手机号" />
+              <el-input v-model="basicForm.phone" placeholder="请输入手机号"/>
             </el-form-item>
-
             <el-form-item label="邮箱" prop="email">
-              <el-input v-model="basicForm.email" placeholder="请输入邮箱" />
+              <el-input v-model="basicForm.email" placeholder="请输入邮箱"/>
             </el-form-item>
-
             <el-form-item>
-              <el-button type="primary" :loading="updating" @click="handleUpdateBasic">
-                保存修改
-              </el-button>
+              <el-button type="primary" :loading="updating" @click="handleUpdateBasic">保存修改</el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
-        <!-- 账号安全 -->
         <el-tab-pane label="账号安全" name="security">
           <div class="security-section">
             <h3>修改密码</h3>
-            <el-form
-                ref="passwordFormRef"
-                :model="passwordForm"
-                :rules="passwordRules"
-                label-width="120px"
-                class="security-form"
-            >
+            <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="120px">
               <el-form-item label="当前密码" prop="oldPassword">
-                <el-input v-model="passwordForm.oldPassword" type="password" show-password />
+                <el-input v-model="passwordForm.oldPassword" type="password" show-password/>
               </el-form-item>
               <el-form-item label="新密码" prop="newPassword">
-                <el-input v-model="passwordForm.newPassword" type="password" show-password />
+                <el-input v-model="passwordForm.newPassword" type="password" show-password/>
               </el-form-item>
               <el-form-item label="确认新密码" prop="confirmPassword">
-                <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
+                <el-input v-model="passwordForm.confirmPassword" type="password" show-password/>
               </el-form-item>
               <el-form-item>
-                <el-button
-                    type="primary"
-                    :loading="changingPassword"
-                    @click="handleChangePassword"
-                >
-                  修改密码
-                </el-button>
+                <el-button type="primary" :loading="changingPassword" @click="handleChangePassword">修改密码</el-button>
               </el-form-item>
             </el-form>
           </div>
-
-          <el-divider />
-
+          <el-divider/>
           <div class="danger-section">
             <h3>危险操作</h3>
-            <el-alert
-                title="注销账号是不可逆的操作，请谨慎操作！"
-                type="error"
-                :closable="false"
-                show-icon
-            />
-            <el-button type="danger" plain style="margin-top: 16px" @click="handleDeleteAccount">
-              注销账号
-            </el-button>
+            <el-alert title="注销账号是不可逆的操作，请谨慎操作！" type="error" :closable="false" show-icon/>
+            <el-button type="danger" plain style="margin-top: 16px" @click="handleDeleteAccount">注销账号</el-button>
           </div>
         </el-tab-pane>
 
-        <!-- 登录历史 -->
         <el-tab-pane label="登录历史" name="login-history">
           <el-table :data="loginHistory" style="width: 100%">
-            <el-table-column prop="loginTime" label="登录时间" width="180" />
-            <el-table-column prop="ipAddress" label="IP地址" width="140" />
-            <el-table-column prop="location" label="登录地点" />
-            <el-table-column prop="device" label="设备信息" />
+            <el-table-column prop="loginTime" label="登录时间" width="180"/>
+            <el-table-column prop="ipAddress" label="IP地址" width="140"/>
+            <el-table-column prop="location" label="登录地点"/>
+            <el-table-column prop="device" label="设备信息"/>
           </el-table>
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
 
-    <!-- Following/Follower Dialog -->
     <el-dialog
-      v-model="showFollowDialog"
-      :title="followDialogTitle"
-      width="500px"
+        v-model="showFollowingDialog"
+        title="我的关注"
+        width="600px"
+        destroy-on-close
     >
-      <div class="follow-list">
-        <el-empty v-if="followUsers.length === 0" description="暂无数据" />
-        <div v-else class="user-list">
-          <div
-            v-for="user in followUsers"
-            :key="user.id"
-            class="user-item"
-            @click="goToUserProfile(user.id)"
-          >
-            <el-avatar :size="40" :src="user.avatar">
-              {{ user.username?.charAt(0).toUpperCase() }}
-            </el-avatar>
-            <div class="user-info">
-              <div class="username">{{ user.username }}</div>
-              <div class="real-name" v-if="user.realName">{{ user.realName }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <UserList
+          :userIds="followingIds"
+          @close="showFollowingDialog = false"
+      />
+    </el-dialog>
+
+    <el-dialog
+        v-model="showFollowerDialog"
+        title="我的粉丝"
+        width="600px"
+        destroy-on-close
+    >
+      <UserList
+          :userIds="followerIds"
+          @close="showFollowerDialog = false"
+      />
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import type { FormInstance } from 'element-plus'
-import { Camera, Edit, View, ChatLineRound, Star } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { userApi } from '@/api/user'
-import { postApi } from '@/api/post'
-import { userFollowApi } from '@/api/userFollow'
-import type { PostVO } from '@/models/vo/post/PostVO'
-import type { SysUser } from '@/models/entity/SysUser'
+import {ref, reactive, onMounted} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import type {FormInstance} from 'element-plus'
+import {Camera, Edit} from '@element-plus/icons-vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {userApi} from '@/api/user'
+import {userFollowApi} from '@/api/userFollow'
+import UserList from '../../components/user/UserList.vue'
+import MyPosts from '@/components/user/MyPosts.vue'
+import UserCollectList from '@/components/user/UserCollectList.vue'
 
-/* ----------------- 性别转换 ----------------- */
+/* --- 工具方法 --- */
 function genderToNum(g?: string): 1 | 0 {
   return g === 'FEMALE' ? 0 : 1
 }
+
 function numToGender(n: 1 | 0): 'MALE' | 'FEMALE' {
   return n === 0 ? 'FEMALE' : 'MALE'
 }
 
-/* ----------------- 基础数据 ----------------- */
+const formatDate = (dateStr?: string) => dateStr ? new Date(dateStr).toLocaleDateString('zh-CN') : ''
+
+/* --- 基础状态 --- */
 const router = useRouter()
 const userStore = useUserStore()
-const activeTab = ref('basic')
-const basicFormRef = ref<FormInstance>()
-const passwordFormRef = ref<FormInstance>()
-
+const activeMainTab = ref('posts')
+const editActiveTab = ref('basic')
+const showProfileDialog = ref(false)
+const showFollowingDialog = ref(false)
+const showFollowerDialog = ref(false)
 const updating = ref(false)
 const changingPassword = ref(false)
-const showProfileDialog = ref(false)
-const showFollowDialog = ref(false)
-const followDialogTitle = ref('')
-const followUsers = ref<SysUser[]>([])
 
-// Posts data
-const posts = ref<PostVO[]>([])
-const currentPage = ref(1)
-const pageSize = ref(10)
-const totalPosts = ref(0)
+/* --- 数据存储 --- */
+const userStats = reactive({followingCount: 0, followerCount: 0})
 const postCount = ref(0)
 
-// User stats
-const userStats = reactive({
-  followingCount: 0,
-  followerCount: 0
-})
+// 关注和粉丝的 ID 列表，传给 UserList 组件
+const followingIds = ref<number[]>([])
+const followerIds = ref<number[]>([])
 
-const basicForm = reactive({
-  realName: '',
-  gender: 1 as 1 | 0,
-  birthday: '',
-  phone: '',
-  email: ''
-})
+const basicFormRef = ref<FormInstance>()
+const passwordFormRef = ref<FormInstance>()
+const basicForm = reactive({realName: '', gender: 1 as 1 | 0, birthday: '', phone: '', email: ''})
+const passwordForm = reactive({oldPassword: '', newPassword: '', confirmPassword: ''})
 
-const passwordForm = reactive({
-  oldPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-})
-
-/* ----------------- 校验规则 ----------------- */
+/* --- 校验规则 --- */
 const basicRules = {
-  realName: [{ min: 2, max: 20, message: '真实姓名长度应在2-20个字符之间', trigger: 'blur' }],
-  phone: [
-    {
-      validator: (_: any, value: string, callback: Function) => {
-        if (!value) return callback()
-        const pattern = /^1[3-9]\d{9}$/
-        pattern.test(value) ? callback() : callback(new Error('电话号码格式不正确'))
-      },
-      trigger: 'blur'
-    }
-  ],
-  email: [{ type: 'email', message: '邮箱格式不正确', trigger: 'blur', required: false }]
+  realName: [{min: 2, max: 20, message: '真实姓名长度应在2-20个字符之间', trigger: 'blur'}],
+  phone: [{
+    validator: (_: any, value: string, callback: Function) => {
+      if (!value) return callback()
+      const pattern = /^1[3-9]\d{9}$/
+      pattern.test(value) ? callback() : callback(new Error('电话号码格式不正确'))
+    }, trigger: 'blur'
+  }],
+  email: [{type: 'email', message: '邮箱格式不正确', trigger: 'blur'}]
 }
-
-const validateConfirmPassword = (_: any, value: string, callback: Function) => {
-  value !== passwordForm.newPassword
-      ? callback(new Error('两次输入的密码不一致'))
-      : callback()
-}
-
 const passwordRules = {
-  oldPassword: [
-    { required: true, message: '请输入当前密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6位', trigger: 'blur' }
-  ],
-  newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6位', trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
-    { validator: validateConfirmPassword, trigger: 'blur' }
-  ]
+  oldPassword: [{required: true, message: '请输入当前密码', trigger: 'blur'}],
+  newPassword: [{required: true, message: '请输入新密码', trigger: 'blur'}, {
+    min: 6,
+    message: '至少6位',
+    trigger: 'blur'
+  }],
+  confirmPassword: [{required: true, message: '请确认新密码', trigger: 'blur'}, {
+    validator: (_: any, value: string, callback: Function) => {
+      value !== passwordForm.newPassword ? callback(new Error('两次输入不一致')) : callback()
+    }, trigger: 'blur'
+  }]
 }
 
-/* ----------------- 登录历史（Mock） ----------------- */
-const loginHistory = ref([
-  {
-    loginTime: '2024-01-15 14:30:25',
-    ipAddress: '192.168.1.100',
-    location: '北京市',
-    device: 'Chrome on Windows'
-  },
-  {
-    loginTime: '2024-01-14 09:15:42',
-    ipAddress: '192.168.1.101',
-    location: '北京市',
-    device: 'Safari on iPhone'
-  }
-])
-
-/* ----------------- 方法 ----------------- */
-
-// Load user posts
-const loadPosts = async () => {
-  if (!userStore.userInfo?.id) return
-  try {
-    const response = await postApi.getPublishedPostsByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
-    if (response.code === 200) {
-      posts.value = response.data.rows
-      totalPosts.value = response.data.total
-    }
-  } catch (error) {
-    console.error('加载文章失败:', error)
-  }
-}
-
-// Load user stats
+/* --- 数据加载逻辑 --- */
 const loadUserStats = async () => {
   if (!userStore.userInfo?.id) return
-  try {
-    const response = await userFollowApi.getUserFollowStats(userStore.userInfo.id)
-    if (response.code === 200) {
-      userStats.followingCount = response.data.followingCount
-      userStats.followerCount = response.data.followerCount
-    }
-  } catch (error) {
-    console.error('加载用户统计失败:', error)
+  const res = await userFollowApi.getUserFollowStats(userStore.userInfo.id)
+  if (res.code === 200) {
+    userStats.followingCount = res.data.followingCount
+    userStats.followerCount = res.data.followerCount
   }
 }
 
-// Show following list
+/* --- 关注/粉丝列表逻辑 (一致化处理) --- */
 const showFollowingList = async () => {
   if (!userStore.userInfo?.id) return
-  followDialogTitle.value = '我的关注'
-  showFollowDialog.value = true
-  try {
-    const response = await userFollowApi.getFollowingUsers(userStore.userInfo.id)
-    if (response.code === 200) {
-      followUsers.value = response.data.rows
-    }
-  } catch (error) {
-    console.error('加载关注列表失败:', error)
+  const res = await userFollowApi.getFollowingUsers(userStore.userInfo.id, 1, 50)
+  if (res.code === 200) {
+    followingIds.value = res.data.rows.map((u: any) => u.id)
+    showFollowingDialog.value = true
   }
 }
 
-// Show follower list
 const showFollowerList = async () => {
   if (!userStore.userInfo?.id) return
-  followDialogTitle.value = '我的粉丝'
-  showFollowDialog.value = true
-  try {
-    const response = await userFollowApi.getFollowerUsers(userStore.userInfo.id)
-    if (response.code === 200) {
-      followUsers.value = response.data.rows
-    }
-  } catch (error) {
-    console.error('加载粉丝列表失败:', error)
-  }
-}
-
-// Go to post detail
-const goToPostDetail = (postId: number) => {
-  router.push(`/post/${postId}`)
-}
-
-// Go to user profile
-const goToUserProfile = (userId: number) => {
-  router.push(`/user/${userId}`)
-}
-
-// Format date
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('zh-CN')
-}
-
-// Handle pagination
-const handleSizeChange = (newSize: number) => {
-  pageSize.value = newSize
-  currentPage.value = 1
-  loadPosts()
-}
-
-const handleCurrentChange = (newPage: number) => {
-  currentPage.value = newPage
-  loadPosts()
-}
-
-const handleAvatarSuccess = (res: any) => {
+  const res = await userFollowApi.getFollowerUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
-    ElMessage.success('头像上传成功')
-    userStore.userProfile!.avatar = res.data
-  } else {
-    ElMessage.error('头像上传失败：' + res.message)
+    followerIds.value = res.data.rows.map((u: any) => u.id)
+    showFollowerDialog.value = true
   }
 }
 
-const beforeAvatarUpload = (file: File) => {
-  const isImage = file.type.startsWith('image/')
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isImage) ElMessage.error('上传文件必须是图片格式!')
-  if (!isLt2M) ElMessage.error('图片大小不能超过 2MB!')
-  return isImage && isLt2M
-}
-
+/* --- 操作方法 --- */
 const handleUpdateBasic = async () => {
   if (!basicFormRef.value) return
-  await basicFormRef.value.validate(async (valid: boolean) => {
+  await basicFormRef.value.validate(async (valid) => {
     if (!valid) return
     updating.value = true
     try {
-      /* 1. 更新 UserProfile */
       await userStore.updateProfile({
         realName: basicForm.realName,
         gender: numToGender(basicForm.gender),
         birthday: basicForm.birthday ? basicForm.birthday + 'T00:00:00' : undefined,
         avatar: userStore.userProfile?.avatar
       })
-      /* 2. 更新 SysUser（phone / email） */
-      if (userStore.userInfo?.id && (basicForm.phone || basicForm.email)) {
-        await userApi.updateUser(userStore.userInfo.id, {
-          phone: basicForm.phone || undefined,
-          email: basicForm.email || undefined
-        })
+      if (userStore.userInfo?.id) {
+        await userApi.updateUser(userStore.userInfo.id, {phone: basicForm.phone, email: basicForm.email})
       }
-      /* 3. 重新拉取最新数据 */
       await userStore.fetchUserInfo()
-      ElMessage.success('资料更新成功')
+      ElMessage.success('更新成功')
     } catch (e) {
       ElMessage.error('更新失败')
     } finally {
@@ -506,19 +312,15 @@ const handleUpdateBasic = async () => {
 
 const handleChangePassword = async () => {
   if (!passwordFormRef.value) return
-  await passwordFormRef.value.validate(async (valid: boolean) => {
+  await passwordFormRef.value.validate(async (valid) => {
     if (!valid) return
     changingPassword.value = true
     try {
-      const res = await userStore.changePassword(
-          passwordForm.oldPassword,
-          passwordForm.newPassword
-      )
-      res.success
-          ? (ElMessage.success('密码修改成功'), passwordFormRef.value!.resetFields())
-          : ElMessage.error(res.message || '修改失败')
-    } catch (e) {
-      ElMessage.error('修改失败')
+      const res = await userStore.changePassword(passwordForm.oldPassword, passwordForm.newPassword)
+      if (res.success) {
+        ElMessage.success('密码修改成功')
+        passwordFormRef.value!.resetFields()
+      } else ElMessage.error(res.message)
     } finally {
       changingPassword.value = false
     }
@@ -527,28 +329,36 @@ const handleChangePassword = async () => {
 
 const handleDeleteAccount = async () => {
   try {
-    await ElMessageBox.confirm(
-        '注销账号是不可逆的操作，您的所有数据将被永久删除。确定要继续吗？',
-        '危险操作',
-        { type: 'error', confirmButtonText: '我已知晓，继续注销', cancelButtonText: '取消' }
-    )
-    const { value } = await ElMessageBox.prompt('请输入 "DELETE" 以确认注销操作', '确认注销', {
-      type: 'error',
-      confirmButtonText: '确认注销',
-      cancelButtonText: '取消'
-    })
+    await ElMessageBox.confirm('确定注销账号吗？这是不可逆的操作！', '警告', {type: 'error'})
+    const {value} = await ElMessageBox.prompt('请输入 "DELETE" 确认', '二次确认')
     if (value === 'DELETE') {
       const res = await userStore.deleteAccount()
-      res.success ? ElMessage.success('账号已注销') : ElMessage.error(res.message || '注销失败')
-    } else {
-      ElMessage.warning('输入不正确，注销已取消')
+      if (res.success) ElMessage.success('注销成功')
     }
   } catch (e) {
-    /* 用户取消 */
   }
 }
 
-const loadUserData = () => {
+const handleAvatarSuccess = (res: any) => {
+  if (res.code === 200) {
+    ElMessage.success('上传成功')
+    userStore.userProfile!.avatar = res.data
+  }
+}
+
+const beforeAvatarUpload = (file: File) => {
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) ElMessage.error('大小不能超过 2MB!')
+  return isLt2M
+}
+
+const goToPostDetail = (id: number) => router.push(`/post/${id}`)
+
+const loginHistory = ref([
+  {loginTime: '2024-01-15 14:30:25', ipAddress: '192.168.1.100', location: '北京市', device: 'Chrome on Windows'}
+])
+
+onMounted(() => {
   if (userStore.userProfile) {
     Object.assign(basicForm, {
       realName: userStore.userProfile.realName || '',
@@ -558,11 +368,8 @@ const loadUserData = () => {
       email: userStore.userProfile.email || ''
     })
   }
-  loadPosts()
   loadUserStats()
-}
-
-onMounted(() => loadUserData())
+})
 </script>
 
 <style scoped>
@@ -575,9 +382,9 @@ onMounted(() => loadUserData())
   gap: 20px;
 }
 
-.profile-header {
+.profile-header, .main-content-card {
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .profile-main {
@@ -587,13 +394,8 @@ onMounted(() => loadUserData())
   padding: 20px;
 }
 
-.profile-avatar {
-  flex: 0 0 120px;
-}
-
 .avatar-uploader {
   position: relative;
-  display: inline-block;
   cursor: pointer;
 }
 
@@ -611,16 +413,11 @@ onMounted(() => loadUserData())
   justify-content: center;
   color: white;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: 0.3s;
 }
 
 .avatar-uploader:hover .avatar-overlay {
   opacity: 1;
-}
-
-.avatar-overlay p {
-  margin: 4px 0 0 0;
-  font-size: 12px;
 }
 
 .profile-info {
@@ -630,60 +427,44 @@ onMounted(() => loadUserData())
   align-items: center;
 }
 
-.profile-basic {
-  flex: 1;
-}
-
 .profile-username {
-  margin: 0 0 16px 0;
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  margin-bottom: 15px;
 }
 
 .profile-stats {
   display: flex;
-  gap: 24px;
+  gap: 30px;
 }
 
 .stat-item {
   text-align: center;
   cursor: pointer;
-  transition: color 0.3s;
-}
-
-.stat-item:hover {
-  color: #409eff;
 }
 
 .stat-number {
   display: block;
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #909399;
 }
 
-.profile-actions {
-  flex: 0 0 auto;
+.main-tabs {
+  padding: 0 10px;
 }
 
-.posts-section {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+:deep(.el-tabs__item) {
+  font-size: 16px;
+  height: 55px;
 }
 
-.section-header h3 {
-  margin: 0;
-  color: #303133;
-}
-
-.posts-container {
-  padding: 20px;
+.tab-content-container {
+  padding: 20px 0;
 }
 
 .posts-grid {
@@ -694,137 +475,51 @@ onMounted(() => loadUserData())
 
 .post-card {
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: 0.3s;
 }
 
 .post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 .post-title {
-  margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  margin-bottom: 10px;
+  height: 44px;
   overflow: hidden;
 }
 
 .post-meta {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
   font-size: 12px;
   color: #909399;
 }
 
-.post-stats {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.post-summary {
-  font-size: 14px;
-  color: #606266;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.post-tags {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.tag {
-  font-size: 12px;
-}
-
 .pagination-wrapper {
+  margin-top: 30px;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
 }
 
 .info-tabs {
-  padding: 20px;
+  padding: 0 10px;
 }
 
 .info-form {
+  padding: 20px 0;
   max-width: 500px;
 }
 
 .security-section h3 {
-  margin-top: 0;
   margin-bottom: 20px;
-  color: #303133;
-}
-
-.security-form {
-  max-width: 500px;
 }
 
 .danger-section {
-  margin-top: 40px;
-  padding-top: 40px;
-  border-top: 1px solid #e4e7ed;
-}
-
-.danger-section h3 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  color: #f56c6c;
-}
-
-.follow-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.user-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.user-item:hover {
-  background-color: #f5f7fa;
-}
-
-.user-info {
-  flex: 1;
-}
-
-.username {
-  font-weight: 500;
-  color: #303133;
-}
-
-.real-name {
-  font-size: 12px;
-  color: #909399;
-}
-
-:deep(.el-input.is-disabled .el-input__wrapper) {
-  background-color: #f5f7fa;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 </style>

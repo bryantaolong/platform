@@ -62,12 +62,17 @@
         </el-form-item>
 
         <el-form-item label="内容" prop="content">
-          <el-input
-              v-model="postForm.content"
-              :rows="15"
-              type="textarea"
-              placeholder="请输入文章内容"
-          />
+          <div class="markdown-editor">
+            <div class="editor-pane">
+              <el-input
+                  v-model="postForm.content"
+                  :rows="20"
+                  type="textarea"
+                  placeholder="请输入文章内容（支持 Markdown）"
+              />
+            </div>
+            <div class="preview-pane markdown-body" v-html="renderedContent"></div>
+          </div>
         </el-form-item>
 
         <el-form-item>
@@ -77,6 +82,13 @@
               :loading="submitting"
           >
             发布文章
+          </el-button>
+          <el-button
+              type="success"
+              @click="saveDraft"
+              :loading="savingDraft"
+          >
+            保存草稿
           </el-button>
           <el-button @click="cancel">
             取消
@@ -88,7 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { marked } from 'marked'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {ElInput, ElMessage} from 'element-plus'
 import { postApi } from '@/api/post'
@@ -100,7 +113,13 @@ const router = useRouter()
 const formRef = ref()
 const loading = ref(false)
 const submitting = ref(false)
+const savingDraft = ref(false)
 const postId = Number(route.params.id)
+
+/* Computed property for rendered markdown content */
+const renderedContent = computed(() => {
+  return marked.parse(postForm.content || '')
+})
 
 /* 表单 */
 const postForm = reactive<Post>({
@@ -181,7 +200,7 @@ const submitForm = async () => {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags,
+          tags: postForm.tags as any,
           weight: 1
         }
 
@@ -209,6 +228,41 @@ const cancel = () => {
   router.go(-1)
 }
 
+/* 保存草稿 */
+const saveDraft = async () => {
+  if (!formRef.value) return
+
+  await formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      savingDraft.value = true
+      try {
+        const requestData = {
+          title: postForm.title,
+          content: postForm.content,
+          categoryId: postForm.categoryId,
+          tags: postForm.tags as any,
+          weight: 1
+        }
+
+        const response = await postApi.saveDraft(requestData)
+        if (response.code === 200) {
+          ElMessage.success('草稿保存成功')
+          router.push(`/post/${response.data.id}`)
+        } else {
+          ElMessage.error(response.message || '保存草稿失败')
+        }
+      } catch (error) {
+        console.error('保存草稿失败:', error)
+        ElMessage.error('保存草稿失败')
+      } finally {
+        savingDraft.value = false
+      }
+    } else {
+      ElMessage.error('请完善表单信息')
+    }
+  })
+}
+
 onMounted(() => {
   loadPost()
 })
@@ -216,16 +270,121 @@ onMounted(() => {
 
 <style scoped>
 .blog-post-edit-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 20px auto;
   padding: 0 20px;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: calc(100vh - 120px);
 }
 
+.markdown-editor {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  height: 600px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.editor-pane, .preview-pane {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.editor-pane {
+  border-right: 1px solid #ebeef5;
+}
+
+.editor-pane :deep(.el-textarea__inner) {
+  height: 100% !important;
+  border: none;
+  resize: none;
+  padding: 0;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.preview-pane {
+  background-color: #fcfcfc;
+}
+
+/* Markdown Styles (Soft & Intuitive) */
+.markdown-body {
+  color: #24292f;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #1f2328;
+}
+
+.markdown-body :deep(h1) { font-size: 1.8em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+.markdown-body :deep(h2) { font-size: 1.4em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+
+.markdown-body :deep(p) { margin-bottom: 1em; }
+
+.markdown-body :deep(code) {
+  padding: 0.2em 0.4em;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 85%;
+}
+
+.markdown-body :deep(pre) {
+  padding: 16px;
+  background-color: #f6f8fa;
+  border-radius: 8px;
+  margin-bottom: 1em;
+  overflow: auto;
+}
+
+.markdown-body :deep(blockquote) {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+  margin: 0 0 1em 0;
+}
+
+.markdown-body :deep(img) {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.markdown-body :deep(table th),
+.markdown-body :deep(table td) {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-body :deep(table tr:nth-child(2n)) {
+  background-color: #f6f8fa;
+}
+
 .form-card {
   border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {

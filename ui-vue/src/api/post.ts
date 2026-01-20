@@ -38,6 +38,7 @@ export const postApi = {
         title: string,
         author: string,
         tags: string,
+        status: PostStatusEnum | null,
         pageNum: number,
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
@@ -48,6 +49,7 @@ export const postApi = {
                 title,
                 author,
                 tags,
+                status,
                 pageNum,
                 pageSize
             }
@@ -58,6 +60,18 @@ export const postApi = {
     getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/all`,
+            method: 'get',
+            params: {
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
+    // Get post audit VOs by user ID with pagination
+    getPostAuditVosByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: `/api/posts/${userId}/audit/all`,
             method: 'get',
             params: {
                 pageNum,
@@ -154,43 +168,11 @@ export const postApi = {
         })
     },
 
-    // Collect a post
-    collectPost: (postId: number, collectionId?: number): Promise<Result<any>> => {
+    // Check if post is liked by current user
+    checkLikeStatus: (postId: number): Promise<Result<boolean>> => {
         return request({
-            url: '/api/user/post-collects',
-            method: 'post',
-            data: {
-                postId,
-                collectionId: collectionId || 0
-            }
-        })
-    },
-
-    // Uncollect a post
-    uncollectPost: (postId: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/user/post-collects/${postId}`,
-            method: 'delete'
-        })
-    },
-
-    // Check if post is collected
-    checkCollectStatus: (postId: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/user/post-collects/${postId}/status`,
+            url: `/api/posts/${postId}/like/status`,
             method: 'get'
         })
     },
-
-    // Get user collects
-    getUserCollects: (pageNum: number, pageSize: number): Promise<Result<PageResult<any>>> => {
-        return request({
-            url: '/api/user/post-collects',
-            method: 'get',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    }
 }

@@ -41,6 +41,18 @@ const routes: RouteRecordRaw[] = [
                 meta: {title: '用户管理'}
             },
             {
+                path: 'posts',
+                name: 'PostManagement',
+                component: () => import('@/views/admin/PostManagement.vue'),
+                meta: {title: '博文管理'}
+            },
+            {
+                path: 'audit',
+                name: 'PostAuditList',
+                component: () => import('@/views/admin/PostAuditList.vue'),
+                meta: {title: '博文审核'}
+            },
+            {
                 path: 'profile',
                 name: 'AdminProfile',
                 component: () => import('@/views/profile/UserProfile.vue'),
@@ -97,7 +109,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/user/:userId',
         name: 'UserProfilePublic',
-        component: () => import('@/views/user/UserProfilePublic.vue'),
+        component: () => import('@/views/profile/UserProfilePublic.vue'),
         meta: {requiresAuth: true, title: '用户主页'},
         props: true
     },

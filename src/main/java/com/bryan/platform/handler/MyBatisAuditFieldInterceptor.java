@@ -20,7 +20,7 @@ import java.util.Properties;
                 method  = "update",
                 args    = {MappedStatement.class, Object.class})
 })
-public class AuditFieldInterceptor implements Interceptor {
+public class MyBatisAuditFieldInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -61,7 +61,7 @@ public class AuditFieldInterceptor implements Interceptor {
     private String currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            return "system";
+            return "SYSTEM";
         }
         return auth.getName();
     }
