@@ -107,6 +107,13 @@
           >
             评论 {{ post?.commentCount }}
           </el-button>
+          <el-button
+              :icon="MagicStick"
+              type="success"
+              @click="openSummaryDialog"
+          >
+            AI 摘要
+          </el-button>
         </el-button-group>
 
         <div class="post-actions" v-if="canEdit">
@@ -162,6 +169,13 @@
           @update:total="handleCommentCountUpdate"
       />
     </el-card>
+
+    <!-- AI Summary Dialog -->
+    <LlmSummaryPostDialog
+        ref="summaryDialogRef"
+        :title="post?.title || ''"
+        :content="post?.content || ''"
+    />
   </div>
 </template>
 
@@ -179,7 +193,8 @@ import {
   Share,
   ArrowUpBold,
   Edit,
-  Delete
+  Delete,
+  MagicStick
 } from '@element-plus/icons-vue'
 import { postApi } from '@/api/post'
 import { userApi } from '@/api/user'
@@ -189,6 +204,7 @@ import type { UserProfileVO } from '@/models/vo/UserProfileVO'
 import {userPostCollectApi} from "@/api/userPostCollect.ts";
 import CommentForm from '@/components/post/CommentForm.vue'
 import CommentList from '@/components/post/CommentList.vue'
+import LlmSummaryPostDialog from '@/components/llm/LlmSummaryPostDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -205,6 +221,7 @@ const authorProfile = ref<UserProfileVO | null>(null)
 const isFollowing = ref(false)
 const followLoading = ref(false)
 const showFollowButton = ref(false)
+const summaryDialogRef = ref<InstanceType<typeof LlmSummaryPostDialog> | null>(null)
 
 // Computed property for rendered markdown content
 const renderedContent = computed(() => {
@@ -507,6 +524,13 @@ const formatDateTime = (dateStr?: string) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleString('zh-CN')
+}
+
+// Open AI summary dialog
+const openSummaryDialog = () => {
+  if (summaryDialogRef.value) {
+    summaryDialogRef.value.open()
+  }
 }
 
 onMounted(() => {

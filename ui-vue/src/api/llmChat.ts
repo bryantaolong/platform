@@ -28,3 +28,17 @@ export function clearChatContext(): Promise<Result<string>> {
         method: 'post',
     });
 }
+
+/**
+ * 生成文章 AI 摘要
+ * @param title 文章标题
+ * @param content 文章内容
+ * @returns AI 生成的摘要内容
+ */
+export function generatePostSummary(title: string, content: string): Promise<{ summary: string }> {
+    return request({
+        url: '/api/llm/chat/post/summary',
+        method: 'post',
+        data: { title, content },
+    });
+}

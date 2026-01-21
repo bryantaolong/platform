@@ -71,6 +71,50 @@ public class LlmChatService {
     }
 
     /**
+     * 生成文章摘要（不保留上下文）
+     *
+     * @param title 文章标题
+     * @param content 文章内容
+     * @return AI 生成的摘要
+     * @throws RestClientException 调用远程 API 异常
+     */
+    public String generatePostSummary(String title, String content) throws RestClientException {
+        // 1. 构建用于生成摘要的提示词
+        String prompt = String.format(
+                "请为以下文章生成一份简洁的摘要（200-300字），突出文章的核心观点和主要内容。\n\n" +
+                "文章标题：%s\n\n" +
+                "文章内容：\n%s",
+                title, content
+        );
+
+        // 2. 构建单次对话的消息列表（不使用上下文）
+        List<LlmChatMessage> messages = new ArrayList<>();
+        messages.add(new LlmChatMessage("user", prompt));
+
+        // 3. 构建请求体
+        LlmChatRequest request = new LlmChatRequest();
+        request.setModel(properties.getModel());
+        request.setMessages(messages);
+
+        // 4. 设置请求头
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + properties.getKey());
+
+        HttpEntity<LlmChatRequest> httpEntity = new HttpEntity<>(request, headers);
+
+        // 5. 调用远程 API
+        ResponseEntity<LlmChatResponse> response = restTemplate.postForEntity(
+                properties.getUrl(),
+                httpEntity,
+                LlmChatResponse.class
+        );
+
+        // 6. 返回 AI 生成的摘要
+        return Objects.requireNonNull(response.getBody()).getFirstReply();
+    }
+
+    /**
      * 清空指定用户的上下文（可提供给控制器或前端手动清空上下文）
      *
      * @param userId 用户 ID
