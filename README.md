@@ -53,7 +53,7 @@ src/
 ## Configuration
 
 * Update database and Redis settings in `src/main/resources/application-dev.yaml`.
-* General settings (logging, MyBatis-Plus logic delete, etc.) are in `src/main/resources/application.yaml`.
+* General settings (logging, MyBatis, etc.) are in `src/main/resources/application.yaml`.
 * Database schema scripts are in [`src/main/resources/sql/create_table.sql`](sql/create_table.sql) and related subdirectories.
 
 ## Getting Started

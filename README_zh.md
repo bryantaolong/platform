@@ -53,7 +53,7 @@ src/
 ## 配置说明
 
 * 数据库连接、Redis 配置请在 `src/main/resources/application-dev.yaml` 中修改。
-* 日志、MyBatis-Plus 逻辑删除等通用配置见 `src/main/resources/application.yaml`。
+* 日志、MyBatis 等通用配置见 `src/main/resources/application.yaml`。
 * 数据库建表脚本见 [`src/main/resources/sql/create_table.sql`](sql/create_table.sql) 及相关子目录。
 
 ## 启动方式
