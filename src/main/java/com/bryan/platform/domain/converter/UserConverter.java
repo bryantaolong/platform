@@ -1,5 +1,6 @@
 package com.bryan.platform.domain.converter;
 
+import com.bryan.platform.domain.vo.user.UserVO;
 import com.bryan.platform.domain.entity.user.UserProfile;
 import com.bryan.platform.domain.enums.user.UserStatusEnum;
 import com.bryan.platform.domain.entity.user.SysUser;
@@ -28,6 +29,23 @@ public class UserConverter {
                 .gender(profile.getGender())
                 .birthday(profile.getBirthday())
                 .avatar(profile.getAvatar())
+                .build();
+    }
+
+    public static UserVO toUserVO(SysUser user) {
+        if (user == null) {
+            return null;
+        }
+
+        return UserVO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .status(user.getStatus() != null ? user.getStatus().name() : null)
+                .createdAt(user.getCreatedAt())
+                .lastLoginAt(user.getLastLoginAt())
+                .roles(user.getRoles())
                 .build();
     }
 

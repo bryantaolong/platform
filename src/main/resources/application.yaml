@@ -27,6 +27,12 @@ mybatis:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 
+# JWT 配置
+jwt:
+  secret-key: BryanTaoLong!@#SuperSecretKeyJwtToken27926
+  expiration-ms: 86400000  # 24小时
+  token-prefix: "Bearer "
+
 # 第三方 API 配置（通用）
 llm:
   api:

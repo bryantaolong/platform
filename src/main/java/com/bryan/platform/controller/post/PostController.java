@@ -70,7 +70,7 @@ public class PostController {
                 .map(PostConverter::toPostVO)
                 .toList();
         return Result.success(PageResult.of(rows, page.getTotal(),
-                                                page.getPageNum(), page.getPageSize()));
+                page.getPageNum(), page.getPageSize()));
     }
 
     @GetMapping("/{userId}/audit/all")
@@ -91,7 +91,7 @@ public class PostController {
                 .map(PostConverter::toPostVO)
                 .toList();
         return Result.success(PageResult.of(rows, page.getTotal(),
-                                                page.getPageNum(), page.getPageSize()));
+                page.getPageNum(), page.getPageSize()));
     }
 
     @GetMapping("/{id}")
@@ -132,7 +132,7 @@ public class PostController {
                 .map(PostConverter::toPostVO)
                 .toList();
         return Result.success(PageResult.of(rows, page.getTotal(),
-                                                page.getPageNum(), page.getPageSize()));
+                page.getPageNum(), page.getPageSize()));
     }
 
     @PostMapping
@@ -183,8 +183,8 @@ public class PostController {
                 .categoryId(request.getCategoryId())
                 .tags(request.getTags())
                 .commentAreaStatus(request.getCommentAreaStatus() != null ?
-                                   CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
-                                   null)
+                        CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
+                        null)
                 .weight(request.getWeight())
                 .build();
 

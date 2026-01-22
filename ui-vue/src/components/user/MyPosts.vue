@@ -80,7 +80,7 @@ const formatDate = (dateStr?: string) => dateStr ? new Date(dateStr).toLocaleDat
 
 const loadPosts = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await postApi.getPostAuditVosByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
+  const res = await postApi.getPostVOsByUserId(userStore.userInfo.id, currentPage.value, pageSize.value)
   if (res.code === 200) {
     let filteredPosts = res.data.rows
     if (statusFilter.value) {

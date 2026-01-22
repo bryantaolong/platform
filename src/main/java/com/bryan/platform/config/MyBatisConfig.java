@@ -1,6 +1,6 @@
 package com.bryan.platform.config;
 
-import com.bryan.platform.handler.MyBatisAuditFieldInterceptor;
+import com.bryan.platform.interceptor.MyBatisAuditFieldInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

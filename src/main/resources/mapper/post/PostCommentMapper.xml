@@ -65,10 +65,10 @@
             like_count, dislike_count, child_count, path, status,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-            #{userId}, #{postId}, #{rootId}, #{parentId}, #{type}, #{content}, #{replyToUserId}, #{floor},
-            #{likeCount}, #{dislikeCount}, #{childCount}, #{path}, #{status},
-            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
-        )
+                     #{userId}, #{postId}, #{rootId}, #{parentId}, #{type}, #{content}, #{replyToUserId}, #{floor},
+                     #{likeCount}, #{dislikeCount}, #{childCount}, #{path}, #{status},
+                     #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+                 )
     </insert>
 
     <update id="increaseLikeCount">
@@ -109,8 +109,8 @@
             updated_by = #{updatedBy}
         </set>
         WHERE id = #{id}
-          AND version = #{version}
-          AND deleted = 0
+        AND version = #{version}
+        AND deleted = 0
     </update>
 
     <update id="deleteById">
@@ -132,8 +132,8 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE post_id = #{postId}
-          AND deleted = 0
-          AND type = 1
+        AND deleted = 0
+        AND type = 1
         ORDER BY floor ASC
     </select>
 
@@ -141,8 +141,8 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE post_id = #{postId}
-          AND deleted = 0
-          AND type = 1
+        AND deleted = 0
+        AND type = 1
         ORDER BY floor ASC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
@@ -151,8 +151,8 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE root_id = #{rootId}
-          AND deleted = 0
-          AND id != #{rootId}
+        AND deleted = 0
+        AND id != #{rootId}
         ORDER BY created_at ASC
     </select>
 
@@ -160,7 +160,7 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE parent_id = #{parentId}
-          AND deleted = 0
+        AND deleted = 0
         ORDER BY created_at ASC
     </select>
 
@@ -192,8 +192,8 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE post_id = #{postId}
-          AND deleted = 0
-          AND type = 1
+        AND deleted = 0
+        AND type = 1
         ORDER BY like_count DESC, created_at DESC
         LIMIT #{limit}
     </select>
@@ -202,8 +202,8 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE post_id = #{postId}
-          AND deleted = 0
-          AND type = 1
+        AND deleted = 0
+        AND type = 1
         ORDER BY created_at DESC
         LIMIT #{limit}
     </select>
@@ -212,19 +212,19 @@
         SELECT <include refid="BaseColumn"/>
         FROM post_comment
         WHERE root_id = #{commentId}
-          AND deleted = 0
-          AND id != #{commentId}
+        AND deleted = 0
+        AND id != #{commentId}
         ORDER BY created_at ASC
         LIMIT #{limit}
     </select>
 
     <select id="selectByPostIdWithUser" resultMap="CommentWithUserResultMap">
-        SELECT pc.*, u.username, up.avatar, 
+        SELECT pc.*, u.username, up.avatar,
                ru.username as reply_to_username
         FROM post_comment pc
-        LEFT JOIN sys_user u ON pc.user_id = u.id
-        LEFT JOIN user_profile up ON u.id = up.user_id
-        LEFT JOIN sys_user ru ON pc.reply_to_user_id = ru.id
+                 LEFT JOIN sys_user u ON pc.user_id = u.id
+                 LEFT JOIN user_profile up ON u.id = up.user_id
+                 LEFT JOIN sys_user ru ON pc.reply_to_user_id = ru.id
         WHERE pc.post_id = #{postId}
           AND pc.deleted = 0
         ORDER BY pc.floor ASC, pc.created_at ASC

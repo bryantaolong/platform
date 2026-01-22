@@ -40,8 +40,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { userApi } from '@/api/user.ts'
-import type { SysUser } from '@/models/entity/SysUser.ts'
-import type { UserProfileVO } from '@/models/vo/UserProfileVO.ts'
+import type { SysUser } from '@/models/entity/user/SysUser.ts'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 
 interface Props {
   userIds: number[]

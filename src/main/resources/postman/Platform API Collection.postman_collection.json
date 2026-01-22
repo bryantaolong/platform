@@ -467,6 +467,84 @@
 						"url": "{{base_url}}/api/posts/1"
 					},
 					"response": []
+				},
+				{
+					"name": "Like Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/posts/1/like"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/posts/1/unlike"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Post Like Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/posts/1/like/status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Audit Posts (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/1/audit/all?pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"posts",
+								"1",
+								"audit",
+								"all"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1024,6 +1102,20 @@
 						"url": "{{base_url}}/api/user/post-collections/count"
 					},
 					"response": []
+				},
+				{
+					"name": "Get User's Collections by User ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/user/post-collections/user/1"
+					},
+					"response": []
 				}
 			]
 		},
@@ -1161,6 +1253,306 @@
 							}
 						],
 						"url": "{{base_url}}/api/user/post-collects/count"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User's Collects by User ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user/post-collects/user/1?pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"post-collects",
+								"user",
+								"1"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Get Comments by Post ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/post/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Paginated Comments by Post ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/post/1/page?pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments",
+								"post",
+								"1",
+								"page"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comment Tree by Post ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/post/1/tree"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comment Replies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/1/replies"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Hot Comments by Post ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/post/1/hot"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Latest Comments by Post ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/post/1/latest"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/comments/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"postId\": 1,\n  \"content\": \"This is a comment\",\n  \"parentId\": null\n}"
+						},
+						"url": "{{base_url}}/api/comments"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/comments/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/comments/1/like"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/comments/1/unlike"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Comment Like Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/comments/1/like/status"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LLM Chat",
+			"item": [
+				{
+					"name": "Chat with AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Hello AI, how can you help me?\"\n}"
+						},
+						"url": "{{base_url}}/api/llm/chat"
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Chat Context",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/llm/chat/clear"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Post Summary",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"postId\": 1\n}"
+						},
+						"url": "{{base_url}}/api/llm/chat/post/summary"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System Logs",
+			"item": [
+				{
+					"name": "Get Latest Logs (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/admin/logs"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Log File List (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/admin/logs/files"
 					},
 					"response": []
 				}

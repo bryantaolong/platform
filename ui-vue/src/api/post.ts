@@ -69,7 +69,7 @@ export const postApi = {
     },
 
     // Get post audit VOs by user ID with pagination
-    getPostAuditVosByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
+    getPostVOsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/audit/all`,
             method: 'get',
@@ -100,7 +100,7 @@ export const postApi = {
         })
     },
 
-    // Get a post audit VO by ID
+    // Get a post VO by ID
     getPostAuditById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/audit/${id}`,

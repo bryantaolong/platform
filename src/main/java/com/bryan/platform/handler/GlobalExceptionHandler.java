@@ -28,7 +28,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public Result<String> handleRuntimeException(HttpServletRequest request, RuntimeException e) {
-        log.error("请求URL: {}, 业务异常: {}", request.getRequestURL(), e.getMessage(), e);
+        // 避免在日志中暴露敏感信息，只记录必要信息
+        log.error("请求URL: {}, 业务异常类型: {}", 
+            request.getRequestURL(), e.getClass().getSimpleName());
+        
+        // 生产环境不返回详细错误信息
         return Result.error(HttpStatus.INTERNAL_ERROR, "服务繁忙，请稍后重试");
     }
 
