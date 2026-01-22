@@ -1,7 +1,6 @@
 import request from '@/utils/request'
 import type { Result } from '@/models/response/Result'
 import type { UserVO } from '@/models/vo/user/UserVO.ts'
-import type { SysUser } from '@/models/entity/user/SysUser.ts'
 import type { LoginRequest } from '@/models/request/auth/LoginRequest.ts'
 import type { RegisterRequest } from '@/models/request/auth/RegisterRequest.ts'
 import type { ChangePasswordRequest } from '@/models/request/user/ChangePasswordRequest.ts'
@@ -14,7 +13,7 @@ export const authApi = {
   /**
    * 用户注册
    */
-  register(data: RegisterRequest): Promise<Result<SysUser>> {
+  register(data: RegisterRequest): Promise<Result<UserVO>> {
     return request.post('/api/auth/register', data)
   },
 
@@ -42,14 +41,14 @@ export const authApi = {
   /**
    * 修改密码
    */
-  changePassword(data: ChangePasswordRequest): Promise<Result<SysUser>> {
+  changePassword(data: ChangePasswordRequest): Promise<Result<UserVO>> {
     return request.put('/api/auth/password', data)
   },
 
   /**
    * 注销账号
    */
-  deleteAccount(): Promise<Result<SysUser>> {
+  deleteAccount(): Promise<Result<UserVO>> {
     return request.delete('/api/auth')
   },
 
