@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * UserPostCollectionController
+ * 用户博文收藏夹控制器
+ * 提供收藏夹的增删改查及数量统计接口。
  *
  * @author Bryan Long
  */
@@ -28,6 +29,9 @@ public class UserPostCollectionController {
 
     /**
      * 创建收藏夹
+     *
+     * @param folderName 收藏夹名称
+     * @return 创建后的收藏夹实体
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -45,6 +49,9 @@ public class UserPostCollectionController {
 
     /**
      * 删除收藏夹
+     *
+     * @param collectionId 收藏夹主键
+     * @return 是否删除成功
      */
     @DeleteMapping("/{collectionId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -60,7 +67,11 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 更新收藏夹
+     * 更新收藏夹名称
+     *
+     * @param collectionId 收藏夹主键
+     * @param folderName   新名称
+     * @return 更新后的收藏夹实体
      */
     @PutMapping("/{collectionId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -77,7 +88,9 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 获取用户收藏夹列表
+     * 获取当前登录用户的全部收藏夹
+     *
+     * @return 收藏夹列表
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -89,7 +102,10 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 获取指定用户的收藏夹列表（用于在用户主页展示其收藏夹）
+     * 获取指定用户的全部收藏夹（用户主页可见）
+     *
+     * @param userId 用户主键
+     * @return 收藏夹列表
      */
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -99,7 +115,10 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 获取收藏夹详情
+     * 根据主键查询单个收藏夹详情
+     *
+     * @param collectionId 收藏夹主键
+     * @return 收藏夹实体或错误提示
      */
     @GetMapping("/{collectionId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -113,7 +132,9 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 获取用户收藏夹数量
+     * 获取当前用户收藏夹数量
+     *
+     * @return 收藏夹数量
      */
     @GetMapping("/count")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")

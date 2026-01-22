@@ -12,6 +12,7 @@ import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.post.PostService;
+import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * PostController
+ * 博文管理控制器
+ * 提供博文的发布、编辑、审核、点赞、删除等后台与前台接口。
  *
  * @author Bryan Long
  */
@@ -32,8 +34,15 @@ public class PostController {
 
     private final PostService postService;
     private final AuthService authService;
-    private final com.bryan.platform.service.post.UserPostLikeService userPostLikeService;
+    private final UserPostLikeService userPostLikeService;
 
+    /**
+     * 管理员分页查询所有博文（含草稿/已删除）
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文实体分页结果
+     */
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<Post>> getAllPosts(
@@ -45,6 +54,10 @@ public class PostController {
 
     /**
      * 全站已发布文章分页列表（任何用户可见）
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
      */
     @GetMapping("/published")
     public Result<PageResult<PostVO>> getAllPublishedPosts(
@@ -60,8 +73,16 @@ public class PostController {
                 PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
     }
 
+    /**
+     * 查询指定用户的全部博文（含草稿、已删除）
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
+     */
     @GetMapping("/{userId}/all")
-    public  Result<PageResult<PostVO>> getAllPostsByUserId(
+    public Result<PageResult<PostVO>> getAllPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -73,6 +94,14 @@ public class PostController {
                 page.getPageNum(), page.getPageSize()));
     }
 
+    /**
+     * 管理员分页查询指定用户的博文审核视图
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文审核 VO 分页结果
+     */
     @GetMapping("/{userId}/audit/all")
     public Result<PageResult<PostVO>> getPostAuditVosByUserId(
             @PathVariable Long userId,
@@ -81,8 +110,16 @@ public class PostController {
         return Result.success(postService.pageUserPostAuditVos(userId, pageNum, pageSize));
     }
 
+    /**
+     * 查询指定用户已发布的博文
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
+     */
     @GetMapping("/{userId}/published")
-    public  Result<PageResult<PostVO>> getPublishedPostsByUserId(
+    public Result<PageResult<PostVO>> getPublishedPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -94,6 +131,12 @@ public class PostController {
                 page.getPageNum(), page.getPageSize()));
     }
 
+    /**
+     * 根据主键查询单条博文
+     *
+     * @param id 博文主键
+     * @return 博文 VO 或错误提示
+     */
     @GetMapping("/{id}")
     public Result<PostVO> getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
@@ -104,6 +147,12 @@ public class PostController {
         }
     }
 
+    /**
+     * 管理员根据主键查询单条博文（含敏感字段）
+     *
+     * @param id 博文主键
+     * @return 博文 VO 或错误提示
+     */
     @GetMapping("/audit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<PostVO> getPostAuditById(@PathVariable Long id) {
@@ -115,8 +164,18 @@ public class PostController {
         }
     }
 
-    /***
-     * TODO 有待改进
+    /**
+     * 管理员多条件搜索博文
+     * <p>
+     * TODO: 后续可接入 Elasticsearch 提升搜索体验
+     *
+     * @param title    标题关键词
+     * @param author   作者关键词
+     * @param tags     标签关键词
+     * @param status   博文状态
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
      */
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
@@ -135,6 +194,12 @@ public class PostController {
                 page.getPageNum(), page.getPageSize()));
     }
 
+    /**
+     * 创建博文（提交审核）
+     *
+     * @param request 创建参数
+     * @return 创建后的博文实体
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Post> createPost(@RequestBody PostCreateRequest request) {
@@ -154,6 +219,12 @@ public class PostController {
         return Result.success(createdPost);
     }
 
+    /**
+     * 保存博文草稿
+     *
+     * @param request 创建参数
+     * @return 创建后的博文实体
+     */
     @PostMapping("/draft")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
@@ -173,6 +244,13 @@ public class PostController {
         return Result.success(createdPost);
     }
 
+    /**
+     * 更新博文
+     *
+     * @param id      博文主键
+     * @param request 更新参数
+     * @return 更新后的博文实体或错误提示
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
@@ -196,6 +274,13 @@ public class PostController {
         }
     }
 
+    /**
+     * 管理员修改博文状态
+     *
+     * @param id     博文主键
+     * @param status 目标状态
+     * @return 更新后的博文实体或错误提示
+     */
     @PutMapping("/status/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public Result<Post> updatePostStatus(@PathVariable Long id, @RequestParam PostStatusEnum status) {
@@ -208,6 +293,12 @@ public class PostController {
         }
     }
 
+    /**
+     * 删除博文（软删）
+     *
+     * @param id 博文主键
+     * @return 是否删除成功
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Boolean> deletePost(@PathVariable Long id) {
@@ -221,6 +312,9 @@ public class PostController {
 
     /**
      * 点赞博文
+     *
+     * @param id 博文主键
+     * @return 是否点赞成功
      */
     @PostMapping("/{id}/like")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -235,7 +329,10 @@ public class PostController {
     }
 
     /**
-     * 取消点赞
+     * 取消点赞博文
+     *
+     * @param id 博文主键
+     * @return 是否取消成功
      */
     @PostMapping("/{id}/unlike")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -250,7 +347,10 @@ public class PostController {
     }
 
     /**
-     * 检查是否已点赞
+     * 查询当前用户对某条博文的点赞状态
+     *
+     * @param id 博文主键
+     * @return true 已点赞；false 未点赞
      */
     @GetMapping("/{id}/like/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")

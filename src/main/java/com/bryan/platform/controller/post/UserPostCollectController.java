@@ -13,7 +13,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * UserPostCollectController
+ * 用户博文收藏控制器
+ * 提供收藏、取消收藏、分页查询收藏列表等接口。
  *
  * @author Bryan Long
  */
@@ -28,6 +29,9 @@ public class UserPostCollectController {
 
     /**
      * 收藏博文
+     *
+     * @param request 收藏请求参数（博文 ID、收藏夹 ID）
+     * @return 收藏记录实体
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -48,6 +52,9 @@ public class UserPostCollectController {
 
     /**
      * 取消收藏博文
+     *
+     * @param postId 博文主键
+     * @return 是否取消成功
      */
     @DeleteMapping("/{postId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -63,7 +70,14 @@ public class UserPostCollectController {
     }
 
     /**
-     * 获取指定用户的收藏列表
+     * 分页查询指定用户的收藏列表
+     * 支持按收藏夹筛选
+     *
+     * @param userId       用户主键
+     * @param collectionId 收藏夹 ID（可选）
+     * @param pageNum      当前页码
+     * @param pageSize     每页条数
+     * @return 收藏记录分页结果
      */
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -72,7 +86,7 @@ public class UserPostCollectController {
             @RequestParam(required = false) Long collectionId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        
+
         PageResult<UserPostCollect> page;
         if (collectionId != null && collectionId != 0L) {
             page = userPostCollectService.pageUserCollectsByCollection(userId, collectionId, pageNum, pageSize);
@@ -83,7 +97,13 @@ public class UserPostCollectController {
     }
 
     /**
-     * 获取当前用户收藏列表
+     * 获取当前登录用户的收藏列表
+     * 支持按收藏夹筛选
+     *
+     * @param collectionId 收藏夹 ID（可选）
+     * @param pageNum      当前页码
+     * @param pageSize     每页条数
+     * @return 收藏记录分页结果
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -95,9 +115,13 @@ public class UserPostCollectController {
         return getUserCollectsByUserId(currentUserId, collectionId, pageNum, pageSize);
     }
 
-
     /**
-     * 获取用户指定收藏夹的收藏
+     * 分页查询当前用户指定收藏夹的收藏
+     *
+     * @param collectionId 收藏夹主键
+     * @param pageNum      当前页码
+     * @param pageSize     每页条数
+     * @return 收藏记录分页结果
      */
     @GetMapping("/collection/{collectionId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -113,7 +137,10 @@ public class UserPostCollectController {
     }
 
     /**
-     * 检查是否已收藏指定博文
+     * 检查当前用户是否已收藏指定博文
+     *
+     * @param postId 博文主键
+     * @return true 已收藏；false 未收藏
      */
     @GetMapping("/{postId}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -125,7 +152,9 @@ public class UserPostCollectController {
     }
 
     /**
-     * 获取用户收藏数量
+     * 获取当前用户收藏总数
+     *
+     * @return 收藏数量
      */
     @GetMapping("/count")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")

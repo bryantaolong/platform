@@ -10,18 +10,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * UserCommentLikeService
+ * 用户评论点赞业务服务
+ * 提供点赞、取消点赞、状态查询及计数回写能力。
  *
  * @author Bryan Long
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UserCommentLikeService {
 
     private final UserCommentLikeMapper userCommentLikeMapper;
     private final PostCommentService postCommentService;
 
+    /**
+     * 点赞评论（幂等）
+     * 若已存在软删记录则恢复；否则新增。
+     *
+     * @param userId    用户主键
+     * @param commentId 评论主键
+     * @return 是否操作成功
+     * @throws RuntimeException 点赞失败或计数回写失败
+     */
     @Transactional
     public boolean likeComment(Long userId, Long commentId) {
         boolean existsIncludeDeleted = userCommentLikeMapper.existsByUserIdAndCommentIdIncludeDeleted(userId, commentId);
@@ -70,6 +80,14 @@ public class UserCommentLikeService {
         return true;
     }
 
+    /**
+     * 取消点赞评论（软删）
+     *
+     * @param userId    用户主键
+     * @param commentId 评论主键
+     * @return 是否取消成功
+     * @throws RuntimeException 计数回写失败
+     */
     @Transactional
     public boolean unlikeComment(Long userId, Long commentId) {
         int rows = userCommentLikeMapper.deleteByUserIdAndCommentId(userId, commentId);
@@ -86,6 +104,13 @@ public class UserCommentLikeService {
         return true;
     }
 
+    /**
+     * 查询当前用户对指定评论的点赞状态
+     *
+     * @param userId    用户主键
+     * @param commentId 评论主键
+     * @return true 已点赞；false 未点赞
+     */
     public boolean isLiked(Long userId, Long commentId) {
         return userCommentLikeMapper.existsByUserIdAndCommentId(userId, commentId);
     }

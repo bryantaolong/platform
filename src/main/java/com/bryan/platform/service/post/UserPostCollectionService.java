@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * UserPostCollectionService
+ * 用户博文收藏夹业务服务
+ * 提供收藏夹的创建、删除、更新、查询及计数能力。
  *
  * @author Bryan Long
  */
@@ -23,9 +24,18 @@ public class UserPostCollectionService {
     private final UserPostCollectionMapper userPostCollectionMapper;
 
     /* ---------- 增 ---------- */
+
+    /**
+     * 创建收藏夹
+     * 同名检测：同一用户下不允许重名
+     *
+     * @param userId     用户主键
+     * @param folderName 收藏夹名称
+     * @return 已持久化的收藏夹实体
+     * @throws RuntimeException 名称冲突或数据库异常
+     */
     @Transactional
     public UserPostCollection createCollection(Long userId, String folderName) {
-        // 检查是否已存在同名收藏夹
         if (userPostCollectionMapper.existsByUserIdAndFolderName(userId, folderName)) {
             log.warn("用户收藏夹已存在，用户ID: {}, 文件夹名: {}", userId, folderName);
             throw new RuntimeException("收藏夹名称已存在");
@@ -46,6 +56,13 @@ public class UserPostCollectionService {
     }
 
     /* ---------- 删 ---------- */
+
+    /**
+     * 删除收藏夹（软删）
+     *
+     * @param collectionId 收藏夹主键
+     * @return 是否删除成功
+     */
     @Transactional
     public boolean deleteCollection(Long collectionId) {
         int rows = userPostCollectionMapper.deleteById(collectionId);
@@ -59,6 +76,16 @@ public class UserPostCollectionService {
     }
 
     /* ---------- 改 ---------- */
+
+    /**
+     * 更新收藏夹名称
+     * 同名检测：排除自身后仍重名则拒绝
+     *
+     * @param collectionId 收藏夹主键
+     * @param newFolderName 新名称
+     * @return 更新后的收藏夹实体
+     * @throws RuntimeException 收藏夹不存在或名称冲突
+     */
     @Transactional
     public UserPostCollection updateCollection(Long collectionId, String newFolderName) {
         UserPostCollection existing = userPostCollectionMapper.selectById(collectionId);
@@ -90,6 +117,13 @@ public class UserPostCollectionService {
     }
 
     /* ---------- 查 ---------- */
+
+    /**
+     * 根据主键查询收藏夹
+     *
+     * @param collectionId 收藏夹主键
+     * @return 收藏夹实体；不存在返回 null
+     */
     public UserPostCollection getCollectionById(Long collectionId) {
         UserPostCollection collection = userPostCollectionMapper.selectById(collectionId);
         if (collection == null) {
@@ -98,17 +132,38 @@ public class UserPostCollectionService {
         return collection;
     }
 
+    /**
+     * 获取指定用户的全部收藏夹
+     *
+     * @param userId 用户主键
+     * @return 收藏夹列表
+     */
     public List<UserPostCollection> getUserCollections(Long userId) {
         List<UserPostCollection> collections = userPostCollectionMapper.selectByUserId(userId);
         log.info("获取用户收藏夹列表完成，用户ID: {} , 数量: {}", userId, collections.size());
         return collections;
     }
 
+    /**
+     * 根据用户与名称查询收藏夹
+     * 主要用于重名校验
+     *
+     * @param userId     用户主键
+     * @param folderName 收藏夹名称
+     * @return 收藏夹实体；不存在返回 null
+     */
     public UserPostCollection getCollectionByUserIdAndName(Long userId, String folderName) {
         return userPostCollectionMapper.selectByUserIdAndFolderName(userId, folderName);
     }
 
     /* ---------- 计数 ---------- */
+
+    /**
+     * 统计指定用户的收藏夹数量
+     *
+     * @param userId 用户主键
+     * @return 收藏夹数量
+     */
     public long countUserCollections(Long userId) {
         long count = userPostCollectionMapper.countByUserId(userId);
         log.info("统计用户收藏夹数量，用户ID: {} , 结果: {}", userId, count);
