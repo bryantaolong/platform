@@ -4,12 +4,19 @@ import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.vo.post.PostVO;
 
 /**
- * PostConverter
+ * 博文实体与值对象转换器
+ * 负责 Post 与 PostVO 之间的单向转换（entity → vo）。
  *
  * @author Bryan Long
  */
 public class PostConverter {
 
+    /**
+     * 将博文实体转换为对外展示的 VO
+     *
+     * @param post 博文实体
+     * @return 博文 VO；若入参为 null 则返回 null
+     */
     public static PostVO toPostVO(Post post) {
         if (post == null) {
             return null;

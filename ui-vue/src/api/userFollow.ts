@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import type { Result } from '@/models/response/Result'
 import type { PageResult } from '@/models/response/PageResult'
-import type { SysUser } from '@/models/entity/SysUser'
+import type { SysUser } from '@/models/entity/user/SysUser.ts'
 
 /**
  * 用户关注API

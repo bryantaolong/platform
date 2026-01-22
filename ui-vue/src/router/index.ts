@@ -57,6 +57,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'AdminProfile',
                 component: () => import('@/views/profile/UserProfile.vue'),
                 meta: {title: '个人中心'}
+            },
+            {
+                path: 'logs',
+                name: 'SystemLog',
+                component: () => import('@/views/admin/SystemLog.vue'),
+                meta: {title: '系统日志'}
             }
         ]
     },

@@ -37,6 +37,10 @@
             <el-icon><Avatar /></el-icon>
             <span>个人中心</span>
           </el-menu-item>
+          <el-menu-item index="/admin/logs">
+            <el-icon><Document /></el-icon>
+            <span>系统日志</span>
+          </el-menu-item>
           <el-menu-item index="/admin/settings">
             <el-icon><Setting /></el-icon>
             <span>系统设置</span>

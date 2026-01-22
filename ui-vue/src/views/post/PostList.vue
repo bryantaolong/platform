@@ -2,7 +2,7 @@
   <div :class="['blog-post-list-container', {'home-page': isHomePage}]">
     <!-- Header Section - Only show on home page -->
     <div v-if="isHomePage" class="header-section">
-      <h1 class="blog-title">欢迎来到文章平台</h1>
+      <h1 class="blog-title">欢迎来到 Platform</h1>
       <p class="blog-subtitle">分享知识，发现精彩</p>
     </div>
 

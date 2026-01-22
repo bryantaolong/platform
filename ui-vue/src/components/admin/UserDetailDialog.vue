@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { SysUser } from '@/models/entity/SysUser'
+import type { SysUser } from '@/models/entity/user/SysUser.ts'
 
 const props = defineProps<{
   modelValue: boolean

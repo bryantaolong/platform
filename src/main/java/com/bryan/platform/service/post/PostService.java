@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * PostService
+ * 博文业务服务
+ * 提供博文的创建、删除、更新、分页查询、搜索、计数等能力。
  *
  * @author Bryan Long
  */
@@ -27,6 +28,14 @@ public class PostService {
     private final PostMapper postMapper;
 
     /* ---------- 增 ---------- */
+
+    /**
+     * 创建博文（含草稿）
+     * 自动注入 ID 与审计字段，事务提交后返回完整实体
+     *
+     * @param post 待保存博文实体
+     * @return 已持久化的博文
+     */
     @Transactional
     public Post createPost(Post post) {
         postMapper.insert(post);
@@ -34,6 +43,13 @@ public class PostService {
         return post;
     }
 
+    /**
+     * 保存博文并返回主键
+     * 适用于只需主键的场景，减少一次查询
+     *
+     * @param post 待保存博文实体
+     * @return 博文主键
+     */
     public Long savePost(Post post) {
         postMapper.insert(post);
         log.info("创建帖子成功，帖子ID: {}", post.getId());
@@ -41,6 +57,13 @@ public class PostService {
     }
 
     /* ---------- 删 ---------- */
+
+    /**
+     * 删除单篇博文（软删）
+     *
+     * @param postId 博文主键
+     * @return 是否删除成功
+     */
     @Transactional
     public boolean deletePost(Long postId) {
         Post post = postMapper.selectById(postId);
@@ -53,6 +76,11 @@ public class PostService {
         return true;
     }
 
+    /**
+     * 批量删除博文（软删）
+     *
+     * @param postIds 博文主键列表
+     */
     @Transactional
     public void deletePostBatch(List<Long> postIds) {
         for (Long id : postIds) {
@@ -63,6 +91,15 @@ public class PostService {
     }
 
     /* ---------- 改 ---------- */
+
+    /**
+     * 更新博文（全字段可选更新）
+     * 仅对非 null 字段执行修改，事务控制
+     *
+     * @param id   博文主键
+     * @param post 待更新字段封装实体
+     * @return 更新后的博文；若不存在返回 null
+     */
     @Transactional
     public Post updatePost(Long id, Post post) {
         Post existingPost = postMapper.selectById(id);
@@ -106,23 +143,56 @@ public class PostService {
         return existingPost;
     }
 
+    /**
+     * 点赞数原子递增
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
     public int likePost(Long postId) {
         return postMapper.updateLikeCount(postId, 1);
     }
 
+    /**
+     * 点赞数原子递减
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
     public int unlikePost(Long postId) {
         return postMapper.updateLikeCount(postId, -1);
     }
 
+    /**
+     * 浏览数原子递增
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
     public int increaseViewCount(Long postId) {
         return postMapper.updateViewCount(postId, 1);
     }
 
+    /**
+     * 评论数原子更新
+     *
+     * @param postId 博文主键
+     * @param delta  变化量（正/负）
+     * @return 影响行数
+     */
     public int updateCommentCount(Long postId, int delta) {
         return postMapper.updateCommentCount(postId, delta);
     }
 
     /* ---------- 单查 ---------- */
+
+    /**
+     * 根据主键查询博文
+     * 同时自动递增浏览数
+     *
+     * @param postId 博文主键
+     * @return 博文实体；不存在返回 null
+     */
     public Post getPostById(Long postId) {
         Post post = postMapper.selectById(postId);
         if (post == null) {
@@ -136,6 +206,12 @@ public class PostService {
         return post;
     }
 
+    /**
+     * 批量查询博文
+     *
+     * @param postIds 博文主键列表
+     * @return 博文实体列表
+     */
     public List<Post> getPostsByIds(List<Long> postIds) {
         List<Post> posts = postMapper.selectByIds(postIds);
         log.info("批量查询帖子完成，数量: {} , 请求IDs: {}", posts.size(), postIds);
@@ -143,8 +219,14 @@ public class PostService {
     }
 
     /* ---------- 列表/分页 ---------- */
+
     /**
-     * 分页查询某用户的帖子
+     * 分页查询指定用户的全部博文（含草稿、已删除）
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码（从 1 开始）
+     * @param pageSize 每页条数
+     * @return 博文分页结果
      */
     public PageResult<Post> pageUserPosts(Long userId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -155,7 +237,12 @@ public class PostService {
     }
 
     /**
-     * 分页查询某用户的帖子
+     * 分页查询指定用户的博文审核视图（VO）
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
      */
     public PageResult<PostVO> pageUserPostAuditVos(Long userId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -170,7 +257,12 @@ public class PostService {
     }
 
     /**
-     * 分页查询某用户已发布的帖子
+     * 分页查询指定用户已发布的博文
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文分页结果
      */
     public PageResult<Post> pageUserPublishedPosts(Long userId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -181,7 +273,11 @@ public class PostService {
     }
 
     /**
-     * 分页查询全局帖子
+     * 分页查询全局全部博文（含草稿、已删除）
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文分页结果
      */
     public PageResult<Post> pageAllPosts(int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -191,7 +287,11 @@ public class PostService {
     }
 
     /**
-     * 分页查询全站已发布帖子
+     * 分页查询全站已发布博文
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文分页结果
      */
     public PageResult<Post> pageAllPublishedPosts(int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -201,7 +301,15 @@ public class PostService {
     }
 
     /**
-     * 分页搜索帖子
+     * 多条件搜索博文（管理员）
+     *
+     * @param title    标题关键词（可空）
+     * @param author   作者关键词（可空）
+     * @param tags     标签关键词（可空）
+     * @param status   状态枚举（可空）
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文分页结果
      */
     public PageResult<Post> searchPosts(String title, String author, String tags, PostStatusEnum status, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -212,12 +320,24 @@ public class PostService {
     }
 
     /* ---------- 计数 ---------- */
+
+    /**
+     * 统计指定用户的博文数
+     *
+     * @param userId 用户主键
+     * @return 博文数量
+     */
     public long countUserPosts(Long userId) {
         long count = postMapper.countByUserId(userId);
         log.info("统计用户帖子数量，用户ID: {} , 结果: {}", userId, count);
         return count;
     }
 
+    /**
+     * 统计全局博文总数
+     *
+     * @return 博文数量
+     */
     public long countAllPosts() {
         long count = postMapper.countAll();
         log.info("统计全局帖子数量，结果: {}", count);

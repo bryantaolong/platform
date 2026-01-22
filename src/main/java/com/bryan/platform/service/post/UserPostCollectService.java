@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * UserPostCollectService
+ * 用户博文收藏业务服务
+ * 提供收藏、取消收藏、分页查询及计数能力，支持收藏夹维度筛选。
  *
  * @author Bryan Long
  */
@@ -28,6 +29,17 @@ public class UserPostCollectService {
     private final PostMapper postMapper;
 
     /* ---------- 增 ---------- */
+
+    /**
+     * 收藏博文（幂等）
+     * 若已存在软删记录则恢复；否则新增。默认收藏夹 ID 为 0 表示“未分类”。
+     *
+     * @param userId       用户主键
+     * @param postId       博文主键
+     * @param collectionId 收藏夹主键（可空，0 表示默认）
+     * @return 已持久化的收藏记录
+     * @throws RuntimeException 已收藏、博文不存在、收藏夹无权访问等
+     */
     @Transactional
     public UserPostCollect collectPost(Long userId, Long postId, Long collectionId) {
         // 检查是否已收藏（包括已删除的）
@@ -87,6 +99,15 @@ public class UserPostCollectService {
     }
 
     /* ---------- 删 ---------- */
+
+    /**
+     * 取消收藏（软删）
+     * 同时减少博文收藏计数
+     *
+     * @param userId 用户主键
+     * @param postId 博文主键
+     * @return 是否取消成功
+     */
     @Transactional
     public boolean uncollectPost(Long userId, Long postId) {
         int rows = userPostCollectMapper.deleteByUserIdAndPostId(userId, postId);
@@ -102,17 +123,38 @@ public class UserPostCollectService {
     }
 
     /* ---------- 查 ---------- */
+
+    /**
+     * 根据用户与博文查询单条收藏记录
+     *
+     * @param userId 用户主键
+     * @param postId 博文主键
+     * @return 收藏记录；不存在返回 null
+     */
     public UserPostCollect getCollectByUserIdAndPostId(Long userId, Long postId) {
         return userPostCollectMapper.selectByUserIdAndPostId(userId, postId);
     }
 
+    /**
+     * 判断用户是否已收藏指定博文
+     *
+     * @param userId 用户主键
+     * @param postId 博文主键
+     * @return true 已收藏；false 未收藏
+     */
     public boolean isCollected(Long userId, Long postId) {
         return userPostCollectMapper.existsByUserIdAndPostId(userId, postId);
     }
 
     /* ---------- 列表/分页 ---------- */
+
     /**
-     * 分页查询用户收藏列表
+     * 分页查询用户全部收藏
+     *
+     * @param userId   用户主键
+     * @param pageNum  当前页码（从 1 开始）
+     * @param pageSize 每页条数
+     * @return 收藏记录分页结果
      */
     public PageResult<UserPostCollect> pageUserCollects(Long userId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -124,6 +166,12 @@ public class UserPostCollectService {
 
     /**
      * 分页查询用户指定收藏夹的收藏
+     *
+     * @param userId       用户主键
+     * @param collectionId 收藏夹主键
+     * @param pageNum      当前页码
+     * @param pageSize     每页条数
+     * @return 收藏记录分页结果
      */
     public PageResult<UserPostCollect> pageUserCollectsByCollection(Long userId, Long collectionId, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
@@ -134,6 +182,13 @@ public class UserPostCollectService {
     }
 
     /* ---------- 计数 ---------- */
+
+    /**
+     * 统计用户收藏总数
+     *
+     * @param userId 用户主键
+     * @return 收藏数量
+     */
     public long countUserCollects(Long userId) {
         long count = userPostCollectMapper.countByUserId(userId);
         log.info("统计用户收藏数量，用户ID: {} , 结果: {}", userId, count);

@@ -4,12 +4,19 @@ import com.bryan.platform.domain.entity.post.PostComment;
 import com.bryan.platform.domain.vo.post.CommentVO;
 
 /**
- * CommentConverter
+ * 评论实体与值对象转换器
+ * 负责 PostComment 与 CommentVO 之间的单向转换（entity → vo）。
  *
  * @author Bryan Long
  */
 public class CommentConverter {
 
+    /**
+     * 将评论实体转换为对外展示的 VO
+     *
+     * @param comment 评论实体
+     * @return 评论 VO；若入参为 null 则返回 null
+     */
     public static CommentVO toCommentVO(PostComment comment) {
         if (comment == null) {
             return null;

@@ -74,4 +74,36 @@ public class LlmChatController {
         // 3. 返回成功提示信息
         return Collections.singletonMap("message", "上下文已清空");
     }
+
+    /**
+     * 生成文章 AI 摘要
+     *
+     * @param payload 请求体，包含文章标题和内容，格式为 {"title": "文章标题", "content": "文章内容"}
+     * @return 返回 AI 生成的摘要，格式为 {"summary": "AI 摘要内容"}
+     *
+     * @throws IllegalArgumentException 如果标题或内容为空
+     */
+    @PostMapping("/post/summary")
+    public Map<String, String> generateSummary(@RequestBody Map<String, String> payload) {
+        // 1. 从请求体中获取文章标题和内容
+        String title = payload.get("title");
+        String content = payload.get("content");
+        log.info("接收到摘要生成请求，文章标题: {}", title);
+
+        // 2. 校验标题和内容是否为空
+        if (title == null || title.trim().isEmpty()) {
+            log.warn("文章标题为空");
+            throw new IllegalArgumentException("文章标题不能为空");
+        }
+        if (content == null || content.trim().isEmpty()) {
+            log.warn("文章内容为空");
+            throw new IllegalArgumentException("文章内容不能为空");
+        }
+
+        // 3. 调用 AI 服务生成摘要
+        String summary = llmChatService.generatePostSummary(title, content);
+
+        // 4. 封装结果返回
+        return Collections.singletonMap("summary", summary);
+    }
 }
