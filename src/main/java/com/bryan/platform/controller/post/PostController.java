@@ -60,6 +60,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/published")
+    @PreAuthorize("permitAll()")
     public Result<PageResult<PostVO>> getAllPublishedPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -163,6 +164,7 @@ public class PostController {
      * @return 博文 VO 或错误提示
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public Result<PostVO> getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         if (post != null) {

@@ -40,6 +40,7 @@ public class PostCommentController {
      * @return 评论 VO 列表
      */
     @GetMapping("/post/{postId}")
+    @PreAuthorize("permitAll()")
     public Result<List<CommentVO>> getCommentsByPostId(@PathVariable Long postId) {
         List<PostComment> comments = postCommentService.getCommentsByPostId(postId);
         List<CommentVO> commentVOs = comments.stream()
@@ -57,6 +58,7 @@ public class PostCommentController {
      * @return 分页结果
      */
     @GetMapping("/post/{postId}/page")
+    @PreAuthorize("permitAll()")
     public Result<PageResult<CommentVO>> pageCommentsByPostId(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -75,6 +77,7 @@ public class PostCommentController {
      * @return 树形评论 VO 列表
      */
     @GetMapping("/post/{postId}/tree")
+    @PreAuthorize("permitAll()")
     public Result<List<CommentVO>> getCommentTree(@PathVariable Long postId) {
         List<CommentVO> tree = postCommentService.getCommentTree(postId);
         return Result.success(tree);
@@ -87,6 +90,7 @@ public class PostCommentController {
      * @return 回复列表
      */
     @GetMapping("/{commentId}/replies")
+    @PreAuthorize("permitAll()")
     public Result<List<CommentVO>> getRepliesByCommentId(@PathVariable Long commentId) {
         List<PostComment> replies = postCommentService.getRepliesByCommentId(commentId);
         List<CommentVO> replyVOs = replies.stream()
@@ -103,6 +107,7 @@ public class PostCommentController {
      * @return 热门评论列表
      */
     @GetMapping("/post/{postId}/hot")
+    @PreAuthorize("permitAll()")
     public Result<List<CommentVO>> getHotComments(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "10") int limit) {
@@ -121,6 +126,7 @@ public class PostCommentController {
      * @return 最新评论列表
      */
     @GetMapping("/post/{postId}/latest")
+    @PreAuthorize("permitAll()")
     public Result<List<CommentVO>> getLatestComments(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "10") int limit) {
@@ -138,6 +144,7 @@ public class PostCommentController {
      * @return 评论 VO 或错误提示
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public Result<CommentVO> getCommentById(@PathVariable Long id) {
         PostComment comment = postCommentService.getCommentById(id);
         if (comment != null) {
@@ -227,6 +234,7 @@ public class PostCommentController {
      * @return true 已点赞；false 未点赞
      */
     @GetMapping("/{id}/like/status")
+    @PreAuthorize("permitAll()")
     public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userCommentLikeService.isLiked(currentUserId, id);
