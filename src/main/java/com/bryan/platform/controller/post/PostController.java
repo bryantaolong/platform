@@ -9,11 +9,14 @@ import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
+import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
+import com.bryan.platform.service.file.FileStorageService;
 import com.bryan.platform.service.post.PostService;
 import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +38,7 @@ public class PostController {
     private final PostService postService;
     private final AuthService authService;
     private final UserPostLikeService userPostLikeService;
+    private final FileStorageService fileStorageService;
 
     /**
      * 管理员分页查询所有博文（含草稿/已删除）
@@ -57,18 +61,18 @@ public class PostController {
      *
      * @param pageNum  当前页码
      * @param pageSize 每页条数
-     * @return 博文 VO 分页结果
+     * @return 博文摘要 VO 分页结果
      */
     @GetMapping("/published")
     @PreAuthorize("permitAll()")
-    public Result<PageResult<PostVO>> getAllPublishedPosts(
+    public Result<PageResult<PostSummaryVO>> getAllPublishedPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
 
         PageResult<Post> page = postService.pageAllPublishedPosts(pageNum, pageSize);
-        List<PostVO> rows = page.getRows()
+        List<PostSummaryVO> rows = page.getRows()
                 .stream()
-                .map(PostConverter::toPostVO)
+                .map(PostConverter::toPostSummaryVO)
                 .toList();
         return Result.success(
                 PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
@@ -79,18 +83,18 @@ public class PostController {
      *
      * @param pageNum  当前页码
      * @param pageSize 每页条数
-     * @return 博文 VO 分页结果
+     * @return 博文摘要 VO 分页结果
      */
     @GetMapping("/following")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<PostVO>> getFollowedUsersPosts(
+    public Result<PageResult<PostSummaryVO>> getFollowedUsersPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
         Long currentUserId = authService.getCurrentUserId();
         PageResult<Post> page = postService.pageFollowedUsersPosts(currentUserId, pageNum, pageSize);
-        List<PostVO> rows = page.getRows()
+        List<PostSummaryVO> rows = page.getRows()
                 .stream()
-                .map(PostConverter::toPostVO)
+                .map(PostConverter::toPostSummaryVO)
                 .toList();
         return Result.success(
                 PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));

@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="post-content">
-          <p class="post-summary">{{ getPostSummary(post.content) }}</p>
+          <p class="post-summary">{{ post.contentPreview }}</p>
         </div>
         <div class="post-footer">
           <div class="stats">
@@ -84,7 +84,7 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import {postApi} from '@/api/post'
-import type { PostVO } from '@/models/vo/post/PostVO'
+import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
 
 interface PaginationData {
   currentPage: number
@@ -94,7 +94,7 @@ interface PaginationData {
 
 const router = useRouter()
 const loading = ref(false)
-const posts = ref<PostVO[]>([])
+const posts = ref<PostSummaryVO[]>([])
 
 const pagination = reactive<PaginationData>({
   currentPage: 1,
@@ -132,13 +132,7 @@ const formatDateTime = (dateStr: string) => {
   return date.toLocaleDateString('zh-CN')
 }
 
-// Get post summary (first 150 characters)
-const getPostSummary = (content: string) => {
-  if (!content) return '暂无内容'
-  // Remove HTML tags and get first 150 characters
-  const text = content.replace(/<[^>]*>/g, '').trim()
-  return text.length > 150 ? text.substring(0, 150) + '...' : text
-}
+
 
 // Handle size change
 const handleSizeChange = (size: number) => {

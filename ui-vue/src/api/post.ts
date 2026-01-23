@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import type {Post} from '@/models/entity/post/Post'
+import type {PostSummaryVO} from '@/models/vo/post/PostSummaryVO'
 import type {PostVO} from '@/models/vo/post/PostVO'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
@@ -25,7 +26,7 @@ export const postApi = {
     getAllPublishedPosts: (
         pageNum: number,
         pageSize: number
-    ): Promise<Result<PageResult<PostVO>>> => {
+    ): Promise<Result<PageResult<PostSummaryVO>>> => {
         return request({
             url: '/api/posts/published',
             method: 'get',
@@ -180,11 +181,23 @@ export const postApi = {
     getFollowedUsersPosts: (
         pageNum: number,
         pageSize: number
-    ): Promise<Result<PageResult<PostVO>>> => {
+    ): Promise<Result<PageResult<PostSummaryVO>>> => {
         return request({
             url: '/api/posts/following',
             method: 'get',
             params: {pageNum, pageSize}
+        })
+    },
+
+    // Upload post image
+    uploadPostImage: (formData: FormData): Promise<Result<string>> => {
+        return request({
+            url: '/api/posts/upload-image',
+            method: 'post',
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         })
     },
 }

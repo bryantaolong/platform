@@ -9,6 +9,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 logs/
+uploads/
 
 ### Vue ###
 ui-vue/node_modules/
