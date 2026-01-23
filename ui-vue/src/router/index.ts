@@ -80,7 +80,6 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/post',
         component: () => import('@/layouts/HomeLayout.vue'),
-        meta: {requiresAuth: true},
         children: [
             {
                 path: 'list',
@@ -99,14 +98,14 @@ const routes: RouteRecordRaw[] = [
                 path: ':id/edit',
                 name: 'PostEdit',
                 component: () => import('@/views/post/PostEdit.vue'),
-                meta: {title: '编辑文章'},
+                meta: {requiresAuth: true, title: '编辑文章'},
                 props: true
             },
             {
                 path: 'create',
                 name: 'PostCreate',
                 component: () => import('@/views/post/PostCreate.vue'),
-                meta: {title: '新建文章'}
+                meta: {requiresAuth: true, title: '新建文章'}
             },
             {
                 path: ':id/audit',

@@ -81,6 +81,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/following")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<PostVO>> getFollowedUsersPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -103,6 +104,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/{userId}/all")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<PostVO>> getAllPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -124,6 +126,7 @@ public class PostController {
      * @return 博文审核 VO 分页结果
      */
     @GetMapping("/{userId}/audit/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<PostVO>> getPostAuditVosByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -140,6 +143,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/{userId}/published")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<PostVO>> getPublishedPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -222,7 +226,7 @@ public class PostController {
      * @return 创建后的博文实体
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> createPost(@RequestBody PostCreateRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -247,7 +251,7 @@ public class PostController {
      * @return 创建后的博文实体
      */
     @PostMapping("/draft")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -273,7 +277,7 @@ public class PostController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
         Post post = Post.builder()
                 .id(id)
@@ -321,7 +325,7 @@ public class PostController {
      * @return 是否删除成功
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deletePost(@PathVariable Long id) {
         boolean deleted = postService.deletePost(id);
         if (deleted) {
@@ -338,7 +342,7 @@ public class PostController {
      * @return 是否点赞成功
      */
     @PostMapping("/{id}/like")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> likePost(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         try {
@@ -356,7 +360,7 @@ public class PostController {
      * @return 是否取消成功
      */
     @PostMapping("/{id}/unlike")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> unlikePost(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean ok = userPostLikeService.unlikePost(currentUserId, id);
@@ -374,7 +378,7 @@ public class PostController {
      * @return true 已点赞；false 未点赞
      */
     @GetMapping("/{id}/like/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userPostLikeService.isLiked(currentUserId, id);

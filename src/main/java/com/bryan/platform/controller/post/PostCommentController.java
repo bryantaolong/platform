@@ -154,7 +154,7 @@ public class PostCommentController {
      * @return 创建后的评论 VO
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<CommentVO> createComment(@RequestBody CommentCreateRequest request) {
         Long currentUserId = authService.getCurrentUserId();
         PostComment comment = postCommentService.createComment(
@@ -174,7 +174,7 @@ public class PostCommentController {
      * @return 是否删除成功
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deleteComment(@PathVariable Long id) {
         boolean deleted = postCommentService.deleteComment(id);
         if (deleted) {
@@ -191,7 +191,7 @@ public class PostCommentController {
      * @return 是否点赞成功
      */
     @PostMapping("/{id}/like")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> likeComment(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         try {
@@ -209,7 +209,7 @@ public class PostCommentController {
      * @return 是否取消成功
      */
     @PostMapping("/{id}/unlike")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> unlikeComment(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean ok = userCommentLikeService.unlikeComment(currentUserId, id);
@@ -227,7 +227,6 @@ public class PostCommentController {
      * @return true 已点赞；false 未点赞
      */
     @GetMapping("/{id}/like/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userCommentLikeService.isLiked(currentUserId, id);

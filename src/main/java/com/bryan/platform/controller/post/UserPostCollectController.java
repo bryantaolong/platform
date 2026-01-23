@@ -34,7 +34,7 @@ public class UserPostCollectController {
      * @return 收藏记录实体
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserPostCollect> collectPost(@RequestBody @Validated UserPostCollectRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
