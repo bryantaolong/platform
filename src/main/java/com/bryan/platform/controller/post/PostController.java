@@ -12,11 +12,10 @@ import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
-import com.bryan.platform.service.file.FileStorageService;
+import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.post.PostService;
 import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,6 @@ public class PostController {
     private final PostService postService;
     private final AuthService authService;
     private final UserPostLikeService userPostLikeService;
-    private final FileStorageService fileStorageService;
 
     /**
      * 管理员分页查询所有博文（含草稿/已删除）

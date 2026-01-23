@@ -11,7 +11,7 @@ import java.nio.file.*;
  * 提供文件上传、删除与读取能力。
  */
 @Service
-public class FileStorageService {
+public class LocalFileService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
