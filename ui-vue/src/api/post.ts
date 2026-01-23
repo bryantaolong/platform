@@ -175,4 +175,16 @@ export const postApi = {
             method: 'get'
         })
     },
+
+    // Get followed users' posts with pagination
+    getFollowedUsersPosts: (
+        pageNum: number,
+        pageSize: number
+    ): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: '/api/posts/following',
+            method: 'get',
+            params: {pageNum, pageSize}
+        })
+    },
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户关注服务类。
@@ -154,6 +155,20 @@ public class UserFollowService {
 
     public long countFollowers(Long userId) {
         return userFollowMapper.countByFollowingId(userId);
+    }
+
+    /**
+     * 获取用户关注的所有用户ID列表
+     * 用于其他服务层查询相关数据
+     *
+     * @param followerId 关注者用户 ID
+     * @return 被关注用户ID列表
+     */
+    public List<Long> getFollowingUserIds(Long followerId) {
+        List<UserFollow> follows = userFollowMapper.selectAllByFollowerId(followerId);
+        return follows.stream()
+                .map(UserFollow::getFollowingId)
+                .collect(Collectors.toList());
     }
 }
 

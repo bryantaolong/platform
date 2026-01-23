@@ -7,13 +7,18 @@ const routes: RouteRecordRaw[] = [
         path: '/',
         name: 'Index',
         component: () => import('@/layouts/HomeLayout.vue'),
-        meta: {requiresAuth: true},
         children: [
             {
                 path: '',
                 name: 'Home',
                 component: () => import('@/views/Home.vue'),
                 meta: {title: '首页'}
+            },
+            {
+                path: 'following',
+                name: 'FollowingPosts',
+                component: () => import('@/views/post/FollowingPosts.vue'),
+                meta: {requiresAuth: true, title: '我的关注'}
             }
         ]
     },
@@ -139,6 +144,7 @@ router.beforeEach(async (to, _from, next) => {
         return next('/')
     }
 
+    // 检查需要认证的页面
     if (to.meta.requiresAuth || to.meta.requiresAdmin) {
         if (!userStore.userInfo && userStore.token) {
             try {
@@ -160,6 +166,7 @@ router.beforeEach(async (to, _from, next) => {
         }
     }
 
+    // 检查需要管理员权限的页面
     if (to.meta.requiresAdmin && !userStore.isAdmin) {
         alert('您没有权限访问此页面！')
         return next('/')

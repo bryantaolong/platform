@@ -7,12 +7,15 @@ import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
+import com.bryan.platform.mapper.user.UserFollowMapper;
+import com.bryan.platform.service.user.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 博文业务服务
@@ -26,6 +29,7 @@ import java.util.List;
 public class PostService {
 
     private final PostMapper postMapper;
+    private final UserFollowService userFollowService;
 
     /* ---------- 增 ---------- */
 
@@ -298,6 +302,53 @@ public class PostService {
         List<Post> rows = postMapper.selectPageByStatus(PostStatusEnum.PUBLISHED, offset, pageSize);
         long total = postMapper.countByStatus(PostStatusEnum.PUBLISHED);
         return PageResult.of(rows, total, pageNum, pageSize);
+    }
+
+    /**
+     * 分页查询当前用户关注用户的文章
+     * 通过多次数据库调用实现，避免 SQL 联表操作
+     * 注意：此实现会有一定性能开销，但符合架构设计要求
+     *
+     * @param followerId 关注者用户 ID
+     * @param pageNum    当前页码
+     * @param pageSize   每页条数
+     * @return 博文分页结果
+     */
+    public PageResult<Post> pageFollowedUsersPosts(Long followerId, int pageNum, int pageSize) {
+        // 1. 先获取用户关注的所有用户ID列表
+        List<Long> followingIds = userFollowService.getFollowingUserIds(followerId);
+        
+        if (followingIds.isEmpty()) {
+            // 如果没有关注任何用户，返回空结果
+            return PageResult.of(List.of(), 0L, pageNum, pageSize);
+        }
+        
+        // 2. 分批查询这些用户的文章，限制每用户最多查询50条
+        List<Post> allPosts = followingIds.stream()
+                .flatMap(userId -> {
+                    // 查询每个用户的已发布文章，限制数量避免数据量过大
+                    List<Post> userPosts = postMapper.selectByUserIdAndStatus(
+                            userId, PostStatusEnum.PUBLISHED, 0, 50);
+                    return userPosts.stream();
+                })
+                .collect(Collectors.toList());
+        
+        // 3. 按创建时间降序排序
+        allPosts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        
+        // 4. 计算总数（注意：这里的总数不是准确的，因为限制了每用户的查询数量）
+        long total = allPosts.size();
+        
+        // 5. 手动分页
+        int startIndex = (pageNum - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, (int) total);
+        List<Post> pagedPosts = startIndex < total ? 
+                allPosts.subList(startIndex, endIndex) : List.of();
+        
+        log.info("用户 {} 关注用户文章查询完成，关注 {} 人，共 {} 篇文章，当前页 {} 条", 
+                followerId, followingIds.size(), total, pagedPosts.size());
+        
+        return PageResult.of(pagedPosts, total, pageNum, pageSize);
     }
 
     /**

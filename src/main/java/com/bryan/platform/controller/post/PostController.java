@@ -74,6 +74,27 @@ public class PostController {
     }
 
     /**
+     * 获取当前用户关注用户的已发布文章分页列表
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
+     */
+    @GetMapping("/following")
+    public Result<PageResult<PostVO>> getFollowedUsersPosts(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        Long currentUserId = authService.getCurrentUserId();
+        PageResult<Post> page = postService.pageFollowedUsersPosts(currentUserId, pageNum, pageSize);
+        List<PostVO> rows = page.getRows()
+                .stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(
+                PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
+    }
+
+    /**
      * 查询指定用户的全部博文（含草稿、已删除）
      *
      * @param userId   用户主键
