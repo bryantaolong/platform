@@ -38,7 +38,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { MagicStick } from '@element-plus/icons-vue'
-import { generatePostSummary } from '@/api/llmChat.ts'
+import { llmChatApi } from '@/api/llmChat'
 
 // Props
 interface Props {
@@ -71,7 +71,7 @@ const handleGenerate = async () => {
   summary.value = ''
 
   try {
-    const response = await generatePostSummary(props.title, props.content)
+    const response = await llmChatApi.generatePostSummary(props.title, props.content)
     summary.value = response.summary
     ElMessage.success('AI 摘要生成成功')
   } catch (err) {
