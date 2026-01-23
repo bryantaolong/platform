@@ -5,7 +5,6 @@ import com.bryan.platform.domain.entity.user.UserFollow;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.user.UserFollowMapper;
-import com.bryan.platform.mapper.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 public class UserFollowService {
 
     private final UserFollowMapper userFollowMapper;
-    private final UserMapper userMapper;
+    private final UserService userService;
 
     /**
      * 当前用户关注另一个用户
@@ -39,10 +38,10 @@ public class UserFollowService {
     @Transactional(rollbackFor = Exception.class)
     public int followUser(Long followerId, Long followingId) {
         // 1. 校验双方用户存在
-        if (userMapper.selectById(followerId) == null) {
+        if (!userService.existsById(followerId)) {
             throw new BusinessException("当前用户不存在");
         }
-        if (userMapper.selectById(followingId) == null) {
+        if (!userService.existsById(followingId)) {
             throw new BusinessException("被关注用户不存在");
         }
 
@@ -89,7 +88,7 @@ public class UserFollowService {
     public PageResult<SysUser> getFollowingUsers(Long userId,
                                                  Integer pageNum,
                                                  Integer pageSize) {
-        if (userMapper.selectById(userId) == null) {
+        if (!userService.existsById(userId)) {
             throw new BusinessException("用户不存在");
         }
         long offset = (long) (pageNum - 1) * pageSize;
@@ -100,9 +99,7 @@ public class UserFollowService {
         List<Long> followingIds = follows.stream()
                 .map(UserFollow::getFollowingId)
                 .toList();
-        List<SysUser> users = followingIds.isEmpty()
-                ? List.of()
-                : userMapper.selectByIdList(followingIds);
+        List<SysUser> users = userService.getUsersByIds(followingIds);
 
         return PageResult.of(users, total, pageNum, pageSize);
     }
@@ -119,7 +116,7 @@ public class UserFollowService {
     public PageResult<SysUser> getFollowerUsers(Long userId,
                                                 Integer pageNum,
                                                 Integer pageSize) {
-        if (userMapper.selectById(userId) == null) {
+        if (!userService.existsById(userId)) {
             throw new BusinessException("用户不存在");
         }
         long offset = (long) (pageNum - 1) * pageSize;
@@ -130,9 +127,7 @@ public class UserFollowService {
         List<Long> followerIds = follows.stream()
                 .map(UserFollow::getFollowerId)
                 .toList();
-        List<SysUser> users = followerIds.isEmpty()
-                ? List.of()
-                : userMapper.selectByIdList(followerIds);
+        List<SysUser> users = userService.getUsersByIds(followerIds);
 
         return PageResult.of(users, total, pageNum, pageSize);
     }

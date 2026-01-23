@@ -92,6 +92,29 @@ public class UserService {
         return PageResult.of(rows, pageNum, pageSize, total);
     }
 
+    /**
+     * 根据用户 ID 列表批量查询用户信息
+     *
+     * @param userIds 用户 ID 列表
+     * @return 用户信息列表
+     */
+    public List<SysUser> getUsersByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userMapper.selectByIdList(userIds);
+    }
+
+    /**
+     * 检查用户是否存在
+     *
+     * @param userId 用户 ID
+     * @return 用户是否存在
+     */
+    public boolean existsById(Long userId) {
+        return userMapper.selectById(userId) != null;
+    }
+
     public SysUser save(SysUser sysUser) {
         if (sysUser.getId() == null) {
             userMapper.insert(sysUser);
@@ -180,7 +203,7 @@ public class UserService {
     /**
      * 封禁指定用户。
      *
-     * @param userId 用户ID
+     * @param userId 用户 ID
      * @return 更新后的用户对象
      * @throws ResourceNotFoundException 用户不存在时抛出
      */
@@ -195,7 +218,7 @@ public class UserService {
     /**
      * 解封指定用户。
      *
-     * @param userId 用户ID
+     * @param userId 用户 ID
      * @return 更新后的用户对象
      * @throws ResourceNotFoundException 用户不存在时抛出
      */
@@ -210,7 +233,7 @@ public class UserService {
     /**
      * 删除用户（逻辑删除）。
      *
-     * @param userId 用户ID
+     * @param userId 用户 ID
      * @return 被删除的用户对象
      * @throws ResourceNotFoundException 用户不存在时抛出
      */

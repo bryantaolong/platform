@@ -7,7 +7,6 @@ import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
-import com.bryan.platform.mapper.user.UserFollowMapper;
 import com.bryan.platform.service.user.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
  * 博文业务服务
@@ -43,7 +42,7 @@ public class PostService {
     @Transactional
     public Post createPost(Post post) {
         postMapper.insert(post);
-        log.info("创建帖子成功，帖子ID: {}", post.getId());
+        log.info("创建博文成功，帖子ID: {}", post.getId());
         return post;
     }
 
@@ -56,7 +55,7 @@ public class PostService {
      */
     public Long savePost(Post post) {
         postMapper.insert(post);
-        log.info("创建帖子成功，帖子ID: {}", post.getId());
+        log.info("保存博文草稿成功，帖子ID: {}", post.getId());
         return post.getId();
     }
 
@@ -306,8 +305,7 @@ public class PostService {
 
     /**
      * 分页查询当前用户关注用户的文章
-     * 通过多次数据库调用实现，避免 SQL 联表操作
-     * 注意：此实现会有一定性能开销，但符合架构设计要求
+     * 严格遵循架构原则：PostService 只调用 PostMapper，其他数据通过对应的 Service 获取
      *
      * @param followerId 关注者用户 ID
      * @param pageNum    当前页码
@@ -315,7 +313,7 @@ public class PostService {
      * @return 博文分页结果
      */
     public PageResult<Post> pageFollowedUsersPosts(Long followerId, int pageNum, int pageSize) {
-        // 1. 先获取用户关注的所有用户ID列表
+        // 1. 通过 UserFollowService 获取关注用户ID列表（遵循架构原则）
         List<Long> followingIds = userFollowService.getFollowingUserIds(followerId);
         
         if (followingIds.isEmpty()) {
@@ -323,15 +321,13 @@ public class PostService {
             return PageResult.of(List.of(), 0L, pageNum, pageSize);
         }
         
-        // 2. 分批查询这些用户的文章，限制每用户最多查询50条
-        List<Post> allPosts = followingIds.stream()
-                .flatMap(userId -> {
-                    // 查询每个用户的已发布文章，限制数量避免数据量过大
-                    List<Post> userPosts = postMapper.selectByUserIdAndStatus(
-                            userId, PostStatusEnum.PUBLISHED, 0, 50);
-                    return userPosts.stream();
-                })
-                .collect(Collectors.toList());
+        // 2. 通过 PostMapper 批量查询这些用户的已发布文章
+        List<Post> allPosts = new ArrayList<>();
+        for (Long userId : followingIds) {
+            List<Post> userPosts = postMapper.selectByUserIdAndStatus(
+                    userId, PostStatusEnum.PUBLISHED, 0, 50);
+            allPosts.addAll(userPosts);
+        }
         
         // 3. 按创建时间降序排序
         allPosts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
