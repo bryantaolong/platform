@@ -50,7 +50,12 @@ public class UserFollowService {
             throw new BusinessException("您已经关注过该用户");
         }
 
-        // 3. 插入
+        // 3. 防止用户关注自己
+        if (followerId.equals(followingId)) {
+            throw new BusinessException("不能关注自己");
+        }
+
+        // 4. 插入
         UserFollow uf = UserFollow.builder()
                 .followerId(followerId)
                 .followingId(followingId)

@@ -127,6 +127,7 @@ import {ref, onMounted} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
+import {useUserStore} from '@/stores/userStore'
 import {userApi} from '@/api/user.ts'
 import {userFollowApi} from '@/api/userFollow.ts'
 import {postApi} from '@/api/post.ts'
@@ -137,6 +138,7 @@ import UserCollectList from '@/components/user/UserCollectList.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const userId = ref(Number(route.params.userId))
 
 // UI 控制
@@ -184,6 +186,12 @@ const loadUserStats = async () => {
 }
 
 const checkFollowingStatus = async () => {
+  // 如果查看的是自己的资料，不显示关注按钮
+  if (userStore.userInfo?.id === userId.value) {
+    showFollowButton.value = false
+    return
+  }
+
   const response = await userFollowApi.checkFollowing(userId.value)
   if (response.code === 200) {
     isFollowing.value = response.data
