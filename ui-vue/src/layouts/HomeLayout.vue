@@ -46,7 +46,7 @@
           <!-- 已登录状态 -->
           <el-dropdown v-else trigger="hover" @command="handleCommand">
             <div class="user-info">
-              <el-avatar :size="32" :src="userStore.userProfile?.avatar">
+              <el-avatar :size="32" :src="getAvatarUrl(userStore.userProfile?.avatar)">
                 {{ userStore.userInfo?.username?.charAt(0).toUpperCase() }}
               </el-avatar>
               <span class="username">{{ userStore.userInfo?.username }}</span>
@@ -104,6 +104,7 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { getAvatarUrl } from '@/utils/file'
 import LlmChatDialog from "@/components/llm/LlmChatDialog.vue";
 
 const route = useRoute()

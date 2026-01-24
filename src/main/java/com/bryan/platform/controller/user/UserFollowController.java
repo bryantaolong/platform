@@ -1,14 +1,19 @@
 package com.bryan.platform.controller.user;
 
+import com.bryan.platform.domain.converter.UserConverter;
 import com.bryan.platform.domain.entity.user.SysUser;
+import com.bryan.platform.domain.entity.user.UserProfile;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
+import com.bryan.platform.domain.vo.user.UserProfileVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.user.UserFollowService;
+import com.bryan.platform.service.user.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +29,7 @@ import java.util.Map;
 public class UserFollowController {
 
     private final UserFollowService userFollowService;
+    private final UserProfileService userProfileService;
     private final AuthService authService;
 
     /**
@@ -62,11 +68,18 @@ public class UserFollowController {
      */
     @GetMapping("/following/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<SysUser>> getFollowingUsers(
+    public Result<PageResult<UserProfileVO>> getFollowingUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userFollowService.getFollowingUsers(userId, pageNum, pageSize));
+        PageResult<SysUser> pageResult = userFollowService.getFollowingUsers(userId, pageNum, pageSize);
+        List<UserProfileVO> vos = pageResult.getRows().stream()
+                .map(user -> {
+                    UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());
+                    return UserConverter.toUserProfileVO(user, profile);
+                })
+                .toList();
+        return Result.success(PageResult.of(vos, pageResult.getTotal(), pageNum, pageSize));
     }
 
     /**
@@ -79,11 +92,18 @@ public class UserFollowController {
      */
     @GetMapping("/followers/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<SysUser>> getFollowerUsers(
+    public Result<PageResult<UserProfileVO>> getFollowerUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userFollowService.getFollowerUsers(userId, pageNum, pageSize));
+        PageResult<SysUser> pageResult = userFollowService.getFollowerUsers(userId, pageNum, pageSize);
+        List<UserProfileVO> vos = pageResult.getRows().stream()
+                .map(user -> {
+                    UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());
+                    return UserConverter.toUserProfileVO(user, profile);
+                })
+                .toList();
+        return Result.success(PageResult.of(vos, pageResult.getTotal(), pageNum, pageSize));
     }
 
     /**

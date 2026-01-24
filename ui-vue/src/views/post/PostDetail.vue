@@ -8,7 +8,7 @@
             <div class="author-details">
               <el-avatar
                   :size="48"
-                  :src="authorProfile?.avatar"
+                  :src="getAvatarUrl(authorProfile?.avatar)"
                   class="author-avatar clickable"
                   @click="goToUserProfile(post?.author)"
               >
@@ -210,6 +210,7 @@ import {
 import { postApi } from '@/api/post'
 import { userApi } from '@/api/user'
 import { userFollowApi } from '@/api/userFollow'
+import { getAvatarUrl } from '@/utils/file'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
 import {userPostCollectApi} from "@/api/userPostCollect.ts";

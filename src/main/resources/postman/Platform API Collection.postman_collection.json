@@ -830,6 +830,30 @@
 						"url": "{{base_url}}/api/user-profiles"
 					},
 					"response": []
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/api/user-profiles/avatar"
+					},
+					"response": []
 				}
 			]
 		},

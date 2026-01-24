@@ -98,5 +98,19 @@ export const userApi = {
    */
   updateUserProfile(data: UserUpdateRequest): Promise<Result<UserProfileVO>> {
     return request.put('/api/user-profiles', data)
+  },
+
+  /**
+   * 上传当前用户头像
+   */
+  uploadAvatar(file: File): Promise<Result<string>> {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post('/api/user-profiles/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 }
+
