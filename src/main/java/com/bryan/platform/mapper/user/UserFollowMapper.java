@@ -36,4 +36,6 @@ public interface UserFollowMapper {
                                          @Param("followingId") Long followingId);
 
     long countByFollowingId(@Param("followingId") Long followingId);
+
+    List<UserFollow> selectAllByFollowerId(@Param("followerId") Long followerId);
 }

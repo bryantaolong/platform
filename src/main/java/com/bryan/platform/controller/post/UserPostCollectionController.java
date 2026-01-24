@@ -34,7 +34,7 @@ public class UserPostCollectionController {
      * @return 创建后的收藏夹实体
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserPostCollection> createCollection(@RequestParam @Validated String folderName) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -54,7 +54,7 @@ public class UserPostCollectionController {
      * @return 是否删除成功
      */
     @DeleteMapping("/{collectionId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deleteCollection(@PathVariable Long collectionId) {
         // TODO: 可以添加权限检查，确保只能删除自己的收藏夹
 
@@ -74,7 +74,7 @@ public class UserPostCollectionController {
      * @return 更新后的收藏夹实体
      */
     @PutMapping("/{collectionId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserPostCollection> updateCollection(
             @PathVariable Long collectionId,
             @RequestParam @Validated String folderName) {
@@ -93,7 +93,7 @@ public class UserPostCollectionController {
      * @return 收藏夹列表
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<List<UserPostCollection>> getUserCollections() {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -108,7 +108,7 @@ public class UserPostCollectionController {
      * @return 收藏夹列表
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<List<UserPostCollection>> getUserCollectionsByUserId(@PathVariable Long userId) {
         List<UserPostCollection> collections = userPostCollectionService.getUserCollections(userId);
         return Result.success(collections);
@@ -121,7 +121,7 @@ public class UserPostCollectionController {
      * @return 收藏夹实体或错误提示
      */
     @GetMapping("/{collectionId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserPostCollection> getCollectionById(@PathVariable Long collectionId) {
         UserPostCollection collection = userPostCollectionService.getCollectionById(collectionId);
         if (collection != null) {
@@ -137,7 +137,7 @@ public class UserPostCollectionController {
      * @return 收藏夹数量
      */
     @GetMapping("/count")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Long> getUserCollectionCount() {
         Long currentUserId = authService.getCurrentUserId();
 

@@ -1,9 +1,10 @@
 <template>
   <div class="comment-item" :class="{ 'is-reply': isReply }">
     <div class="comment-header">
-      <el-avatar :size="isReply ? 32 : 40" :src="comment.avatar">
+      <el-avatar :size="isReply ? 32 : 40" :src="getAvatarUrl(comment.avatar)">
         {{ comment.username ? comment.username.charAt(0).toUpperCase() : '' }}
       </el-avatar>
+
       <div class="comment-user-info">
         <div class="comment-author">
           {{ comment.username }}
@@ -88,7 +89,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatLineRound, ArrowUpBold, Star, Delete } from '@element-plus/icons-vue'
 import CommentForm from './CommentForm.vue'
 import { commentApi } from '@/api/comment'
+import { getAvatarUrl } from '@/utils/file'
 import type { CommentVO } from '@/models/vo/post/CommentVO'
+
 
 interface Props {
   comment: CommentVO

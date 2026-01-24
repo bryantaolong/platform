@@ -19,6 +19,7 @@
           >
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/post/list">文章</el-menu-item>
+            <el-menu-item v-if="isLoggedIn" index="/following">关注</el-menu-item>
             <el-menu-item index="/post/create">写文章</el-menu-item>
             <el-menu-item @click="chatRef.open()">AI对话</el-menu-item>
           </el-menu>
@@ -36,9 +37,16 @@
             </template>
           </el-input>
           
-          <el-dropdown trigger="hover" @command="handleCommand">
+          <!-- 未登录状态 -->
+          <div v-if="!isLoggedIn" class="auth-buttons">
+            <el-button @click="handleLogin">登录</el-button>
+            <el-button type="primary" @click="handleRegister">注册</el-button>
+          </div>
+          
+          <!-- 已登录状态 -->
+          <el-dropdown v-else trigger="hover" @command="handleCommand">
             <div class="user-info">
-              <el-avatar :size="32" :src="userStore.userProfile?.avatar">
+              <el-avatar :size="32" :src="getAvatarUrl(userStore.userProfile?.avatar)">
                 {{ userStore.userInfo?.username?.charAt(0).toUpperCase() }}
               </el-avatar>
               <span class="username">{{ userStore.userInfo?.username }}</span>
@@ -50,7 +58,7 @@
                   <el-icon><User /></el-icon>
                   个人中心
                 </el-dropdown-item>
-                <el-dropdown-item command="admin">
+                <el-dropdown-item command="admin" v-if="isAdmin">
                   <el-icon><Setting /></el-icon>
                   管理后台
                 </el-dropdown-item>
@@ -96,6 +104,7 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { getAvatarUrl } from '@/utils/file'
 import LlmChatDialog from "@/components/llm/LlmChatDialog.vue";
 
 const route = useRoute()
@@ -103,10 +112,14 @@ const router = useRouter()
 const userStore = useUserStore()
 const searchQuery = ref('')
 
+const isLoggedIn = computed(() => userStore.isAuthenticated)
+const isAdmin = computed(() => userStore.isAdmin)
+
 const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
 
 const activeMenu = computed(() => {
   if (route.path === '/') return '/'
+  if (route.path.startsWith('/following')) return '/following'
   if (route.path.startsWith('/post')) return '/post/list'
   return route.path
 })
@@ -125,13 +138,20 @@ const handleCommand = async (command: string) => {
           type: 'warning'
         })
         await userStore.logout()
-        router.push('/login')
         ElMessage.success('已退出登录')
       } catch {
         // 取消退出
       }
       break
   }
+}
+
+const handleLogin = () => {
+  router.push('/login')
+}
+
+const handleRegister = () => {
+  router.push('/register')
 }
 
 const handleSearch = () => {
@@ -232,6 +252,17 @@ const handleSearch = () => {
   background-color: #f5f7fa;
 }
 
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.auth-buttons .el-button {
+  border-radius: 20px;
+  padding: 8px 20px;
+}
+
 .username {
   font-size: 14px;
   color: #606266;
@@ -273,10 +304,20 @@ const handleSearch = () => {
   .nav-right {
     order: 2;
     justify-content: center;
+    gap: 10px;
   }
   
   .search-input {
     width: 200px;
+  }
+  
+  .auth-buttons {
+    gap: 8px;
+  }
+  
+  .auth-buttons .el-button {
+    padding: 6px 16px;
+    font-size: 12px;
   }
 }
 </style>

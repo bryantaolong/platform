@@ -8,7 +8,7 @@
             <div class="author-details">
               <el-avatar
                   :size="48"
-                  :src="authorProfile?.avatar"
+                  :src="getAvatarUrl(authorProfile?.avatar)"
                   class="author-avatar clickable"
                   @click="goToUserProfile(post?.author)"
               >
@@ -145,14 +145,14 @@
 
       <!-- Add Comment Form -->
       <CommentForm
-          v-if="showCommentForm"
+          v-if="showCommentForm && isAuthenticated"
           :post-id="postId"
           @submit="handleCommentSubmit"
           @cancel="showCommentForm = false"
       />
 
       <el-button
-          v-if="!showCommentForm"
+          v-if="!showCommentForm && isAuthenticated"
           type="primary"
           size="large"
           :icon="Edit"
@@ -160,6 +160,17 @@
           class="write-comment-btn"
       >
         写评论
+      </el-button>
+
+      <el-button
+          v-if="!isAuthenticated"
+          type="primary"
+          size="large"
+          :icon="Edit"
+          @click="router.push('/login')"
+          class="write-comment-btn"
+      >
+        登录后评论
       </el-button>
 
       <!-- Comments List -->
@@ -199,15 +210,18 @@ import {
 import { postApi } from '@/api/post'
 import { userApi } from '@/api/user'
 import { userFollowApi } from '@/api/userFollow'
+import { getAvatarUrl } from '@/utils/file'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
 import {userPostCollectApi} from "@/api/userPostCollect.ts";
 import CommentForm from '@/components/post/CommentForm.vue'
 import CommentList from '@/components/post/CommentList.vue'
 import LlmSummaryPostDialog from '@/components/llm/LlmSummaryPostDialog.vue'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const postId = ref(Number(route.params.id))
 const loading = ref(true)
 const post = ref<PostVO | null>(null)
@@ -218,10 +232,13 @@ const showComments = ref(true)
 const showCommentForm = ref(false)
 const commentListRef = ref()
 const authorProfile = ref<UserProfileVO | null>(null)
+const authorUserId = ref<number | null>(null) // Cache author user ID
 const isFollowing = ref(false)
 const followLoading = ref(false)
 const showFollowButton = ref(false)
 const summaryDialogRef = ref<InstanceType<typeof LlmSummaryPostDialog> | null>(null)
+
+const isAuthenticated = computed(() => userStore.isAuthenticated)
 
 // Computed property for rendered markdown content
 const renderedContent = computed(() => {
@@ -241,20 +258,26 @@ const loadPost = async () => {
       post.value = response.data
 
       // Load author profile and stats
-      if (post.value.author) {
-        await loadAuthorInfo(post.value.author)
+      if (post.value.userId) {
+        await loadAuthorInfo(post.value.userId)
       }
 
-      // Check collect status
-      await checkCollectStatus()
+      // Check collect status (only for authenticated users)
+      if (isAuthenticated.value) {
+        await checkCollectStatus()
+      }
 
-      // Check like status
-      await checkLikeStatus()
+      // Check like status (only for authenticated users)
+      if (isAuthenticated.value) {
+        await checkLikeStatus()
+      }
 
-      // Check if current user can edit this post
-      // This would require checking the current user's ID against post.userId
-      // For now, using a mock value
-      canEdit.value = true // Mock value - in real implementation, check user permissions
+      // Check if current user can edit this post (only post owner)
+      if (isAuthenticated.value && userStore.userInfo) {
+        canEdit.value = post.value.author === userStore.userInfo.username
+      } else {
+        canEdit.value = false
+      }
     } else {
       ElMessage.error(response.message || '获取文章失败')
     }
@@ -267,19 +290,18 @@ const loadPost = async () => {
 }
 
 // Load author information
-const loadAuthorInfo = async (username: string) => {
+const loadAuthorInfo = async (userId: number) => {
   try {
-    // Get author user info
-    const userResponse = await userApi.getUserByUsername(username)
-    if (userResponse.code === 200 && userResponse.data) {
-      // Get author profile
-      const profileResponse = await userApi.getUserProfileByUserId(userResponse.data.id)
-      if (profileResponse.code === 200) {
-        authorProfile.value = profileResponse.data
+    // Cache the author user ID for later use (follow operations)
+    authorUserId.value = userId
+    
+    // Get author profile directly by userId
+    const profileResponse = await userApi.getUserProfileByUserId(userId)
+    if (profileResponse.code === 200) {
+      authorProfile.value = profileResponse.data
 
-        // Check if current user is following this author
-        await checkFollowingStatus(userResponse.data.id)
-      }
+      // Check if current user is following this author
+      await checkFollowingStatus(userId)
     }
   } catch (error) {
     console.error('加载作者信息失败:', error)
@@ -288,6 +310,11 @@ const loadAuthorInfo = async (username: string) => {
 
 // Check if current user is following the author
 const checkFollowingStatus = async (userId: number) => {
+  if (!isAuthenticated.value) {
+    showFollowButton.value = false
+    return
+  }
+  
   try {
     const response = await userFollowApi.checkFollowing(userId)
     if (response.code === 200) {
@@ -302,22 +329,13 @@ const checkFollowingStatus = async (userId: number) => {
 
 // Toggle follow/unfollow
 const toggleFollow = async () => {
-  if (!post.value?.author) return
+  if (!authorUserId.value) return
 
   followLoading.value = true
   try {
-    let response
-    if (isFollowing.value) {
-      const userResponse = await userApi.getUserByUsername(post.value.author)
-      if (userResponse.code === 200) {
-        response = await userFollowApi.unfollowUser(userResponse.data.id)
-      }
-    } else {
-      const userResponse = await userApi.getUserByUsername(post.value.author)
-      if (userResponse.code === 200) {
-        response = await userFollowApi.followUser(userResponse.data.id)
-      }
-    }
+    const response = isFollowing.value
+      ? await userFollowApi.unfollowUser(authorUserId.value)
+      : await userFollowApi.followUser(authorUserId.value)
 
     if (response && response.code === 200 && response.data) {
       isFollowing.value = !isFollowing.value
@@ -337,21 +355,22 @@ const toggleFollow = async () => {
 const goToUserProfile = async (username: string | undefined) => {
   if (!username) return
 
-  try {
-    const userResponse = await userApi.getUserByUsername(username)
-    if (userResponse.code === 200) {
-      router.push(`/user/${userResponse.data.id}`)
-    } else {
-      ElMessage.error('用户不存在')
-    }
-  } catch (error) {
-    console.error('跳转用户页面失败:', error)
-    ElMessage.error('跳转失败')
+  // Use cached authorUserId if available
+  if (authorUserId.value) {
+    router.push(`/user/${authorUserId.value}`)
+  } else {
+    ElMessage.error('用户信息加载中')
   }
 }
 
 // Handle like action
 const handleLike = async () => {
+  if (!isAuthenticated.value) {
+    ElMessage.warning('请先登录后再点赞')
+    router.push('/login')
+    return
+  }
+
   if (!post.value) return
 
   try {
@@ -414,6 +433,12 @@ const checkCollectStatus = async () => {
 
 // Handle collect action
 const handleCollect = async () => {
+  if (!isAuthenticated.value) {
+    ElMessage.warning('请先登录后再收藏')
+    router.push('/login')
+    return
+  }
+
   try {
     if (!post.value) return
 

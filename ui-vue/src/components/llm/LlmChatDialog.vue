@@ -33,7 +33,7 @@
 import { ref } from 'vue';
 import { marked } from 'marked';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { sendChatMessage, clearChatContext } from '@/api/llmChat.ts';
+import { llmChatApi } from '@/api/llmChat'
 
 const visible = ref(false);
 const userMessage = ref('');
@@ -57,7 +57,7 @@ const sendMessage = async () => {
 
   try {
     // 2. 发送消息到后端
-    const res = await sendChatMessage(input);
+    const res = await llmChatApi.sendChatMessage(input)
     // 3. 显示 AI 回复
     messages.value.push({ role: 'ai', content: res.reply });
   } catch (err) {
@@ -80,7 +80,7 @@ const handleClearContext = async () => {
         }
     );
 
-    const res = await clearChatContext();
+    const res = await llmChatApi.clearChatContext()
     messages.value = [];
     ElMessage.success(res.data || '上下文已清空');
   } catch (err) {

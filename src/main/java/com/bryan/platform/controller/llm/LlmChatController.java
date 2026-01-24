@@ -4,6 +4,7 @@ import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.llm.LlmChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,7 @@ public class LlmChatController {
      * @throws IllegalArgumentException 如果消息内容为空或格式不正确
      */
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public Map<String, String> chat(@RequestBody Map<String, String> payload) {
         // 1. 获取用户 ID
         Long currentUserId = authService.getCurrentUserId();
@@ -63,6 +65,7 @@ public class LlmChatController {
      * @return 返回清空结果提示信息，格式为 {"message": "上下文已清空"}
      */
     @PostMapping("/clear")
+    @PreAuthorize("isAuthenticated()")
     public Map<String, String> clearContext() {
         // 1. 获取当前登录用户 ID
         Long currentUserId = authService.getCurrentUserId();
@@ -84,6 +87,7 @@ public class LlmChatController {
      * @throws IllegalArgumentException 如果标题或内容为空
      */
     @PostMapping("/post/summary")
+    @PreAuthorize("isAuthenticated()")
     public Map<String, String> generateSummary(@RequestBody Map<String, String> payload) {
         // 1. 从请求体中获取文章标题和内容
         String title = payload.get("title");

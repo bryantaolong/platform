@@ -86,4 +86,12 @@
           AND following_id = #{followingId}
     </update>
 
+    <select id="selectAllByFollowerId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM user_follow
+        WHERE follower_id = #{followerId}
+        AND deleted = 0
+        ORDER BY id DESC
+    </select>
+
 </mapper>

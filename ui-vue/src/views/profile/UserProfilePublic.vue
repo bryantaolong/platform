@@ -3,7 +3,7 @@
     <el-card class="profile-header">
       <div class="profile-main">
         <div class="profile-avatar">
-          <el-avatar :size="120" :src="userProfile?.avatar">
+          <el-avatar :size="120" :src="getAvatarUrl(userProfile?.avatar)">
             {{ userProfile?.username?.charAt(0).toUpperCase() }}
           </el-avatar>
         </div>
@@ -113,11 +113,11 @@
     </el-card>
 
     <el-dialog v-model="showFollowingDialog" title="关注列表" width="600px" destroy-on-close>
-      <UserList :userIds="followingIds" @close="showFollowingDialog = false"/>
+      <UserList :users="followingUsers" @close="showFollowingDialog = false"/>
     </el-dialog>
 
     <el-dialog v-model="showFollowerDialog" title="粉丝列表" width="600px" destroy-on-close>
-      <UserList :userIds="followerIds" @close="showFollowerDialog = false"/>
+      <UserList :users="followerUsers" @close="showFollowerDialog = false"/>
     </el-dialog>
   </div>
 </template>
@@ -127,9 +127,11 @@ import {ref, onMounted} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
+import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user.ts'
 import {userFollowApi} from '@/api/userFollow.ts'
 import {postApi} from '@/api/post.ts'
+import {getAvatarUrl} from '@/utils/file'
 import type {UserProfileVO} from '@/models/vo/user/UserProfileVO.ts'
 import type {PostVO} from '@/models/vo/post/PostVO.ts'
 import UserList from '../../components/user/UserList.vue'
@@ -137,6 +139,7 @@ import UserCollectList from '@/components/user/UserCollectList.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const userId = ref(Number(route.params.userId))
 
 // UI 控制
@@ -156,10 +159,10 @@ const totalPosts = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 
-const followingIds = ref<number[]>([])
-const followerIds = ref<number[]>([])
+const followingUsers = ref<UserProfileVO[]>([])
+const followerUsers = ref<UserProfileVO[]>([])
 
-// 数据加载方法
+/* --- 数据加载逻辑 --- */
 const loadUserProfile = async () => {
   try {
     const response = await userApi.getUserProfileByUserId(userId.value)
@@ -184,6 +187,12 @@ const loadUserStats = async () => {
 }
 
 const checkFollowingStatus = async () => {
+  // 如果查看的是自己的资料，不显示关注按钮
+  if (userStore.userInfo?.id === userId.value) {
+    showFollowButton.value = false
+    return
+  }
+
   const response = await userFollowApi.checkFollowing(userId.value)
   if (response.code === 200) {
     isFollowing.value = response.data
@@ -222,7 +231,7 @@ const toggleFollow = async () => {
 const showFollowingList = async () => {
   const response = await userFollowApi.getFollowingUsers(userId.value, 1, 50)
   if (response.code === 200) {
-    followingIds.value = response.data.rows.map(u => u.id);
+    followingUsers.value = response.data.rows
     showFollowingDialog.value = true
   }
 }
@@ -230,7 +239,7 @@ const showFollowingList = async () => {
 const showFollowerList = async () => {
   const response = await userFollowApi.getFollowerUsers(userId.value, 1, 50)
   if (response.code === 200) {
-    followerIds.value = response.data.rows.map(u => u.id);
+    followerUsers.value = response.data.rows
     showFollowerDialog.value = true
   }
 }

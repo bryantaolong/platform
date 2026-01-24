@@ -9,8 +9,10 @@ import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
+import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.auth.AuthService;
+import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.post.PostService;
 import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
@@ -57,17 +59,40 @@ public class PostController {
      *
      * @param pageNum  当前页码
      * @param pageSize 每页条数
-     * @return 博文 VO 分页结果
+     * @return 博文摘要 VO 分页结果
      */
     @GetMapping("/published")
-    public Result<PageResult<PostVO>> getAllPublishedPosts(
+    @PreAuthorize("permitAll()")
+    public Result<PageResult<PostSummaryVO>> getAllPublishedPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
 
         PageResult<Post> page = postService.pageAllPublishedPosts(pageNum, pageSize);
-        List<PostVO> rows = page.getRows()
+        List<PostSummaryVO> rows = page.getRows()
                 .stream()
-                .map(PostConverter::toPostVO)
+                .map(PostConverter::toPostSummaryVO)
+                .toList();
+        return Result.success(
+                PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
+    }
+
+    /**
+     * 获取当前用户关注用户的已发布文章分页列表
+     *
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文摘要 VO 分页结果
+     */
+    @GetMapping("/following")
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<PostSummaryVO>> getFollowedUsersPosts(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        Long currentUserId = authService.getCurrentUserId();
+        PageResult<Post> page = postService.pageFollowedUsersPosts(currentUserId, pageNum, pageSize);
+        List<PostSummaryVO> rows = page.getRows()
+                .stream()
+                .map(PostConverter::toPostSummaryVO)
                 .toList();
         return Result.success(
                 PageResult.of(rows, page.getTotal(), page.getPageNum(), page.getPageSize()));
@@ -82,6 +107,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/{userId}/all")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<PostVO>> getAllPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -103,6 +129,7 @@ public class PostController {
      * @return 博文审核 VO 分页结果
      */
     @GetMapping("/{userId}/audit/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<PostVO>> getPostAuditVosByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -119,6 +146,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @GetMapping("/{userId}/published")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<PostVO>> getPublishedPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -138,6 +166,7 @@ public class PostController {
      * @return 博文 VO 或错误提示
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public Result<PostVO> getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         if (post != null) {
@@ -201,7 +230,7 @@ public class PostController {
      * @return 创建后的博文实体
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> createPost(@RequestBody PostCreateRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -226,7 +255,7 @@ public class PostController {
      * @return 创建后的博文实体
      */
     @PostMapping("/draft")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -252,7 +281,7 @@ public class PostController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
         Post post = Post.builder()
                 .id(id)
@@ -300,7 +329,7 @@ public class PostController {
      * @return 是否删除成功
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deletePost(@PathVariable Long id) {
         boolean deleted = postService.deletePost(id);
         if (deleted) {
@@ -317,7 +346,7 @@ public class PostController {
      * @return 是否点赞成功
      */
     @PostMapping("/{id}/like")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> likePost(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         try {
@@ -335,7 +364,7 @@ public class PostController {
      * @return 是否取消成功
      */
     @PostMapping("/{id}/unlike")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> unlikePost(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean ok = userPostLikeService.unlikePost(currentUserId, id);
@@ -353,7 +382,7 @@ public class PostController {
      * @return true 已点赞；false 未点赞
      */
     @GetMapping("/{id}/like/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> checkLikeStatus(@PathVariable Long id) {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userPostLikeService.isLiked(currentUserId, id);

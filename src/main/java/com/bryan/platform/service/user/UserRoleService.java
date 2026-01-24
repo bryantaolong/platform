@@ -1,6 +1,5 @@
 package com.bryan.platform.service.user;
 
-import com.bryan.platform.domain.vo.user.UserRoleOptionVO;
 import com.bryan.platform.domain.entity.user.UserRole;
 import com.bryan.platform.mapper.user.UserRoleMapper;
 import lombok.RequiredArgsConstructor;

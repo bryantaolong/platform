@@ -74,4 +74,5 @@ public interface PostMapper {
                        @Param("author") String author,
                        @Param("tags") String tags,
                        @Param("status") PostStatusEnum status);
+
 }

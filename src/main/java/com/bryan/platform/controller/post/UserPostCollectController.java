@@ -34,7 +34,7 @@ public class UserPostCollectController {
      * @return 收藏记录实体
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserPostCollect> collectPost(@RequestBody @Validated UserPostCollectRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -57,7 +57,7 @@ public class UserPostCollectController {
      * @return 是否取消成功
      */
     @DeleteMapping("/{postId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> uncollectPost(@PathVariable Long postId) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -80,7 +80,7 @@ public class UserPostCollectController {
      * @return 收藏记录分页结果
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<UserPostCollect>> getUserCollectsByUserId(
             @PathVariable Long userId,
             @RequestParam(required = false) Long collectionId,
@@ -106,7 +106,7 @@ public class UserPostCollectController {
      * @return 收藏记录分页结果
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<UserPostCollect>> getUserCollects(
             @RequestParam(required = false) Long collectionId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -124,7 +124,7 @@ public class UserPostCollectController {
      * @return 收藏记录分页结果
      */
     @GetMapping("/collection/{collectionId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<PageResult<UserPostCollect>> getUserCollectsByCollection(
             @PathVariable Long collectionId,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -143,7 +143,7 @@ public class UserPostCollectController {
      * @return true 已收藏；false 未收藏
      */
     @GetMapping("/{postId}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> checkCollectStatus(@PathVariable Long postId) {
         Long currentUserId = authService.getCurrentUserId();
 
@@ -157,7 +157,7 @@ public class UserPostCollectController {
      * @return 收藏数量
      */
     @GetMapping("/count")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("isAuthenticated()")
     public Result<Long> getUserCollectCount() {
         Long currentUserId = authService.getCurrentUserId();
 

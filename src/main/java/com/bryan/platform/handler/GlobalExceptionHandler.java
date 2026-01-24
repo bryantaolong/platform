@@ -7,6 +7,7 @@ import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.enums.HttpStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,6 +68,18 @@ public class GlobalExceptionHandler {
     public Result<String> handleNotFoundException(ResourceNotFoundException e) {
         log.warn("资源不存在: {}", e.getMessage());
         return Result.error(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * 处理数据完整性异常
+     *
+     * @param e 数据完整性异常
+     * @return 统一错误响应
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public Result<String> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.error("数据完整性异常: {}", e.getMessage(), e);
+        return Result.error(HttpStatus.INTERNAL_ERROR, "数据操作失败，请检查数据格式");
     }
 
     /**

@@ -29,7 +29,8 @@ src/
       controller/     # RESTful controllers (auth, post, user modules)
       domain/         # Entities, request/response objects, VO, enums, converters
       filter/         # JWT authentication filter
-      handler/        # MyBatis auto-fill, global exception handler
+      handler/        # Global exception handler, PostgreSQL type handler
+      interceptor/    # MyBatis auto-fill
       mapper/         # MyBatis mapper interfaces
       service/        # Service layer
       util/           # Utility classes (JWT, HTTP, etc.)
@@ -37,7 +38,6 @@ src/
       application.yaml
       application-dev.yaml
       mapper/         # MyBatis mapper xmls
-      sql/            # Database schema scripts
   test/
     java/com/bryan/platform/
       PlatformApplicationTests.java
@@ -54,14 +54,14 @@ src/
 
 * Update database and Redis settings in `src/main/resources/application-dev.yaml`.
 * General settings (logging, MyBatis, etc.) are in `src/main/resources/application.yaml`.
-* Database schema scripts are in [`src/main/resources/sql/create_table.sql`](sql/create_table.sql) and related subdirectories.
+* Database schema scripts are in [`sql/create_table.sql`](sql/create_table.sql) and related subdirectories.
 
 ## Getting Started
 
 1. Initialize the PostgreSQL database by running the schema script:
 
    ```sh
-   psql -U postgres -d postgres -f src/main/resources/sql/create_table.sql
+   psql -U postgres -d postgres -f sql/create_table.sql
    ```
 2. Start the Redis service.
 3. Build and run the project with Maven:
@@ -126,7 +126,7 @@ services:
       POSTGRES_DB: platform
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./src/main/resources/sql/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+      - ./sql/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
     ports:
       - "5432:5432"
 
@@ -190,76 +190,21 @@ docker-compose up -d --build
 
 ## Main Features
 
-### Authentication & Authorization
-* User registration: `POST /api/auth/register`
-* User login: `POST /api/auth/login`
-* Get current user: `GET /api/auth/me`
-* Logout: `GET /api/auth/logout`
-* Change password: `PUT /api/auth/password`
-* Delete account: `DELETE /api/auth`
-* Validate token: `GET /api/auth/validate`
+### 👤 User & Social System
+* **Auth**: Secure registration and login with JWT-based stateless authentication.
+* **Profiles**: Comprehensive personal information management including avatar uploads and public profile views.
+* **Social**: Dynamic user follow/follower system with integrated profile identity (avatars/real names).
+* **Role-Based Security**: Fine-grained access control (RBAC) ensuring data safety across administrative and user operations.
 
-### User Management
-* List users: `GET /api/users` (admin only)
-* Get user by ID: `GET /api/users/{userId}` (admin only)
-* Get user by username: `GET /api/users/username/{username}` (admin only)
-* Search users: `POST /api/users/search` (admin only)
-* Update user: `PUT /api/users/{userId}`
-* Change user role: `PUT /api/users/roles/{userId}` (admin only)
-* Reset password: `PUT /api/users/password/{userId}` (admin only)
-* Block user: `PUT /api/users/block/{userId}` (admin only)
-* Unblock user: `PUT /api/users/unblock/{userId}` (admin only)
-* Delete user: `DELETE /api/users/{userId}` (admin only)
+### 📝 Content Management
+* **Post Lifecycle**: Full support for creating, drafting, publishing, auditing, and deleting articles.
+* **Engagement**: Rich interactive features including nested comment trees and high-performance post liking.
+* **Collections**: Personalized multi-folder bookmarking system for organizing favorite content.
 
-### User Profiles
-* Get user profile by user ID: `GET /api/user-profiles/{userId}`
-* Get user profile by real name: `GET /api/user-profiles/name/{realName}`
-* Get current user profile: `GET /api/user-profiles/me`
-* Update current user profile: `PUT /api/user-profiles`
-
-### User Roles
-* List all roles: `GET /api/user-roles` (admin only)
-
-### User Follow System
-* Follow user: `POST /api/user-follows/follow/{followingId}`
-* Unfollow user: `POST /api/user-follows/unfollow/{followingId}`
-* Get following users: `GET /api/user-follows/following/{userId}`
-* Get follower users: `GET /api/user-follows/followers/{userId}`
-* Check following status: `GET /api/user-follows/check/{followingId}`
-* Get user follow stats: `GET /api/user-follows/stats/{userId}`
-
-### Post Management
-* Get all posts: `GET /api/posts/all` (admin only)
-* Get all published posts: `GET /api/posts/published`
-* Get posts by user ID: `GET /api/posts/{userId}/all`
-* Get published posts by user ID: `GET /api/posts/{userId}/published`
-* Get post by ID: `GET /api/posts/{id}`
-* Get post audit by ID: `GET /api/posts/audit/{id}` (admin only)
-* Search posts: `GET /api/posts/search` (admin only)
-* Create post: `POST /api/posts`
-* Save post draft: `POST /api/posts/draft`
-* Update post: `PUT /api/posts/{id}`
-* Update post status: `PUT /api/posts/status/{id}?status={status}` (admin only)
-* Delete post: `DELETE /api/posts/{id}`
-
-### Post Collections & Collects
-* Create collection: `POST /api/user/post-collections?folderName={folderName}`
-* Update collection: `PUT /api/user/post-collections/{collectionId}?folderName={folderName}`
-* Delete collection: `DELETE /api/user/post-collections/{collectionId}`
-* Get user collections: `GET /api/user/post-collections`
-* Get collection by ID: `GET /api/user/post-collections/{collectionId}`
-* Get user collection count: `GET /api/user/post-collections/count`
-* Collect post: `POST /api/user/post-collects`
-* Uncollect post: `DELETE /api/user/post-collects/{postId}`
-* Get user collects: `GET /api/user/post-collects`
-* Get user collects by collection: `GET /api/user/post-collects/collection/{collectionId}`
-* Check collect status: `GET /api/user/post-collects/{postId}/status`
-* Get user collect count: `GET /api/user/post-collects/count`
-
-### Data Export
-* Export all users: `GET /api/users/export/all` (admin only)
-* Export users by fields: `POST /api/users/export/fields` (admin only)
-* Get exportable fields: `GET /api/users/export/fields` (admin only)
+### 🛠️ Advanced Capabilities
+* **AI Integration**: Intelligent LLM-powered features for real-time chat and automated post summarization.
+* **Data Export**: Professional-grade Excel reporting for user data with customizable field selection.
+* **System Observability**: Integrated log management and administrative auditing tools.
 
 ## Notes
 

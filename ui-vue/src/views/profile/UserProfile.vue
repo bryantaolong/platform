@@ -5,15 +5,15 @@
         <div class="profile-avatar">
           <el-upload
               class="avatar-uploader"
-              action="/api/upload/avatar"
+              action="#"
               :show-file-list="false"
-              :on-success="handleAvatarSuccess"
+              :http-request="handleUploadAvatar"
               :before-upload="beforeAvatarUpload"
           >
             <el-avatar
                 v-if="userStore.userProfile?.avatar"
                 :size="120"
-                :src="userStore.userProfile.avatar"
+                :src="getAvatarUrl(userStore.userProfile.avatar)"
             />
             <el-avatar v-else :size="120">
               {{ userStore.userInfo?.username?.charAt(0).toUpperCase() }}
@@ -26,6 +26,7 @@
             </div>
           </el-upload>
         </div>
+
         <div class="profile-info">
           <div class="profile-basic">
             <h2 class="profile-username">{{ userStore.userInfo?.username }}</h2>
@@ -114,7 +115,7 @@
         destroy-on-close
     >
       <UserList
-          :userIds="followingIds"
+          :users="followingUsers"
           @close="showFollowingDialog = false"
       />
     </el-dialog>
@@ -126,7 +127,7 @@
         destroy-on-close
     >
       <UserList
-          :userIds="followerIds"
+          :users="followerUsers"
           @close="showFollowerDialog = false"
       />
     </el-dialog>
@@ -136,13 +137,13 @@
 <script setup lang="ts">
 import {ref, reactive, onMounted} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import type {FormInstance} from 'element-plus'
 import {Camera} from '@element-plus/icons-vue'
-import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user'
 import {userFollowApi} from '@/api/userFollow'
+import {getAvatarUrl} from '@/utils/file'
 import UserList from '../../components/user/UserList.vue'
+
 import MyPosts from '@/components/user/MyPosts.vue'
 import UserCollectList from '@/components/user/UserCollectList.vue'
 import BasicInfo from '@/components/profile/BasicInfo.vue'
@@ -157,11 +158,7 @@ function genderToNum(g?: string): 1 | 0 {
 function numToGender(n: 1 | 0): 'MALE' | 'FEMALE' {
   return n === 0 ? 'FEMALE' : 'MALE'
 }
-
-const formatDate = (dateStr?: string) => dateStr ? new Date(dateStr).toLocaleDateString('zh-CN') : ''
-
 /* --- 基础状态 --- */
-const router = useRouter()
 const userStore = useUserStore()
 const activeMainTab = ref('posts')
 const editActiveTab = ref('basic')
@@ -175,9 +172,9 @@ const securitySettingsRef = ref()
 const userStats = reactive({followingCount: 0, followerCount: 0})
 const postCount = ref(0)
 
-// 关注和粉丝的 ID 列表，传给 UserList 组件
-const followingIds = ref<number[]>([])
-const followerIds = ref<number[]>([])
+// 关注和粉丝的用户列表，传给 UserList 组件
+const followingUsers = ref<UserProfileVO[]>([])
+const followerUsers = ref<UserProfileVO[]>([])
 
 const basicForm = reactive({realName: '', gender: 1 as 1 | 0, birthday: '', phone: '', email: ''})
 
@@ -196,7 +193,7 @@ const showFollowingList = async () => {
   if (!userStore.userInfo?.id) return
   const res = await userFollowApi.getFollowingUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
-    followingIds.value = res.data.rows.map((u: any) => u.id)
+    followingUsers.value = res.data.rows
     showFollowingDialog.value = true
   }
 }
@@ -205,7 +202,7 @@ const showFollowerList = async () => {
   if (!userStore.userInfo?.id) return
   const res = await userFollowApi.getFollowerUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
-    followerIds.value = res.data.rows.map((u: any) => u.id)
+    followerUsers.value = res.data.rows
     showFollowerDialog.value = true
   }
 }
@@ -257,10 +254,19 @@ const handleDeleteAccount = async () => {
   }
 }
 
-const handleAvatarSuccess = (res: any) => {
-  if (res.code === 200) {
-    ElMessage.success('上传成功')
-    userStore.userProfile!.avatar = res.data
+const handleUploadAvatar = async (options: any) => {
+  try {
+    const res = await userApi.uploadAvatar(options.file)
+    if (res.code === 200) {
+      ElMessage.success('头像上传成功')
+      if (userStore.userProfile) {
+        userStore.userProfile.avatar = res.data
+      }
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '上传失败')
   }
 }
 
@@ -269,8 +275,6 @@ const beforeAvatarUpload = (file: File) => {
   if (!isLt2M) ElMessage.error('大小不能超过 2MB!')
   return isLt2M
 }
-
-const goToPostDetail = (id: number) => router.push(`/post/${id}`)
 
 const loginHistory = ref([
   {loginTime: '2024-01-15 14:30:25', ipAddress: '192.168.1.100', location: '北京市', device: 'Chrome on Windows'}
@@ -379,51 +383,6 @@ onMounted(() => {
 :deep(.el-tabs__item) {
   font-size: 16px;
   height: 55px;
-}
-
-.tab-content-container {
-  padding: 20px 0;
-}
-
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.post-card {
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.post-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-.post-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  height: 44px;
-  overflow: hidden;
-}
-
-.post-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #909399;
-}
-
-.pagination-wrapper {
-  margin-top: 30px;
-  display: flex;
-  justify-content: center;
-}
-
-.info-tabs {
-  padding: 0 10px;
 }
 
 .settings-container {

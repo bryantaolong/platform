@@ -1,13 +1,19 @@
 package com.bryan.platform.controller.user;
 
+import com.bryan.platform.domain.converter.UserConverter;
 import com.bryan.platform.domain.entity.user.SysUser;
+import com.bryan.platform.domain.entity.user.UserProfile;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.domain.response.Result;
+import com.bryan.platform.domain.vo.user.UserProfileVO;
 import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.user.UserFollowService;
+import com.bryan.platform.service.user.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +29,7 @@ import java.util.Map;
 public class UserFollowController {
 
     private final UserFollowService userFollowService;
+    private final UserProfileService userProfileService;
     private final AuthService authService;
 
     /**
@@ -32,6 +39,7 @@ public class UserFollowController {
      * @return 关注操作是否成功，true表示成功
      */
     @PostMapping("/follow/{followingId}")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> followUser(@PathVariable Long followingId) {
         Long currentUserId = authService.getCurrentUserId();
         return Result.success(userFollowService.followUser(currentUserId, followingId) > 0);
@@ -44,6 +52,7 @@ public class UserFollowController {
      * @return 取消关注是否成功，true表示成功
      */
     @PostMapping("/unfollow/{followingId}")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> unfollowUser(@PathVariable Long followingId) {
         Long currentUserId = authService.getCurrentUserId();
         return Result.success(userFollowService.unfollowUser(currentUserId, followingId) > 0);
@@ -58,11 +67,19 @@ public class UserFollowController {
      * @return 分页的关注用户列表
      */
     @GetMapping("/following/{userId}")
-    public Result<PageResult<SysUser>> getFollowingUsers(
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<UserProfileVO>> getFollowingUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userFollowService.getFollowingUsers(userId, pageNum, pageSize));
+        PageResult<SysUser> pageResult = userFollowService.getFollowingUsers(userId, pageNum, pageSize);
+        List<UserProfileVO> vos = pageResult.getRows().stream()
+                .map(user -> {
+                    UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());
+                    return UserConverter.toUserProfileVO(user, profile);
+                })
+                .toList();
+        return Result.success(PageResult.of(vos, pageResult.getTotal(), pageNum, pageSize));
     }
 
     /**
@@ -74,11 +91,19 @@ public class UserFollowController {
      * @return 分页的粉丝用户列表
      */
     @GetMapping("/followers/{userId}")
-    public Result<PageResult<SysUser>> getFollowerUsers(
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<UserProfileVO>> getFollowerUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userFollowService.getFollowerUsers(userId, pageNum, pageSize));
+        PageResult<SysUser> pageResult = userFollowService.getFollowerUsers(userId, pageNum, pageSize);
+        List<UserProfileVO> vos = pageResult.getRows().stream()
+                .map(user -> {
+                    UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());
+                    return UserConverter.toUserProfileVO(user, profile);
+                })
+                .toList();
+        return Result.success(PageResult.of(vos, pageResult.getTotal(), pageNum, pageSize));
     }
 
     /**
@@ -88,6 +113,7 @@ public class UserFollowController {
      * @return true表示已关注，false表示未关注
      */
     @GetMapping("/check/{followingId}")
+    @PreAuthorize("isAuthenticated()")
     public Result<Boolean> isFollowing(@PathVariable Long followingId) {
         Long currentUserId = authService.getCurrentUserId();
         return Result.success(userFollowService.isFollowing(currentUserId, followingId));
@@ -100,12 +126,13 @@ public class UserFollowController {
      * @return 包含关注数和粉丝数的对象
      */
     @GetMapping("/stats/{userId}")
+    @PreAuthorize("isAuthenticated()")
     public Result<Object> getUserFollowStats(@PathVariable Long userId) {
         long followingCount = userFollowService.countFollowing(userId);
         long followerCount = userFollowService.countFollowers(userId);
         return Result.success(Map.of(
-            "followingCount", followingCount,
-            "followerCount", followerCount
+                "followingCount", followingCount,
+                "followerCount", followerCount
         ));
     }
 }

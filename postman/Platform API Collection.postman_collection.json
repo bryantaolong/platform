@@ -38,7 +38,7 @@
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
 									"    if (response.code === 200) {",
-									"        pm.collectionVariables.set('token', response.data);",
+									"        pm.collectionVariables.set('token', response.data.token || response.data);",
 									"    }",
 									"}"
 								],
@@ -828,6 +828,30 @@
 							"raw": "{\n  \"realName\": \"Updated Name\",\n  \"gender\": \"MALE\",\n  \"birthday\": \"1990-01-01\",\n  \"avatar\": \"http://example.com/avatar.jpg\"\n}"
 						},
 						"url": "{{base_url}}/api/user-profiles"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/api/user-profiles/avatar"
 					},
 					"response": []
 				}

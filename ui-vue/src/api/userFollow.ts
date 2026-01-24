@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import type { Result } from '@/models/response/Result'
 import type { PageResult } from '@/models/response/PageResult'
-import type { SysUser } from '@/models/entity/user/SysUser.ts'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 
 /**
  * 用户关注API
@@ -24,7 +24,7 @@ export const userFollowApi = {
   /**
    * 获取用户的关注列表
    */
-  getFollowingUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
+  getFollowingUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
     return request.get(`/api/user-follows/following/${userId}`, {
       params: { pageNum, pageSize }
     })
@@ -33,7 +33,7 @@ export const userFollowApi = {
   /**
    * 获取用户的粉丝列表
    */
-  getFollowerUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
+  getFollowerUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
     return request.get(`/api/user-follows/followers/${userId}`, {
       params: { pageNum, pageSize }
     })

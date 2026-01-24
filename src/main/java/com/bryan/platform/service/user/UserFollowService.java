@@ -5,13 +5,13 @@ import com.bryan.platform.domain.entity.user.UserFollow;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.user.UserFollowMapper;
-import com.bryan.platform.mapper.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户关注服务类。
@@ -25,7 +25,7 @@ import java.util.List;
 public class UserFollowService {
 
     private final UserFollowMapper userFollowMapper;
-    private final UserMapper userMapper;
+    private final UserService userService;
 
     /**
      * 当前用户关注另一个用户
@@ -38,10 +38,10 @@ public class UserFollowService {
     @Transactional(rollbackFor = Exception.class)
     public int followUser(Long followerId, Long followingId) {
         // 1. 校验双方用户存在
-        if (userMapper.selectById(followerId) == null) {
+        if (!userService.existsById(followerId)) {
             throw new BusinessException("当前用户不存在");
         }
-        if (userMapper.selectById(followingId) == null) {
+        if (!userService.existsById(followingId)) {
             throw new BusinessException("被关注用户不存在");
         }
 
@@ -50,7 +50,12 @@ public class UserFollowService {
             throw new BusinessException("您已经关注过该用户");
         }
 
-        // 3. 插入
+        // 3. 防止用户关注自己
+        if (followerId.equals(followingId)) {
+            throw new BusinessException("不能关注自己");
+        }
+
+        // 4. 插入
         UserFollow uf = UserFollow.builder()
                 .followerId(followerId)
                 .followingId(followingId)
@@ -88,7 +93,7 @@ public class UserFollowService {
     public PageResult<SysUser> getFollowingUsers(Long userId,
                                                  Integer pageNum,
                                                  Integer pageSize) {
-        if (userMapper.selectById(userId) == null) {
+        if (!userService.existsById(userId)) {
             throw new BusinessException("用户不存在");
         }
         long offset = (long) (pageNum - 1) * pageSize;
@@ -99,9 +104,7 @@ public class UserFollowService {
         List<Long> followingIds = follows.stream()
                 .map(UserFollow::getFollowingId)
                 .toList();
-        List<SysUser> users = followingIds.isEmpty()
-                ? List.of()
-                : userMapper.selectByIdList(followingIds);
+        List<SysUser> users = userService.getUsersByIds(followingIds);
 
         return PageResult.of(users, total, pageNum, pageSize);
     }
@@ -118,7 +121,7 @@ public class UserFollowService {
     public PageResult<SysUser> getFollowerUsers(Long userId,
                                                 Integer pageNum,
                                                 Integer pageSize) {
-        if (userMapper.selectById(userId) == null) {
+        if (!userService.existsById(userId)) {
             throw new BusinessException("用户不存在");
         }
         long offset = (long) (pageNum - 1) * pageSize;
@@ -129,9 +132,7 @@ public class UserFollowService {
         List<Long> followerIds = follows.stream()
                 .map(UserFollow::getFollowerId)
                 .toList();
-        List<SysUser> users = followerIds.isEmpty()
-                ? List.of()
-                : userMapper.selectByIdList(followerIds);
+        List<SysUser> users = userService.getUsersByIds(followerIds);
 
         return PageResult.of(users, total, pageNum, pageSize);
     }
@@ -154,6 +155,20 @@ public class UserFollowService {
 
     public long countFollowers(Long userId) {
         return userFollowMapper.countByFollowingId(userId);
+    }
+
+    /**
+     * 获取用户关注的所有用户ID列表
+     * 用于其他服务层查询相关数据
+     *
+     * @param followerId 关注者用户 ID
+     * @return 被关注用户ID列表
+     */
+    public List<Long> getFollowingUserIds(Long followerId) {
+        List<UserFollow> follows = userFollowMapper.selectAllByFollowerId(followerId);
+        return follows.stream()
+                .map(UserFollow::getFollowingId)
+                .collect(Collectors.toList());
     }
 }
 
