@@ -190,9 +190,9 @@ export const postApi = {
     },
 
     // Upload post image
-    uploadPostImage: (formData: FormData): Promise<Result<string>> => {
+    uploadPostImage: (formData: FormData): Promise<Result<{ url: string }>> => {
         return request({
-            url: '/api/posts/upload-image',
+            url: '/api/posts/upload/image',
             method: 'post',
             data: formData,
             headers: {

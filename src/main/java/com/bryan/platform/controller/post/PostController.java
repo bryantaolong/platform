@@ -16,11 +16,15 @@ import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.post.PostService;
 import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 博文管理控制器
@@ -37,6 +41,7 @@ public class PostController {
     private final PostService postService;
     private final AuthService authService;
     private final UserPostLikeService userPostLikeService;
+    private final LocalFileService localFileService;
 
     /**
      * 管理员分页查询所有博文（含草稿/已删除）
@@ -387,5 +392,33 @@ public class PostController {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userPostLikeService.isLiked(currentUserId, id);
         return Result.success(liked);
+    }
+
+    /**
+     * 上传博文图片
+     * <p>
+     * 支持用户在编辑博文时上传图片，图片将保存到 uploads/post-images/ 目录
+     * 返回图片URL，前端可将其插入到Markdown内容中
+     *
+     * @param file 图片文件
+     * @return 图片访问URL
+     */
+    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public Result<Map<String, String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return Result.error(HttpStatus.BAD_REQUEST, "文件不能为空");
+        }
+
+        try {
+            // 只传递子目录，LocalFileService 会自动生成文件名
+            String savedPath = localFileService.storeFile(file, "post-images");
+
+            Map<String, String> result = new HashMap<>();
+            result.put("url", savedPath);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(HttpStatus.INTERNAL_ERROR, "图片上传失败: " + e.getMessage());
+        }
     }
 }

@@ -60,6 +60,8 @@ public class LocalFileService {
 
         // 返回文件在 uploads 目录下的相对路径
         return Paths.get(subDirectory, fileName).toString();
+//        ！！！此是备用的方案，返回文件在 uploads 目录下的相对路径，使用正斜杠（URL格式）
+//        return Paths.get(subDirectory, fileName).toString().replace("\\", "/");
     }
 
     /**
