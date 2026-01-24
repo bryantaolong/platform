@@ -38,7 +38,7 @@
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
 									"    if (response.code === 200) {",
-									"        pm.collectionVariables.set('token', response.data);",
+									"        pm.collectionVariables.set('token', response.data.token || response.data);",
 									"    }",
 									"}"
 								],
