@@ -121,7 +121,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElInput, ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
@@ -257,7 +257,7 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-/* 提交更新 */
+/* 提交发布 */
 const submitForm = async () => {
   if (!formRef.value) return
 
@@ -269,20 +269,19 @@ const submitForm = async () => {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags as any,
-          weight: 1
+          tags: postForm.tags as any
         }
 
         const response = await postApi.updatePost(postId, requestData)
         if (response.code === 200) {
-          ElMessage.success('文章更新成功')
+          ElMessage.success('文章发布成功')
           router.push(`/post/${postId}`)
         } else {
-          ElMessage.error(response.message || '更新失败')
+          ElMessage.error(response.message || '发布失败')
         }
       } catch (error) {
-        console.error('更新文章失败:', error)
-        ElMessage.error('更新文章失败')
+        console.error('发布文章失败:', error)
+        ElMessage.error('发布文章失败')
       } finally {
         submitting.value = false
       }

@@ -133,9 +133,6 @@ public class PostService {
         if (post.getCommentAreaStatus() != null) {
             existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
         }
-        if (post.getWeight() != null) {
-            existingPost.setWeight(post.getWeight());
-        }
 
         int rows = postMapper.update(existingPost);
         if (rows == 0) {
@@ -200,6 +197,7 @@ public class PostService {
         Post post = postMapper.selectById(postId);
         if (post == null) {
             log.warn("查询帖子不存在，ID: {}", postId);
+            return null;
         }
 
         int increased = this.increaseViewCount(postId);
@@ -345,6 +343,22 @@ public class PostService {
                 followerId, followingIds.size(), total, pagedPosts.size());
         
         return PageResult.of(pagedPosts, total, pageNum, pageSize);
+    }
+
+    /**
+     * 多条件搜索博文
+     *
+     * @param title    标题关键词
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文分页结果
+     */
+    public PageResult<Post> pagePostsByTitle(String title, int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<Post> rows = postMapper.selectByTitle(title, PostStatusEnum.PUBLISHED, offset, pageSize);
+        long total = postMapper.countByTitle(title, PostStatusEnum.PUBLISHED);
+
+        return PageResult.of(rows, total, pageNum, pageSize);
     }
 
     /**

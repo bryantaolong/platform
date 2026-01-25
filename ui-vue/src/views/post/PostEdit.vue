@@ -181,8 +181,7 @@ const submitForm = async () => {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags as any,
-          weight: 1
+          tags: postForm.tags as any
         }
 
         const response = await postApi.updatePost(postId, requestData)

@@ -140,8 +140,11 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {Camera} from '@element-plus/icons-vue'
 import {useUserStore} from '@/stores/user'
 import {userApi} from '@/api/user'
+import {userProfileApi} from '@/api/userProfile'
 import {userFollowApi} from '@/api/userFollow'
 import {getAvatarUrl} from '@/utils/file'
+import {getLocationFromIp} from '@/utils/ipLocation'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
 import UserList from '../../components/user/UserList.vue'
 
 import MyPosts from '@/components/user/MyPosts.vue'
@@ -256,7 +259,7 @@ const handleDeleteAccount = async () => {
 
 const handleUploadAvatar = async (options: any) => {
   try {
-    const res = await userApi.uploadAvatar(options.file)
+    const res = await userProfileApi.uploadAvatar(options.file)
     if (res.code === 200) {
       ElMessage.success('头像上传成功')
       if (userStore.userProfile) {
@@ -276,9 +279,35 @@ const beforeAvatarUpload = (file: File) => {
   return isLt2M
 }
 
-const loginHistory = ref([
-  {loginTime: '2024-01-15 14:30:25', ipAddress: '192.168.1.100', location: '北京市', device: 'Chrome on Windows'}
-])
+const loginHistory = ref<any[]>([])
+
+const loadLoginHistory = async () => {
+  if (userStore.userInfo?.lastLoginAt) {
+    try {
+      const ipAddress = userStore.userInfo.lastLoginIp || 'Unknown'
+      const location = ipAddress !== 'Unknown' 
+        ? await getLocationFromIp(ipAddress) 
+        : 'Unknown'
+      
+      loginHistory.value = [{
+        loginTime: userStore.userInfo.lastLoginAt.replace('T', ' ').substring(0, 19),
+        ipAddress: ipAddress,
+        location: location,
+        device: userStore.userInfo.lastLoginDevice || 'Unknown'
+      }]
+    } catch (error) {
+      console.error('Failed to load login history:', error)
+      loginHistory.value = [{
+        loginTime: userStore.userInfo.lastLoginAt.replace('T', ' ').substring(0, 19),
+        ipAddress: 'Unknown',
+        location: 'Unknown',
+        device: 'Unknown'
+      }]
+    }
+  } else {
+    loginHistory.value = []
+  }
+}
 
 onMounted(() => {
   if (userStore.userProfile) {
@@ -291,7 +320,9 @@ onMounted(() => {
     })
   }
   loadUserStats()
+  loadLoginHistory()
 })
+
 </script>
 
 <style scoped>

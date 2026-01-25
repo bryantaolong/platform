@@ -27,6 +27,4 @@ public class PostUpdateDTO {
     private String tags;
 
     private Integer commentStatus;
-
-    private Integer weight;
 }

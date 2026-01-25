@@ -137,11 +137,8 @@ const loadPosts = async () => {
 
     if (searchForm.title || urlSearchQuery) {
       // Use search API if title is provided
-      response = await postApi.searchPosts(
-          searchForm.title || urlSearchQuery || '',
-          '',
-          '',
-          null,
+      response = await postApi.searchPostsByTitle(
+          searchForm.title,
           pagination.currentPage,
           pagination.pageSize
       )

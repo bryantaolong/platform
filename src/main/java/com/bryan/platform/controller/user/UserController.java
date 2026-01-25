@@ -4,6 +4,7 @@ import com.bryan.platform.domain.dto.user.UserUpdateDTO;
 import com.bryan.platform.domain.entity.user.SysUser;
 import com.bryan.platform.domain.request.user.ChangePasswordRequest;
 import com.bryan.platform.domain.request.user.ChangeRoleRequest;
+import com.bryan.platform.domain.request.user.UserCreateRequest;
 import com.bryan.platform.domain.request.user.UserSearchRequest;
 import com.bryan.platform.domain.request.user.UserUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
@@ -29,6 +30,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<SysUser> createUser(@RequestBody @Valid UserCreateRequest req) {
+        return Result.success(userService.createUser(req));
+    }
 
     /**
      * 获取所有用户列表（不分页）。

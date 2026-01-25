@@ -5,6 +5,7 @@ import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.HttpStatus;
 import com.bryan.platform.domain.enums.post.CommentAreaStatusEnum;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
+import com.bryan.platform.domain.request.post.PostSearchRequest;
 import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
@@ -201,26 +202,43 @@ public class PostController {
     /**
      * 管理员多条件搜索博文
      * <p>
-     * TODO: 后续可接入 Elasticsearch 提升搜索体验
      *
-     * @param title    标题关键词
-     * @param author   作者关键词
-     * @param tags     标签关键词
-     * @param status   博文状态
+     * @param title    博文标题
      * @param pageNum  当前页码
      * @param pageSize 每页条数
      * @return 博文 VO 分页结果
      */
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<PageResult<PostVO>> searchPosts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String tags,
-            @RequestParam(required = false) PostStatusEnum status,
+    @PostMapping("/title")
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<PostVO>> getPostsByTitle(
+            @RequestParam String title,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        PageResult<Post> page = postService.searchPosts(title, author, tags, status, pageNum, pageSize);
+        PageResult<Post> page = postService.pagePostsByTitle(title, pageNum, pageSize);
+        List<PostVO> rows = page.getRows().stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(PageResult.of(rows, page.getTotal(),
+                page.getPageNum(), page.getPageSize()));
+    }
+
+    /**
+     * 管理员多条件搜索博文
+     * <p>
+     *
+     * @param req      管理员博文搜索请求
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
+     */
+    @PostMapping("/admin/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<PageResult<PostVO>> searchPosts(
+            @RequestBody PostSearchRequest req,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        PageResult<Post> page = postService.searchPosts(req.getTitle(),
+                req.getAuthor(), req.getTags(), req.getStatus(), pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)
                 .toList();
@@ -297,7 +315,6 @@ public class PostController {
                 .commentAreaStatus(request.getCommentAreaStatus() != null ?
                         CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
                         null)
-                .weight(request.getWeight())
                 .build();
 
         Post updatedPost = postService.updatePost(id, post);

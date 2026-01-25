@@ -22,10 +22,10 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_post_like (
-            user_id, post_id,
+            user_id, post_id, deleted, version,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{userId}, #{postId},
+                     #{userId}, #{postId}, #{deleted}, #{version},
                      #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
@@ -33,7 +33,7 @@
     <update id="deleteById">
         UPDATE user_post_like
         SET deleted = 1,
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
@@ -43,7 +43,7 @@
     <update id="deleteByUserIdAndPostId">
         UPDATE user_post_like
         SET deleted = 1,
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE user_id = #{userId}
@@ -90,7 +90,7 @@
     <update id="restoreLike">
         UPDATE user_post_like
         SET deleted = 0,
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE user_id = #{userId}

@@ -7,5 +7,7 @@ export interface UserVO {
     roles: string;
     lastLoginAt?: string;
     lastLoginIp?: string;
+    lastLoginDevice?: string;
     createdAt: string;
+
 }
