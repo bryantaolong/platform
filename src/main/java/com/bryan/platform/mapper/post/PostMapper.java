@@ -53,6 +53,11 @@ public interface PostMapper {
                                   @Param("offset") int offset,
                                   @Param("pageSize") int pageSize);
 
+    List<Post> selectByTitle(@Param("title") String title,
+                              @Param("status") PostStatusEnum status,
+                              @Param("offset") int offset,
+                              @Param("pageSize") int pageSize);
+
     List<Post> selectBySearch(@Param("title") String title,
                               @Param("author") String author,
                               @Param("tags") String tags,
@@ -70,9 +75,11 @@ public interface PostMapper {
 
     long countAll();
 
+    long countByTitle(@Param("title") String title,
+                       @Param("status") PostStatusEnum status);
+
     long countBySearch(@Param("title") String title,
                        @Param("author") String author,
                        @Param("tags") String tags,
                        @Param("status") PostStatusEnum status);
-
 }

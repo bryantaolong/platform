@@ -118,11 +118,13 @@ const searchForm = reactive({
 const loadPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.searchPosts(
-      searchForm.title,
-      searchForm.author,
-      '',
-      searchForm.status,
+    const res = await postApi.searchPostsAdmin(
+      {
+        title: searchForm.title,
+        author: searchForm.author,
+        tags: '',
+        status: searchForm.status ?? undefined
+      },
       pageNum.value,
       pageSize.value
     )

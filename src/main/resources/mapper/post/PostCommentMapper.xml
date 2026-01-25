@@ -63,10 +63,10 @@
         INSERT INTO post_comment (
             user_id, post_id, root_id, parent_id, type, content, reply_to_user_id, floor,
             like_count, dislike_count, child_count, path, status,
-            created_at, updated_at, created_by, updated_by
+            deleted, version, created_at, updated_at, created_by, updated_by
         ) VALUES (
                      #{userId}, #{postId}, #{rootId}, #{parentId}, #{type}, #{content}, #{replyToUserId}, #{floor},
-                     #{likeCount}, #{dislikeCount}, #{childCount}, #{path}, #{status},
+                     #{likeCount}, #{dislikeCount}, #{childCount}, #{path}, #{status}, #{deleted}, #{version},
                      #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
@@ -74,8 +74,9 @@
     <update id="increaseLikeCount">
         UPDATE post_comment
         SET like_count = like_count + 1,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
@@ -83,8 +84,9 @@
     <update id="increaseDislikeCount">
         UPDATE post_comment
         SET dislike_count = dislike_count + 1,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
@@ -92,8 +94,9 @@
     <update id="increaseChildCount">
         UPDATE post_comment
         SET child_count = child_count + 1,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{rootId}
           AND deleted = 0
     </update>
@@ -104,20 +107,20 @@
             <if test="content != null">content = #{content},</if>
             <if test="status != null">status = #{status},</if>
             <if test="rootId != null">root_id = #{rootId},</if>
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         </set>
         WHERE id = #{id}
-        AND version = #{version}
         AND deleted = 0
     </update>
 
     <update id="deleteById">
         UPDATE post_comment
         SET deleted = 1,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>

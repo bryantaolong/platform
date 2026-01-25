@@ -64,11 +64,31 @@
         <el-form-item label="内容" prop="content">
           <div class="markdown-editor">
             <div class="editor-pane">
+              <div class="editor-toolbar">
+                <input
+                    type="file"
+                    ref="imageInputRef"
+                    accept="image/*"
+                    style="display: none"
+                    @change="handleImageUpload"
+                />
+                <el-button
+                    type="primary"
+                    size="small"
+                    @click="triggerImageUpload"
+                    :loading="uploadingImage"
+                >
+                  <template #icon>📷</template>
+                  上传图片
+                </el-button>
+                <span class="hint-text">选择图片后自动插入到光标位置</span>
+              </div>
               <el-input
                   v-model="postForm.content"
                   :rows="20"
                   type="textarea"
                   placeholder="请输入文章内容（支持 Markdown）"
+                  ref="contentTextareaRef"
               />
             </div>
             <div class="preview-pane markdown-body" v-html="renderedContent"></div>
@@ -101,7 +121,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElInput, ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
@@ -114,7 +134,10 @@ const formRef = ref()
 const loading = ref(false)
 const submitting = ref(false)
 const savingDraft = ref(false)
+const uploadingImage = ref(false)
 const postId = Number(route.params.id)
+const imageInputRef = ref<HTMLInputElement>()
+const contentTextareaRef = ref<InstanceType<typeof ElInput>>()
 
 /* Computed property for rendered markdown content */
 const renderedContent = computed(() => {
@@ -188,7 +211,53 @@ const removeTag = (idx: number) => {
   postForm.tags.splice(idx, 1)
 }
 
-/* 提交更新 */
+/* 触发图片上传选择 */
+const triggerImageUpload = () => {
+  imageInputRef.value?.click()
+}
+
+/* 处理图片上传 */
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  uploadingImage.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await postApi.uploadPostImage(formData)
+    if (response.code === 200 && response.data?.url) {
+      const imageUrl = response.data.url
+      // 插入 Markdown 图片语法，使用完整的相对路径（包含 /uploads/ 前缀）
+      const markdownImageSyntax = `
+![图片描述](/uploads/${imageUrl})
+`
+
+      const textarea = contentTextareaRef.value?.$el.querySelector('textarea') as HTMLTextAreaElement
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const content = postForm.content
+        postForm.content = content.substring(0, start) + markdownImageSyntax + content.substring(end)
+        ElMessage.success('图片上传成功，已插入到编辑器')
+      }
+    } else {
+      ElMessage.error(response.message || '图片上传失败')
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    ElMessage.error('图片上传失败')
+  } finally {
+    uploadingImage.value = false
+    if (target) {
+      target.value = ''
+    }
+  }
+}
+
+/* 提交发布 */
 const submitForm = async () => {
   if (!formRef.value) return
 
@@ -200,20 +269,19 @@ const submitForm = async () => {
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags as any,
-          weight: 1
+          tags: postForm.tags as any
         }
 
         const response = await postApi.updatePost(postId, requestData)
         if (response.code === 200) {
-          ElMessage.success('文章更新成功')
+          ElMessage.success('文章发布成功')
           router.push(`/post/${postId}`)
         } else {
-          ElMessage.error(response.message || '更新失败')
+          ElMessage.error(response.message || '发布失败')
         }
       } catch (error) {
-        console.error('更新文章失败:', error)
-        ElMessage.error('更新文章失败')
+        console.error('发布文章失败:', error)
+        ElMessage.error('发布文章失败')
       } finally {
         submitting.value = false
       }
@@ -286,6 +354,20 @@ onMounted(() => {
   border-radius: 8px;
   background: #fff;
   overflow: hidden;
+}
+
+.editor-toolbar {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ebeef5;
+  background-color: #f5f7fa;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: #909399;
 }
 
 .editor-pane, .preview-pane {

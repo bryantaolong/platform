@@ -4,6 +4,7 @@ import type {PostSummaryVO} from '@/models/vo/post/PostSummaryVO'
 import type {PostVO} from '@/models/vo/post/PostVO'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
+import type {PostSearchRequest} from "@/models/request/post/PostSearchRequest.ts";
 import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
 import type {Result} from "@/models/response/Result.ts";
 import type {PageResult} from "@/models/response/PageResult.ts";
@@ -35,22 +36,33 @@ export const postApi = {
     },
 
     // Search posts with pagination
-    searchPosts: (
+    searchPostsByTitle: (
         title: string,
-        author: string,
-        tags: string,
-        status: PostStatusEnum | null,
+        pageNum: number,
+        pageSize: number
+    ): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: '/api/posts/title',
+            method: 'post',
+            params: {
+                title,
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
+    // Admin search posts with pagination
+    searchPostsAdmin: (
+        req: PostSearchRequest,
         pageNum: number,
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/search',
-            method: 'get',
+            method: 'post',
+            data: req,
             params: {
-                title,
-                author,
-                tags,
-                status,
                 pageNum,
                 pageSize
             }
@@ -190,9 +202,9 @@ export const postApi = {
     },
 
     // Upload post image
-    uploadPostImage: (formData: FormData): Promise<Result<string>> => {
+    uploadPostImage: (formData: FormData): Promise<Result<{ url: string }>> => {
         return request({
-            url: '/api/posts/upload-image',
+            url: '/api/posts/upload/image',
             method: 'post',
             data: formData,
             headers: {

@@ -5,6 +5,7 @@ import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.HttpStatus;
 import com.bryan.platform.domain.enums.post.CommentAreaStatusEnum;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
+import com.bryan.platform.domain.request.post.PostSearchRequest;
 import com.bryan.platform.domain.request.post.PostCreateRequest;
 import com.bryan.platform.domain.request.post.PostUpdateRequest;
 import com.bryan.platform.domain.response.PageResult;
@@ -16,11 +17,15 @@ import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.post.PostService;
 import com.bryan.platform.service.post.UserPostLikeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 博文管理控制器
@@ -37,6 +42,7 @@ public class PostController {
     private final PostService postService;
     private final AuthService authService;
     private final UserPostLikeService userPostLikeService;
+    private final LocalFileService localFileService;
 
     /**
      * 管理员分页查询所有博文（含草稿/已删除）
@@ -196,26 +202,43 @@ public class PostController {
     /**
      * 管理员多条件搜索博文
      * <p>
-     * TODO: 后续可接入 Elasticsearch 提升搜索体验
      *
-     * @param title    标题关键词
-     * @param author   作者关键词
-     * @param tags     标签关键词
-     * @param status   博文状态
+     * @param title    博文标题
      * @param pageNum  当前页码
      * @param pageSize 每页条数
      * @return 博文 VO 分页结果
      */
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<PageResult<PostVO>> searchPosts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String tags,
-            @RequestParam(required = false) PostStatusEnum status,
+    @PostMapping("/title")
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<PostVO>> getPostsByTitle(
+            @RequestParam String title,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        PageResult<Post> page = postService.searchPosts(title, author, tags, status, pageNum, pageSize);
+        PageResult<Post> page = postService.pagePostsByTitle(title, pageNum, pageSize);
+        List<PostVO> rows = page.getRows().stream()
+                .map(PostConverter::toPostVO)
+                .toList();
+        return Result.success(PageResult.of(rows, page.getTotal(),
+                page.getPageNum(), page.getPageSize()));
+    }
+
+    /**
+     * 管理员多条件搜索博文
+     * <p>
+     *
+     * @param req      管理员博文搜索请求
+     * @param pageNum  当前页码
+     * @param pageSize 每页条数
+     * @return 博文 VO 分页结果
+     */
+    @PostMapping("/admin/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<PageResult<PostVO>> searchPosts(
+            @RequestBody PostSearchRequest req,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        PageResult<Post> page = postService.searchPosts(req.getTitle(),
+                req.getAuthor(), req.getTags(), req.getStatus(), pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)
                 .toList();
@@ -292,7 +315,6 @@ public class PostController {
                 .commentAreaStatus(request.getCommentAreaStatus() != null ?
                         CommentAreaStatusEnum.valueOf(request.getCommentAreaStatus()) :
                         null)
-                .weight(request.getWeight())
                 .build();
 
         Post updatedPost = postService.updatePost(id, post);
@@ -387,5 +409,33 @@ public class PostController {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userPostLikeService.isLiked(currentUserId, id);
         return Result.success(liked);
+    }
+
+    /**
+     * 上传博文图片
+     * <p>
+     * 支持用户在编辑博文时上传图片，图片将保存到 uploads/post-images/ 目录
+     * 返回图片URL，前端可将其插入到Markdown内容中
+     *
+     * @param file 图片文件
+     * @return 图片访问URL
+     */
+    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public Result<Map<String, String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return Result.error(HttpStatus.BAD_REQUEST, "文件不能为空");
+        }
+
+        try {
+            // 只传递子目录，LocalFileService 会自动生成文件名
+            String savedPath = localFileService.storeFile(file, "post-images");
+
+            Map<String, String> result = new HashMap<>();
+            result.put("url", savedPath);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(HttpStatus.INTERNAL_ERROR, "图片上传失败: " + e.getMessage());
+        }
     }
 }

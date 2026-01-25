@@ -26,9 +26,9 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_post_collect (
             user_id, post_id, collection_id, post_title,
-            created_at, updated_at, created_by, updated_by
+            deleted, version, created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{userId}, #{postId}, #{collectionId}, #{postTitle},
+                     #{userId}, #{postId}, #{collectionId}, #{postTitle}, #{deleted}, #{version},
                      #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
@@ -36,7 +36,7 @@
     <update id="deleteById">
         UPDATE user_post_collect
         SET deleted = 1,
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
@@ -46,7 +46,7 @@
     <update id="deleteByUserIdAndPostId">
         UPDATE user_post_collect
         SET deleted = 1,
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE user_id = #{userId}
@@ -58,11 +58,10 @@
         UPDATE user_post_collect
         SET collection_id = #{collectionId},
             post_title = #{postTitle},
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
-          AND version = #{version}
           AND deleted = 0
     </update>
 

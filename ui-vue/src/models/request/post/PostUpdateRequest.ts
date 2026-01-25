@@ -5,5 +5,4 @@ export interface PostUpdateRequest {
   content?: string
   categoryId?: number
   tags?: string
-  weight?: number
 }

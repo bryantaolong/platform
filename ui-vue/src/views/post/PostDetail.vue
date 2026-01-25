@@ -208,7 +208,7 @@ import {
   MagicStick
 } from '@element-plus/icons-vue'
 import { postApi } from '@/api/post'
-import { userApi } from '@/api/user'
+import { userProfileApi } from '@/api/userProfile'
 import { userFollowApi } from '@/api/userFollow'
 import { getAvatarUrl } from '@/utils/file'
 import type { PostVO } from "@/models/vo/post/PostVO";
@@ -296,7 +296,7 @@ const loadAuthorInfo = async (userId: number) => {
     authorUserId.value = userId
     
     // Get author profile directly by userId
-    const profileResponse = await userApi.getUserProfileByUserId(userId)
+    const profileResponse = await userProfileApi.getUserProfileByUserId(userId)
     if (profileResponse.code === 200) {
       authorProfile.value = profileResponse.data
 
@@ -472,7 +472,6 @@ const handleShare = () => {
   if (!post.value) return
 
   const url = window.location.href
-  const title = `分享文章: ${post.value.title}`
 
   if (navigator.share) {
     navigator.share({

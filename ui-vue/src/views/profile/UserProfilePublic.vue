@@ -128,7 +128,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
 import {useUserStore} from '@/stores/user'
-import {userApi} from '@/api/user.ts'
+import { userProfileApi } from '@/api/userProfile'
 import {userFollowApi} from '@/api/userFollow.ts'
 import {postApi} from '@/api/post.ts'
 import {getAvatarUrl} from '@/utils/file'
@@ -165,7 +165,7 @@ const followerUsers = ref<UserProfileVO[]>([])
 /* --- 数据加载逻辑 --- */
 const loadUserProfile = async () => {
   try {
-    const response = await userApi.getUserProfileByUserId(userId.value)
+    const response = await userProfileApi.getUserProfileByUserId(userId.value)
     if (response.code === 200) {
       userProfile.value = response.data
       await loadUserStats()

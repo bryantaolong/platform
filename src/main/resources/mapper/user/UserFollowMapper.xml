@@ -22,10 +22,10 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_follow (
-            follower_id, following_id,
+            follower_id, following_id, deleted, version,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{followerId}, #{followingId},
+                     #{followerId}, #{followingId}, #{deleted}, #{version},
                      #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
@@ -79,7 +79,7 @@
     <update id="updateDeletedByFollowerIdAndFollowingId">
         UPDATE user_follow
         SET deleted = #{deleted},
-            version = version + 1,
+            version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE follower_id = #{followerId}

@@ -22,10 +22,10 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_comment_like (
-            user_id, comment_id,
+            user_id, comment_id, deleted, version,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-                     #{userId}, #{commentId},
+                     #{userId}, #{commentId}, #{deleted}, #{version},
                      #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
                  )
     </insert>
@@ -33,8 +33,9 @@
     <update id="deleteByUserIdAndCommentId">
         UPDATE user_comment_like
         SET deleted = 1,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE user_id = #{userId}
           AND comment_id = #{commentId}
           AND deleted = 0
@@ -73,8 +74,9 @@
     <update id="restoreLike">
         UPDATE user_comment_like
         SET deleted = 0,
-            version = version + 1,
-            updated_at = CURRENT_TIMESTAMP
+            version = #{version},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
         WHERE user_id = #{userId}
           AND comment_id = #{commentId}
     </update>

@@ -2,15 +2,22 @@ import request from '@/utils/request'
 import type { Result } from '@/models/response/Result'
 import type { PageResult } from '@/models/response/PageResult'
 import type { SysUser } from '@/models/entity/user/SysUser.ts'
+import type { UserCreateRequest } from '@/models/request/user/UserCreateRequest'
 import type { UserUpdateRequest } from '@/models/request/user/UserUpdateRequest.ts'
 import type { ChangePasswordRequest } from '@/models/request/user/ChangePasswordRequest.ts'
 import type { UserSearchRequest } from '@/models/request/user/UserSearchRequest.ts'
-import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 
 /**
  * 用户管理API
  */
 export const userApi = {
+  /**
+   * 创建用户（管理员）
+   */
+  createUser(data: UserCreateRequest): Promise<Result<SysUser>> {
+    return request.post('/api/users', data)
+  },
+
   /**
    * 获取用户列表（分页）
    */
@@ -51,6 +58,13 @@ export const userApi = {
   },
 
   /**
+   * 修改用户角色（管理员）
+   */
+  changeUserRoles(userId: number, roleIds: number[]): Promise<Result<SysUser>> {
+    return request.put(`/api/users/roles/${userId}`, { roleIds })
+  },
+
+  /**
    * 重置用户密码（管理员）
    */
   resetPassword(userId: number, newPassword: string): Promise<Result<SysUser>> {
@@ -77,40 +91,6 @@ export const userApi = {
    */
   deleteUser(userId: number): Promise<Result<number>> {
     return request.delete(`/api/users/${userId}`)
-  },
-
-  /**
-   * 根据用户ID获取用户详情
-   */
-  getUserProfileByUserId(userId: number): Promise<Result<UserProfileVO>> {
-    return request.get(`/api/user-profiles/${userId}`)
-  },
-
-  /**
-   * 根据真实姓名获取用户详情
-   */
-  getUserProfileByRealName(realName: string): Promise<Result<UserProfileVO>> {
-    return request.get(`/api/user-profiles/name/${realName}`)
-  },
-
-  /**
-   * 更新当前用户详情
-   */
-  updateUserProfile(data: UserUpdateRequest): Promise<Result<UserProfileVO>> {
-    return request.put('/api/user-profiles', data)
-  },
-
-  /**
-   * 上传当前用户头像
-   */
-  uploadAvatar(file: File): Promise<Result<string>> {
-    const formData = new FormData()
-    formData.append('file', file)
-    return request.post('/api/user-profiles/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
   }
 }
 
