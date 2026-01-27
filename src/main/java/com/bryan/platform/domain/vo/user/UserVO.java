@@ -33,5 +33,4 @@ public class UserVO {
     private String lastLoginDevice;
 
     private LocalDateTime createdAt;
-
 }

@@ -81,7 +81,18 @@ public class UserCommentLikeService {
     }
 
     /**
-     * 取消点赞评论（软删）
+     * 查询当前用户对指定评论的点赞状态
+     *
+     * @param userId    用户主键
+     * @param commentId 评论主键
+     * @return true 已点赞；false 未点赞
+     */
+    public boolean isLiked(Long userId, Long commentId) {
+        return userCommentLikeMapper.existsByUserIdAndCommentId(userId, commentId);
+    }
+
+    /**
+     * 取消点赞评论（逻辑删除）
      *
      * @param userId    用户主键
      * @param commentId 评论主键
@@ -102,16 +113,5 @@ public class UserCommentLikeService {
             throw new RuntimeException("评论取消点赞计数更新失败");
         }
         return true;
-    }
-
-    /**
-     * 查询当前用户对指定评论的点赞状态
-     *
-     * @param userId    用户主键
-     * @param commentId 评论主键
-     * @return true 已点赞；false 未点赞
-     */
-    public boolean isLiked(Long userId, Long commentId) {
-        return userCommentLikeMapper.existsByUserIdAndCommentId(userId, commentId);
     }
 }

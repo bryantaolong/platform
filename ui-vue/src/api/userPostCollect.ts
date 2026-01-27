@@ -8,7 +8,7 @@ export const userPostCollectApi = {
     collectPost: (postId: number, collectionId?: number): Promise<Result<any>> => {
         return request({
             url: '/api/user/post-collects',
-            method: 'post',
+            method: 'POST',
             data: {
                 postId,
                 collectionId: collectionId || 0
@@ -16,11 +16,11 @@ export const userPostCollectApi = {
         })
     },
 
-    // Uncollect a post
-    uncollectPost: (postId: number): Promise<Result<boolean>> => {
+    // Cancel collect a post
+    cancelCollectPost: (postId: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/user/post-collects/${postId}`,
-            method: 'delete'
+            method: 'DELETE'
         })
     },
 
@@ -28,7 +28,7 @@ export const userPostCollectApi = {
     checkCollectStatus: (postId: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/user/post-collects/${postId}/status`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
@@ -36,7 +36,7 @@ export const userPostCollectApi = {
     getUserCollects: (pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> => {
         return request({
             url: '/api/user/post-collects',
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize,
@@ -49,7 +49,7 @@ export const userPostCollectApi = {
     getUserCollectsByUser: (userId: number, pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> => {
         return request({
             url: `/api/user/post-collects/user/${userId}`,
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize,

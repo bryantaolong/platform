@@ -36,9 +36,9 @@ public interface UserMapper {
 
     SysUser selectByStatus(@Param("status") UserStatusEnum status);
 
+    long count(@Param("req") UserSearchRequest search);
+
     int update(SysUser user);
 
     int deleteById(@Param("id") Long id);
-
-    long count(@Param("req") UserSearchRequest search);
 }

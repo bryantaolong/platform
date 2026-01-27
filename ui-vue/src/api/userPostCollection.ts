@@ -21,7 +21,7 @@ export const userPostCollectionApi = {
   getCollections: (): Promise<Result<UserPostCollection[]>> => {
     return request({
       url: '/api/user/post-collections',
-      method: 'get'
+      method: 'GET'
     })
   },
 
@@ -31,7 +31,7 @@ export const userPostCollectionApi = {
   createCollection: (folderName: string): Promise<Result<UserPostCollection>> => {
     return request({
       url: '/api/user/post-collections',
-      method: 'post',
+      method: 'POST',
       params: { folderName }
     })
   },
@@ -42,7 +42,7 @@ export const userPostCollectionApi = {
   getCollectionsByUser: (userId: number): Promise<Result<UserPostCollection[]>> => {
     return request({
       url: `/api/user/post-collections/user/${userId}`,
-      method: 'get'
+      method: 'GET'
     })
   }
 }

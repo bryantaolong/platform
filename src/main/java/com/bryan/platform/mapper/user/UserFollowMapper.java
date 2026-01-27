@@ -14,8 +14,10 @@ import java.util.List;
 @Mapper
 public interface UserFollowMapper {
 
+    /* ---------- 增 ---------- */
     int insert(UserFollow record);
 
+    /* ---------- 查 ---------- */
     UserFollow selectById(Long id);
 
     List<UserFollow> selectPageByFollowerId(@Param("followerId") Long followerId,
@@ -26,16 +28,17 @@ public interface UserFollowMapper {
                                              @Param("offset") long offset,
                                              @Param("size") int size);
 
+    List<UserFollow> selectAllByFollowerId(@Param("followerId") Long followerId);
+
     long countByFollowerId(@Param("followerId") Long followerId);
 
-    int updateDeletedByFollowerIdAndFollowingId(@Param("followerId") Long followerId,
-                                                @Param("followingId") Long followingId,
-                                                @Param("deleted") Integer deleted);
+    long countByFollowingId(@Param("followingId") Long followingId);
 
     long countByFollowerIdAndFollowingId(@Param("followerId") Long followerId,
                                          @Param("followingId") Long followingId);
 
-    long countByFollowingId(@Param("followingId") Long followingId);
-
-    List<UserFollow> selectAllByFollowerId(@Param("followerId") Long followerId);
+    /* ---------- 改 ---------- */
+    int updateDeletedByFollowerIdAndFollowingId(@Param("followerId") Long followerId,
+                                                @Param("followingId") Long followingId,
+                                                @Param("deleted") Integer deleted);
 }

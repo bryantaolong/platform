@@ -84,7 +84,18 @@ public class UserPostLikeService {
     }
 
     /**
-     * 取消点赞博文（软删）
+     * 查询当前用户对指定博文的点赞状态
+     *
+     * @param userId 用户主键
+     * @param postId 博文主键
+     * @return true 已点赞；false 未点赞
+     */
+    public boolean isLiked(Long userId, Long postId) {
+        return userPostLikeMapper.existsByUserIdAndPostId(userId, postId);
+    }
+
+    /**
+     * 取消点赞博文（逻辑删除）
      *
      * @param userId 用户主键
      * @param postId 博文主键
@@ -106,16 +117,5 @@ public class UserPostLikeService {
             throw new RuntimeException("帖子取消点赞计数更新失败");
         }
         return true;
-    }
-
-    /**
-     * 查询当前用户对指定博文的点赞状态
-     *
-     * @param userId 用户主键
-     * @param postId 博文主键
-     * @return true 已点赞；false 未点赞
-     */
-    public boolean isLiked(Long userId, Long postId) {
-        return userPostLikeMapper.existsByUserIdAndPostId(userId, postId);
     }
 }

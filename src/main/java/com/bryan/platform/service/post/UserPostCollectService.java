@@ -28,11 +28,9 @@ public class UserPostCollectService {
     private final UserPostCollectionMapper userPostCollectionMapper;
     private final PostMapper postMapper;
 
-    /* ---------- 增 ---------- */
-
     /**
      * 收藏博文（幂等）
-     * 若已存在软删记录则恢复；否则新增。默认收藏夹 ID 为 0 表示“未分类”。
+     * 若已存在软删记录则恢复；否则新增。默认收藏夹 ID 为 0 表示"未分类"。
      *
      * @param userId       用户主键
      * @param postId       博文主键
@@ -98,32 +96,6 @@ public class UserPostCollectService {
         return collect;
     }
 
-    /* ---------- 删 ---------- */
-
-    /**
-     * 取消收藏（软删）
-     * 同时减少博文收藏计数
-     *
-     * @param userId 用户主键
-     * @param postId 博文主键
-     * @return 是否取消成功
-     */
-    @Transactional
-    public boolean uncollectPost(Long userId, Long postId) {
-        int rows = userPostCollectMapper.deleteByUserIdAndPostId(userId, postId);
-        if (rows > 0) {
-            // 更新博文收藏数 -1
-            postMapper.updateCollectCount(postId, -1);
-            log.info("用户取消收藏成功，用户ID: {}, 博文ID: {}", userId, postId);
-            return true;
-        } else {
-            log.warn("取消收藏失败，用户ID: {}, 博文ID: {}，可能未收藏", userId, postId);
-            return false;
-        }
-    }
-
-    /* ---------- 查 ---------- */
-
     /**
      * 根据用户与博文查询单条收藏记录
      *
@@ -145,8 +117,6 @@ public class UserPostCollectService {
     public boolean isCollected(Long userId, Long postId) {
         return userPostCollectMapper.existsByUserIdAndPostId(userId, postId);
     }
-
-    /* ---------- 列表/分页 ---------- */
 
     /**
      * 分页查询用户全部收藏
@@ -181,8 +151,6 @@ public class UserPostCollectService {
         return PageResult.of(rows, total, pageNum, pageSize);
     }
 
-    /* ---------- 计数 ---------- */
-
     /**
      * 统计用户收藏总数
      *
@@ -193,5 +161,27 @@ public class UserPostCollectService {
         long count = userPostCollectMapper.countByUserId(userId);
         log.info("统计用户收藏数量，用户ID: {} , 结果: {}", userId, count);
         return count;
+    }
+
+    /**
+     * 取消收藏（逻辑删除）
+     * 同时减少博文收藏计数
+     *
+     * @param userId 用户主键
+     * @param postId 博文主键
+     * @return 是否取消成功
+     */
+    @Transactional
+    public boolean cancelCollectPost(Long userId, Long postId) {
+        int rows = userPostCollectMapper.deleteByUserIdAndPostId(userId, postId);
+        if (rows > 0) {
+            // 更新博文收藏数 -1
+            postMapper.updateCollectCount(postId, -1);
+            log.info("用户取消收藏成功，用户ID: {}, 博文ID: {}", userId, postId);
+            return true;
+        } else {
+            log.warn("取消收藏失败，用户ID: {}, 博文ID: {}，可能未收藏", userId, postId);
+            return false;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.bryan.platform.service.post;
 
 import com.bryan.platform.domain.entity.post.UserPostCollection;
+import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.UserPostCollectionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,6 @@ import java.util.List;
 public class UserPostCollectionService {
 
     private final UserPostCollectionMapper userPostCollectionMapper;
-
-    /* ---------- 增 ---------- */
 
     /**
      * 创建收藏夹
@@ -55,27 +54,55 @@ public class UserPostCollectionService {
         return collection;
     }
 
-    /* ---------- 删 ---------- */
-
     /**
-     * 删除收藏夹（软删）
+     * 根据主键查询收藏夹
      *
      * @param collectionId 收藏夹主键
-     * @return 是否删除成功
+     * @return 收藏夹实体；不存在返回 null
      */
-    @Transactional
-    public boolean deleteCollection(Long collectionId) {
-        int rows = userPostCollectionMapper.deleteById(collectionId);
-        if (rows > 0) {
-            log.info("删除收藏夹成功，收藏夹ID: {}", collectionId);
-            return true;
-        } else {
-            log.warn("删除收藏夹失败，收藏夹ID: {}，可能不存在", collectionId);
-            return false;
+    public UserPostCollection getCollectionById(Long collectionId) {
+        UserPostCollection collection = userPostCollectionMapper.selectById(collectionId);
+        if (collection == null) {
+            log.warn("查询收藏夹不存在，ID: {}", collectionId);
         }
+        return collection;
     }
 
-    /* ---------- 改 ---------- */
+    /**
+     * 获取指定用户的全部收藏夹
+     *
+     * @param userId 用户主键
+     * @return 收藏夹列表
+     */
+    public List<UserPostCollection> getUserCollections(Long userId) {
+        List<UserPostCollection> collections = userPostCollectionMapper.selectByUserId(userId);
+        log.info("获取用户收藏夹列表完成，用户ID: {} , 数量: {}", userId, collections.size());
+        return collections;
+    }
+
+    /**
+     * 根据用户与名称查询收藏夹
+     * 主要用于重名校验
+     *
+     * @param userId     用户主键
+     * @param folderName 收藏夹名称
+     * @return 收藏夹实体；不存在返回 null
+     */
+    public UserPostCollection getCollectionByUserIdAndName(Long userId, String folderName) {
+        return userPostCollectionMapper.selectByUserIdAndFolderName(userId, folderName);
+    }
+
+    /**
+     * 统计指定用户的收藏夹数量
+     *
+     * @param userId 用户主键
+     * @return 收藏夹数量
+     */
+    public long countUserCollections(Long userId) {
+        long count = userPostCollectionMapper.countByUserId(userId);
+        log.info("统计用户收藏夹数量，用户ID: {} , 结果: {}", userId, count);
+        return count;
+    }
 
     /**
      * 更新收藏夹名称
@@ -116,57 +143,29 @@ public class UserPostCollectionService {
         return existing;
     }
 
-    /* ---------- 查 ---------- */
-
     /**
-     * 根据主键查询收藏夹
+     * 删除收藏夹（逻辑删除）
      *
+     * @param userId 用户 ID
      * @param collectionId 收藏夹主键
-     * @return 收藏夹实体；不存在返回 null
+     * @return 是否删除成功
      */
-    public UserPostCollection getCollectionById(Long collectionId) {
+    @Transactional
+    public boolean deleteCollection(Long userId, Long collectionId) {
         UserPostCollection collection = userPostCollectionMapper.selectById(collectionId);
-        if (collection == null) {
-            log.warn("查询收藏夹不存在，ID: {}", collectionId);
+
+        if(!collection.getUserId().equals(userId)) {
+            log.error("用户 {} 尝试删除无权限的收藏夹 {}", userId, collectionId);
+            throw new BusinessException("用户尝试删除无权限的收藏夹");
         }
-        return collection;
-    }
 
-    /**
-     * 获取指定用户的全部收藏夹
-     *
-     * @param userId 用户主键
-     * @return 收藏夹列表
-     */
-    public List<UserPostCollection> getUserCollections(Long userId) {
-        List<UserPostCollection> collections = userPostCollectionMapper.selectByUserId(userId);
-        log.info("获取用户收藏夹列表完成，用户ID: {} , 数量: {}", userId, collections.size());
-        return collections;
-    }
-
-    /**
-     * 根据用户与名称查询收藏夹
-     * 主要用于重名校验
-     *
-     * @param userId     用户主键
-     * @param folderName 收藏夹名称
-     * @return 收藏夹实体；不存在返回 null
-     */
-    public UserPostCollection getCollectionByUserIdAndName(Long userId, String folderName) {
-        return userPostCollectionMapper.selectByUserIdAndFolderName(userId, folderName);
-    }
-
-    /* ---------- 计数 ---------- */
-
-    /**
-     * 统计指定用户的收藏夹数量
-     *
-     * @param userId 用户主键
-     * @return 收藏夹数量
-     */
-    public long countUserCollections(Long userId) {
-        long count = userPostCollectionMapper.countByUserId(userId);
-        log.info("统计用户收藏夹数量，用户ID: {} , 结果: {}", userId, count);
-        return count;
+        int rows = userPostCollectionMapper.deleteById(collectionId);
+        if (rows > 0) {
+            log.info("删除收藏夹成功，收藏夹ID: {}", collectionId);
+            return true;
+        } else {
+            log.warn("删除收藏夹失败，收藏夹ID: {}，可能不存在", collectionId);
+            return false;
+        }
     }
 }

@@ -30,8 +30,6 @@ public class PostService {
     private final PostMapper postMapper;
     private final UserFollowService userFollowService;
 
-    /* ---------- 增 ---------- */
-
     /**
      * 创建博文（含草稿）
      * 自动注入 ID 与审计字段，事务提交后返回完整实体
@@ -58,133 +56,6 @@ public class PostService {
         log.info("保存博文草稿成功，帖子ID: {}", post.getId());
         return post.getId();
     }
-
-    /* ---------- 删 ---------- */
-
-    /**
-     * 删除单篇博文（软删）
-     *
-     * @param postId 博文主键
-     * @return 是否删除成功
-     */
-    @Transactional
-    public boolean deletePost(Long postId) {
-        Post post = postMapper.selectById(postId);
-        if (post == null) {
-            log.warn("删除帖子失败，帖子不存在，ID: {}", postId);
-            return false;
-        }
-        postMapper.deleteById(postId);
-        log.info("帖子ID: {} 删除成功 (逻辑删除)", postId);
-        return true;
-    }
-
-    /**
-     * 批量删除博文（软删）
-     *
-     * @param postIds 博文主键列表
-     */
-    @Transactional
-    public void deletePostBatch(List<Long> postIds) {
-        for (Long id : postIds) {
-            postMapper.deleteById(id);
-            log.info("帖子ID: {} 删除成功 (逻辑删除)", id);
-        }
-        log.info("批量删除帖子完成，数量: {}", postIds.size());
-    }
-
-    /* ---------- 改 ---------- */
-
-    /**
-     * 更新博文（全字段可选更新）
-     * 仅对非 null 字段执行修改，事务控制
-     *
-     * @param id   博文主键
-     * @param post 待更新字段封装实体
-     * @return 更新后的博文；若不存在返回 null
-     */
-    @Transactional
-    public Post updatePost(Long id, Post post) {
-        Post existingPost = postMapper.selectById(id);
-        if (existingPost == null) {
-            log.warn("更新帖子失败，帖子不存在，ID: {}", id);
-            return null;
-        }
-
-        // Update fields
-        if (post.getUserId() != null) {
-            existingPost.setUserId(post.getUserId());
-        }
-        if (post.getTitle() != null) {
-            existingPost.setTitle(post.getTitle());
-        }
-        if (post.getContent() != null) {
-            existingPost.setContent(post.getContent());
-        }
-        if (post.getStatus() != null) {
-            existingPost.setStatus(post.getStatus());
-        }
-        if (post.getCategoryId() != null) {
-            existingPost.setCategoryId(post.getCategoryId());
-        }
-        if (post.getTags() != null) {
-            existingPost.setTags(post.getTags());
-        }
-        if (post.getCommentAreaStatus() != null) {
-            existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
-        }
-
-        int rows = postMapper.update(existingPost);
-        if (rows == 0) {
-            log.warn("更新帖子失败，ID: {} , 可能已被修改或不存在", existingPost.getId());
-            return null;
-        }
-        log.info("更新帖子成功，帖子ID: {}", existingPost.getId());
-        return existingPost;
-    }
-
-    /**
-     * 点赞数原子递增
-     *
-     * @param postId 博文主键
-     * @return 影响行数
-     */
-    public int likePost(Long postId) {
-        return postMapper.updateLikeCount(postId, 1);
-    }
-
-    /**
-     * 点赞数原子递减
-     *
-     * @param postId 博文主键
-     * @return 影响行数
-     */
-    public int unlikePost(Long postId) {
-        return postMapper.updateLikeCount(postId, -1);
-    }
-
-    /**
-     * 浏览数原子递增
-     *
-     * @param postId 博文主键
-     * @return 影响行数
-     */
-    public int increaseViewCount(Long postId) {
-        return postMapper.updateViewCount(postId, 1);
-    }
-
-    /**
-     * 评论数原子更新
-     *
-     * @param postId 博文主键
-     * @param delta  变化量（正/负）
-     * @return 影响行数
-     */
-    public int updateCommentCount(Long postId, int delta) {
-        return postMapper.updateCommentCount(postId, delta);
-    }
-
-    /* ---------- 单查 ---------- */
 
     /**
      * 根据主键查询博文
@@ -218,8 +89,6 @@ public class PostService {
         log.info("批量查询帖子完成，数量: {} , 请求IDs: {}", posts.size(), postIds);
         return posts;
     }
-
-    /* ---------- 列表/分页 ---------- */
 
     /**
      * 分页查询指定用户的全部博文（含草稿、已删除）
@@ -313,12 +182,12 @@ public class PostService {
     public PageResult<Post> pageFollowedUsersPosts(Long followerId, int pageNum, int pageSize) {
         // 1. 通过 UserFollowService 获取关注用户ID列表（遵循架构原则）
         List<Long> followingIds = userFollowService.getFollowingUserIds(followerId);
-        
+
         if (followingIds.isEmpty()) {
             // 如果没有关注任何用户，返回空结果
             return PageResult.of(List.of(), 0L, pageNum, pageSize);
         }
-        
+
         // 2. 通过 PostMapper 批量查询这些用户的已发布文章
         List<Post> allPosts = new ArrayList<>();
         for (Long userId : followingIds) {
@@ -326,22 +195,22 @@ public class PostService {
                     userId, PostStatusEnum.PUBLISHED, 0, 50);
             allPosts.addAll(userPosts);
         }
-        
+
         // 3. 按创建时间降序排序
         allPosts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
-        
+
         // 4. 计算总数（注意：这里的总数不是准确的，因为限制了每用户的查询数量）
         long total = allPosts.size();
-        
+
         // 5. 手动分页
         int startIndex = (pageNum - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, (int) total);
-        List<Post> pagedPosts = startIndex < total ? 
+        List<Post> pagedPosts = startIndex < total ?
                 allPosts.subList(startIndex, endIndex) : List.of();
-        
-        log.info("用户 {} 关注用户文章查询完成，关注 {} 人，共 {} 篇文章，当前页 {} 条", 
+
+        log.info("用户 {} 关注用户文章查询完成，关注 {} 人，共 {} 篇文章，当前页 {} 条",
                 followerId, followingIds.size(), total, pagedPosts.size());
-        
+
         return PageResult.of(pagedPosts, total, pageNum, pageSize);
     }
 
@@ -380,8 +249,6 @@ public class PostService {
         return PageResult.of(rows, total, pageNum, pageSize);
     }
 
-    /* ---------- 计数 ---------- */
-
     /**
      * 统计指定用户的博文数
      *
@@ -403,5 +270,126 @@ public class PostService {
         long count = postMapper.countAll();
         log.info("统计全局帖子数量，结果: {}", count);
         return count;
+    }
+
+    /**
+     * 更新博文（全字段可选更新）
+     * 仅对非 null 字段执行修改，事务控制
+     *
+     * @param id   博文主键
+     * @param post 待更新字段封装实体
+     * @return 更新后的博文；若不存在返回 null
+     */
+    @Transactional
+    public Post updatePost(Long id, Post post) {
+        Post existingPost = postMapper.selectById(id);
+        if (existingPost == null) {
+            log.warn("更新帖子失败，帖子不存在，ID: {}", id);
+            return null;
+        }
+
+        // Update fields
+        if (post.getUserId() != null) {
+            existingPost.setUserId(post.getUserId());
+        }
+        if (post.getTitle() != null) {
+            existingPost.setTitle(post.getTitle());
+        }
+        if (post.getContent() != null) {
+            existingPost.setContent(post.getContent());
+        }
+        if (post.getStatus() != null) {
+            existingPost.setStatus(post.getStatus());
+        }
+        if (post.getCategoryId() != null) {
+            existingPost.setCategoryId(post.getCategoryId());
+        }
+        if (post.getTags() != null) {
+            existingPost.setTags(post.getTags());
+        }
+        if (post.getCommentAreaStatus() != null) {
+            existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
+        }
+
+        int rows = postMapper.update(existingPost);
+        if (rows == 0) {
+            log.warn("更新帖子失败，ID: {} , 可能已被修改或不存在", existingPost.getId());
+            return null;
+        }
+        log.info("更新帖子成功，帖子ID: {}", existingPost.getId());
+        return existingPost;
+    }
+
+    /**
+     * 点赞数原子递增
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
+    public int likePost(Long postId) {
+        return postMapper.updateLikeCount(postId, 1);
+    }
+
+    /**
+     * 点赞数原子递减
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
+    public int unlikePost(Long postId) {
+        return postMapper.updateLikeCount(postId, -1);
+    }
+
+    /**
+     * 浏览数原子递增
+     *
+     * @param postId 博文主键
+     * @return 影响行数
+     */
+    public int increaseViewCount(Long postId) {
+        return postMapper.updateViewCount(postId, 1);
+    }
+
+    /**
+     * 评论数原子更新
+     *
+     * @param postId 博文主键
+     * @param delta  变化量（正/负）
+     * @return 影响行数
+     */
+    public int updateCommentCount(Long postId, int delta) {
+        return postMapper.updateCommentCount(postId, delta);
+    }
+
+    /**
+     * 删除单篇博文（逻辑删除）
+     *
+     * @param postId 博文主键
+     * @return 是否删除成功
+     */
+    @Transactional
+    public boolean deletePost(Long postId) {
+        Post post = postMapper.selectById(postId);
+        if (post == null) {
+            log.warn("删除帖子失败，帖子不存在，ID: {}", postId);
+            return false;
+        }
+        postMapper.deleteById(postId);
+        log.info("帖子ID: {} 删除成功 (逻辑删除)", postId);
+        return true;
+    }
+
+    /**
+     * 批量删除博文（逻辑删除）
+     *
+     * @param postIds 博文主键列表
+     */
+    @Transactional
+    public void deletePostBatch(List<Long> postIds) {
+        for (Long id : postIds) {
+            postMapper.deleteById(id);
+            log.info("帖子ID: {} 删除成功 (逻辑删除)", id);
+        }
+        log.info("批量删除帖子完成，数量: {}", postIds.size());
     }
 }

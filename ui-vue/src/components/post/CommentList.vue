@@ -35,7 +35,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import CommentItem from './CommentItem.vue'
-import { commentApi } from '@/api/comment'
+import { commentApi } from '@/api/postComment.ts'
 import type { CommentVO } from '@/models/vo/post/CommentVO'
 
 interface Props {

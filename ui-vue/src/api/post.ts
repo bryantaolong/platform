@@ -15,7 +15,7 @@ export const postApi = {
     getAllPosts: (pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/all',
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize
@@ -30,7 +30,7 @@ export const postApi = {
     ): Promise<Result<PageResult<PostSummaryVO>>> => {
         return request({
             url: '/api/posts/published',
-            method: 'get',
+            method: 'GET',
             params: {pageNum, pageSize}
         })
     },
@@ -43,7 +43,7 @@ export const postApi = {
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/title',
-            method: 'post',
+            method: 'POST',
             params: {
                 title,
                 pageNum,
@@ -60,7 +60,7 @@ export const postApi = {
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: '/api/posts/search',
-            method: 'post',
+            method: 'POST',
             data: req,
             params: {
                 pageNum,
@@ -73,7 +73,7 @@ export const postApi = {
     getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/all`,
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize
@@ -85,7 +85,7 @@ export const postApi = {
     getPostVOsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/audit/all`,
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize
@@ -97,7 +97,7 @@ export const postApi = {
     getPublishedPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/published`,
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize
@@ -109,7 +109,7 @@ export const postApi = {
     getPostById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/${id}`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
@@ -117,7 +117,7 @@ export const postApi = {
     getPostAuditById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/audit/${id}`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
@@ -125,7 +125,7 @@ export const postApi = {
     createPost: (data: PostCreateRequest): Promise<Result<Post>> => {
         return request({
             url: '/api/posts',
-            method: 'post',
+            method: 'POST',
             data
         })
     },
@@ -134,7 +134,7 @@ export const postApi = {
     saveDraft: (data: PostCreateRequest): Promise<Result<Post>> => {
         return request({
             url: '/api/posts/draft',
-            method: 'post',
+            method: 'POST',
             data
         })
     },
@@ -143,7 +143,7 @@ export const postApi = {
     updatePost: (id: number, data: PostUpdateRequest): Promise<Result<Post>> => {
         return request({
             url: `/api/posts/${id}`,
-            method: 'put',
+            method: 'PUT',
             data
         })
     },
@@ -152,7 +152,7 @@ export const postApi = {
     updatePostStatus: (id: number, status: PostStatusEnum): Promise<Result<Post>> => {
         return request({
             url: `/api/posts/status/${id}`,
-            method: 'put',
+            method: 'PUT',
             params: {status}
         })
     },
@@ -161,7 +161,7 @@ export const postApi = {
     deletePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}`,
-            method: 'delete'
+            method: 'DELETE'
         })
     },
 
@@ -169,7 +169,7 @@ export const postApi = {
     likePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/like`,
-            method: 'post'
+            method: 'POST'
         })
     },
 
@@ -177,7 +177,7 @@ export const postApi = {
     unlikePost: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${id}/unlike`,
-            method: 'post'
+            method: 'POST'
         })
     },
 
@@ -185,7 +185,7 @@ export const postApi = {
     checkLikeStatus: (postId: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/posts/${postId}/like/status`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
@@ -196,7 +196,7 @@ export const postApi = {
     ): Promise<Result<PageResult<PostSummaryVO>>> => {
         return request({
             url: '/api/posts/following',
-            method: 'get',
+            method: 'GET',
             params: {pageNum, pageSize}
         })
     },
@@ -205,7 +205,7 @@ export const postApi = {
     uploadPostImage: (formData: FormData): Promise<Result<{ url: string }>> => {
         return request({
             url: '/api/posts/upload/image',
-            method: 'post',
+            method: 'POST',
             data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'

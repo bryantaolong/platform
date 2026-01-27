@@ -111,29 +111,6 @@ public class PostCommentService {
     }
 
     /**
-     * 删除评论（软删）
-     *
-     * @param commentId 评论主键
-     * @return 是否删除成功
-     */
-    @Transactional
-    public boolean deleteComment(Long commentId) {
-        PostComment comment = postCommentMapper.selectById(commentId);
-        if (comment == null) {
-            log.warn("删除评论失败，评论不存在，ID: {}", commentId);
-            return false;
-        }
-
-        int rows = postCommentMapper.deleteById(commentId);
-        if (rows > 0) {
-            postMapper.updateCommentCount(comment.getPostId(), -1);
-            log.info("评论ID: {} 删除成功 (逻辑删除)", commentId);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * 根据主键查询单条评论
      *
      * @param commentId 评论主键
@@ -211,36 +188,6 @@ public class PostCommentService {
     }
 
     /**
-     * 点赞评论
-     *
-     * @param commentId 评论主键
-     * @return 影响行数
-     */
-    @Transactional
-    public int likeComment(Long commentId) {
-        PostComment comment = postCommentMapper.selectById(commentId);
-        if (comment == null) {
-            throw new BusinessException("评论不存在");
-        }
-        return postCommentMapper.increaseLikeCount(commentId);
-    }
-
-    /**
-     * 点踩评论
-     *
-     * @param commentId 评论主键
-     * @return 影响行数
-     */
-    @Transactional
-    public int dislikeComment(Long commentId) {
-        PostComment comment = postCommentMapper.selectById(commentId);
-        if (comment == null) {
-            throw new BusinessException("评论不存在");
-        }
-        return postCommentMapper.increaseDislikeCount(commentId);
-    }
-
-    /**
      * 构建评论树（两层：根评论 + 回复）
      *
      * @param postId 博文主键
@@ -302,5 +249,58 @@ public class PostCommentService {
         }
 
         return result;
+    }
+
+    /**
+     * 点赞评论
+     *
+     * @param commentId 评论主键
+     * @return 影响行数
+     */
+    @Transactional
+    public int likeComment(Long commentId) {
+        PostComment comment = postCommentMapper.selectById(commentId);
+        if (comment == null) {
+            throw new BusinessException("评论不存在");
+        }
+        return postCommentMapper.increaseLikeCount(commentId);
+    }
+
+    /**
+     * 点踩评论
+     *
+     * @param commentId 评论主键
+     * @return 影响行数
+     */
+    @Transactional
+    public int dislikeComment(Long commentId) {
+        PostComment comment = postCommentMapper.selectById(commentId);
+        if (comment == null) {
+            throw new BusinessException("评论不存在");
+        }
+        return postCommentMapper.increaseDislikeCount(commentId);
+    }
+
+    /**
+     * 删除评论（逻辑删除）
+     *
+     * @param commentId 评论主键
+     * @return 是否删除成功
+     */
+    @Transactional
+    public boolean deleteComment(Long commentId) {
+        PostComment comment = postCommentMapper.selectById(commentId);
+        if (comment == null) {
+            log.warn("删除评论失败，评论不存在，ID: {}", commentId);
+            return false;
+        }
+
+        int rows = postCommentMapper.deleteById(commentId);
+        if (rows > 0) {
+            postMapper.updateCommentCount(comment.getPostId(), -1);
+            log.info("评论ID: {} 删除成功 (逻辑删除)", commentId);
+            return true;
+        }
+        return false;
     }
 }

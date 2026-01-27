@@ -64,24 +64,6 @@ public class UserFollowService {
     }
 
     /**
-     * 当前用户取消关注另一个用户
-     *
-     * @param followerId 关注者 ID
-     * @param followingId 被关注者 ID
-     * @return 是否成功
-     * @throws BusinessException 若未关注该用户
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public int unfollowUser(Long followerId, Long followingId) {
-        // 检查是否已关注
-        if (!this.isFollowing(followerId, followingId)) {
-            throw new BusinessException("您尚未关注该用户");
-        }
-
-        return userFollowMapper.updateDeletedByFollowerIdAndFollowingId(followerId, followingId, 1);
-    }
-
-    /**
      * 获取当前用户关注的用户列表（分页）
      *
      * @param userId 用户 ID
@@ -170,5 +152,22 @@ public class UserFollowService {
                 .map(UserFollow::getFollowingId)
                 .collect(Collectors.toList());
     }
-}
 
+    /**
+     * 当前用户取消关注另一个用户
+     *
+     * @param followerId 关注者 ID
+     * @param followingId 被关注者 ID
+     * @return 是否成功
+     * @throws BusinessException 若未关注该用户
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int unfollowUser(Long followerId, Long followingId) {
+        // 检查是否已关注
+        if (!this.isFollowing(followerId, followingId)) {
+            throw new BusinessException("您尚未关注该用户");
+        }
+
+        return userFollowMapper.updateDeletedByFollowerIdAndFollowingId(followerId, followingId, 1);
+    }
+}

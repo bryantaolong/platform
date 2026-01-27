@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class PostSecurityService {
 
     private final PostMapper postMapper;
-    private final JwtUtils jwtUtils;
 
     /**
      * 检查当前用户是否为文章的所有者
@@ -26,7 +25,7 @@ public class PostSecurityService {
      */
     public boolean isOwner(Long postId) {
         try {
-            Long currentUserId = jwtUtils.getCurrentUserId();
+            Long currentUserId = JwtUtils.getCurrentUserId();
             Post post = postMapper.selectById(postId);
             return post != null && post.getUserId().equals(currentUserId);
         } catch (Exception e) {
@@ -64,7 +63,7 @@ public class PostSecurityService {
         }
 
         try {
-            Long currentUserId = jwtUtils.getCurrentUserId();
+            Long currentUserId = JwtUtils.getCurrentUserId();
             if (!post.getUserId().equals(currentUserId)) {
                 throw new RuntimeException("无权限访问此文章");
             }

@@ -46,19 +46,6 @@ public class UserFollowController {
     }
 
     /**
-     * 当前用户取消关注指定用户。
-     *
-     * @param followingId 被取消关注用户 ID
-     * @return 取消关注是否成功，true表示成功
-     */
-    @PostMapping("/unfollow/{followingId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> unfollowUser(@PathVariable Long followingId) {
-        Long currentUserId = authService.getCurrentUserId();
-        return Result.success(userFollowService.unfollowUser(currentUserId, followingId) > 0);
-    }
-
-    /**
      * 查询指定用户关注的用户列表（分页）。
      *
      * @param userId   用户 ID
@@ -134,5 +121,18 @@ public class UserFollowController {
                 "followingCount", followingCount,
                 "followerCount", followerCount
         ));
+    }
+
+    /**
+     * 当前用户取消关注指定用户。
+     *
+     * @param followingId 被取消关注用户 ID
+     * @return 取消关注是否成功，true表示成功
+     */
+    @PostMapping("/unfollow/{followingId}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Boolean> unfollowUser(@PathVariable Long followingId) {
+        Long currentUserId = authService.getCurrentUserId();
+        return Result.success(userFollowService.unfollowUser(currentUserId, followingId) > 0);
     }
 }

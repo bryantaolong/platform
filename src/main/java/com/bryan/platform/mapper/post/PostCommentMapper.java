@@ -7,7 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * PostCommentMapper
+ * 帖子评论Mapper接口
+ * 提供帖子评论相关的数据库操作
  *
  * @author Bryan Long
  */
@@ -16,37 +17,42 @@ public interface PostCommentMapper {
 
     int insert(PostComment record);
 
-    int increaseLikeCount(Long id);
+    PostComment selectById(@Param("id") Long id);
 
-    int increaseDislikeCount(Long id);
+    List<PostComment> selectByPostId(@Param("postId") Long postId);
 
-    int increaseChildCount(Long rootId);
+    List<PostComment> selectByPostIdWithPage(@Param("postId") Long postId,
+                                             @Param("offset") int offset,
+                                             @Param("pageSize") int pageSize);
+
+    List<PostComment> selectByRootId(@Param("rootId") Long rootId);
+
+    List<PostComment> selectByParentId(@Param("parentId") Long parentId);
+
+    long countByPostId(@Param("postId") Long postId);
+
+    long countByRootId(@Param("rootId") Long rootId);
+
+    int selectMaxFloorByRootId(@Param("rootId") Long rootId);
+
+    List<PostComment> selectHotCommentsByPostId(@Param("postId") Long postId,
+                                                @Param("limit") int limit);
+
+    List<PostComment> selectLatestCommentsByPostId(@Param("postId") Long postId,
+                                                   @Param("limit") int limit);
+
+    List<PostComment> selectRepliesByCommentId(@Param("commentId") Long commentId,
+                                               @Param("limit") int limit);
+
+    List<PostComment> selectByPostIdWithUser(@Param("postId") Long postId);
+
+    int increaseLikeCount(@Param("id") Long id);
+
+    int increaseDislikeCount(@Param("id") Long id);
+
+    int increaseChildCount(@Param("rootId") Long rootId);
 
     int updateById(PostComment comment);
 
-    int deleteById(Long id);
-
-    PostComment selectById(Long id);
-
-    List<PostComment> selectByPostId(Long postId);
-
-    List<PostComment> selectByPostIdWithPage(Long postId, int offset, int pageSize);
-
-    List<PostComment> selectByRootId(Long rootId);
-
-    List<PostComment> selectByParentId(Long parentId);
-
-    long countByPostId(Long postId);
-
-    long countByRootId(Long rootId);
-
-    int selectMaxFloorByRootId(Long rootId);
-
-    List<PostComment> selectHotCommentsByPostId(Long postId, int limit);
-
-    List<PostComment> selectLatestCommentsByPostId(Long postId, int limit);
-
-    List<PostComment> selectRepliesByCommentId(Long commentId, int limit);
-
-    List<PostComment> selectByPostIdWithUser(Long postId);
+    int deleteById(@Param("id") Long id);
 }

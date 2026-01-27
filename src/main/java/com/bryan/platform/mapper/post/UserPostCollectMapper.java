@@ -14,18 +14,8 @@ import java.util.List;
 @Mapper
 public interface UserPostCollectMapper {
 
-    /* ---------- 增 ---------- */
     int insert(UserPostCollect record);
 
-    /* ---------- 删 ---------- */
-    int deleteById(@Param("id") Long id);
-
-    int deleteByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
-
-    /* ---------- 改 ---------- */
-    int update(UserPostCollect record);
-
-    /* ---------- 查 ---------- */
     UserPostCollect selectById(@Param("id") Long id);
 
     UserPostCollect selectByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
@@ -39,7 +29,6 @@ public interface UserPostCollectMapper {
                                                         @Param("offset") int offset,
                                                         @Param("pageSize") int pageSize);
 
-    /* ---------- 计数 ---------- */
     long countByUserId(@Param("userId") Long userId);
 
     long countByUserIdAndCollectionId(@Param("userId") Long userId, @Param("collectionId") Long collectionId);
@@ -49,4 +38,10 @@ public interface UserPostCollectMapper {
     boolean existsByUserIdAndPostIdIncludeDeleted(@Param("userId") Long userId, @Param("postId") Long postId);
 
     int restoreCollect(@Param("userId") Long userId, @Param("postId") Long postId);
+
+    int update(UserPostCollect record);
+
+    int deleteById(@Param("id") Long id);
+
+    int deleteByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
 }
