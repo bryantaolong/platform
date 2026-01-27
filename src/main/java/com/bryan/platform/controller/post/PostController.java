@@ -45,6 +45,84 @@ public class PostController {
     private final LocalFileService localFileService;
 
     /**
+     * 创建博文（提交审核）
+     *
+     * @param request 创建参数
+     * @return 创建后的博文实体
+     */
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
+    public Result<Post> createPost(@RequestBody PostCreateRequest request) {
+        Long currentUserId = authService.getCurrentUserId();
+
+        Post post = Post.builder()
+                .userId(currentUserId)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .status(PostStatusEnum.AUDITING)
+                .categoryId(request.getCategoryId())
+                .tags(request.getTags())
+                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .build();
+
+        Post createdPost = postService.createPost(post);
+        return Result.success(createdPost);
+    }
+
+    /**
+     * 保存博文草稿
+     *
+     * @param request 创建参数
+     * @return 创建后的博文实体
+     */
+    @PostMapping("/draft")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
+        Long currentUserId = authService.getCurrentUserId();
+
+        Post post = Post.builder()
+                .userId(currentUserId)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .status(PostStatusEnum.DRAFT)
+                .categoryId(request.getCategoryId())
+                .tags(request.getTags())
+                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .build();
+
+        Post createdPost = postService.createPost(post);
+        return Result.success(createdPost);
+    }
+
+    /**
+     * 上传博文图片
+     * <p>
+     * 支持用户在编辑博文时上传图片，图片将保存到 uploads/post-images/ 目录
+     * 返回图片URL，前端可将其插入到Markdown内容中
+     *
+     * @param file 图片文件
+     * @return 图片访问URL
+     */
+    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public Result<Map<String, String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return Result.error(HttpStatus.BAD_REQUEST, "文件不能为空");
+        }
+
+        try {
+            // 只传递子目录，LocalFileService 会自动生成文件名
+            String savedPath = localFileService.storeFile(file, "post-images");
+
+            Map<String, String> result = new HashMap<>();
+            result.put("url", savedPath);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(HttpStatus.INTERNAL_ERROR, "图片上传失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 管理员分页查询所有博文（含草稿/已删除）
      *
      * @param pageNum  当前页码
@@ -247,56 +325,6 @@ public class PostController {
     }
 
     /**
-     * 创建博文（提交审核）
-     *
-     * @param request 创建参数
-     * @return 创建后的博文实体
-     */
-    @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public Result<Post> createPost(@RequestBody PostCreateRequest request) {
-        Long currentUserId = authService.getCurrentUserId();
-
-        Post post = Post.builder()
-                .userId(currentUserId)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .status(PostStatusEnum.AUDITING)
-                .categoryId(request.getCategoryId())
-                .tags(request.getTags())
-                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
-                .build();
-
-        Post createdPost = postService.createPost(post);
-        return Result.success(createdPost);
-    }
-
-    /**
-     * 保存博文草稿
-     *
-     * @param request 创建参数
-     * @return 创建后的博文实体
-     */
-    @PostMapping("/draft")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Post> savePostDraft(@RequestBody PostCreateRequest request) {
-        Long currentUserId = authService.getCurrentUserId();
-
-        Post post = Post.builder()
-                .userId(currentUserId)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .status(PostStatusEnum.DRAFT)
-                .categoryId(request.getCategoryId())
-                .tags(request.getTags())
-                .commentAreaStatus(CommentAreaStatusEnum.OPEN)
-                .build();
-
-        Post createdPost = postService.createPost(post);
-        return Result.success(createdPost);
-    }
-
-    /**
      * 更新博文
      *
      * @param id      博文主键
@@ -345,7 +373,7 @@ public class PostController {
     }
 
     /**
-     * 删除博文（软删）
+     * 删除博文（逻辑删除）
      *
      * @param id 博文主键
      * @return 是否删除成功
@@ -409,33 +437,5 @@ public class PostController {
         Long currentUserId = authService.getCurrentUserId();
         boolean liked = userPostLikeService.isLiked(currentUserId, id);
         return Result.success(liked);
-    }
-
-    /**
-     * 上传博文图片
-     * <p>
-     * 支持用户在编辑博文时上传图片，图片将保存到 uploads/post-images/ 目录
-     * 返回图片URL，前端可将其插入到Markdown内容中
-     *
-     * @param file 图片文件
-     * @return 图片访问URL
-     */
-    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
-    public Result<Map<String, String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return Result.error(HttpStatus.BAD_REQUEST, "文件不能为空");
-        }
-
-        try {
-            // 只传递子目录，LocalFileService 会自动生成文件名
-            String savedPath = localFileService.storeFile(file, "post-images");
-
-            Map<String, String> result = new HashMap<>();
-            result.put("url", savedPath);
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error(HttpStatus.INTERNAL_ERROR, "图片上传失败: " + e.getMessage());
-        }
     }
 }

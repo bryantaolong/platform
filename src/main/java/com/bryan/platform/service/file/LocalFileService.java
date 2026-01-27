@@ -65,6 +65,20 @@ public class LocalFileService {
     }
 
     /**
+     * 读取指定相对路径文件为字节数组
+     *
+     * @param filePath uploads 下的相对路径
+     * @return 文件字节数组
+     * @throws IOException 文件读写异常
+     */
+    public byte[] loadFileAsBytes(String filePath) throws IOException {
+        // 构建文件的完整物理路径
+        Path fullPath = Paths.get(uploadDir, filePath).toAbsolutePath().normalize();
+        // 读取文件所有字节
+        return Files.readAllBytes(fullPath);
+    }
+
+    /**
      * 删除指定相对路径的文件
      *
      * @param filePath uploads 下的相对路径
@@ -81,19 +95,5 @@ public class LocalFileService {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * 读取指定相对路径文件为字节数组
-     *
-     * @param filePath uploads 下的相对路径
-     * @return 文件字节数组
-     * @throws IOException 文件读写异常
-     */
-    public byte[] loadFileAsBytes(String filePath) throws IOException {
-        // 构建文件的完整物理路径
-        Path fullPath = Paths.get(uploadDir, filePath).toAbsolutePath().normalize();
-        // 读取文件所有字节
-        return Files.readAllBytes(fullPath);
     }
 }

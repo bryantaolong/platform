@@ -51,8 +51,6 @@ public class UserProfileController {
         return Result.success(avatarPath);
     }
 
-
-
     /**
      * 根据用户主键查询用户资料（公开访问，用于展示用户信息）
      *

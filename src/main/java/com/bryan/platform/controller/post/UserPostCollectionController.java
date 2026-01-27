@@ -48,46 +48,6 @@ public class UserPostCollectionController {
     }
 
     /**
-     * 删除收藏夹
-     *
-     * @param collectionId 收藏夹主键
-     * @return 是否删除成功
-     */
-    @DeleteMapping("/{collectionId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> deleteCollection(@PathVariable Long collectionId) {
-        // TODO: 可以添加权限检查，确保只能删除自己的收藏夹
-
-        boolean success = userPostCollectionService.deleteCollection(collectionId);
-        if (success) {
-            return Result.success(true);
-        } else {
-            return Result.error(HttpStatus.NOT_FOUND, "删除失败，收藏夹不存在");
-        }
-    }
-
-    /**
-     * 更新收藏夹名称
-     *
-     * @param collectionId 收藏夹主键
-     * @param folderName   新名称
-     * @return 更新后的收藏夹实体
-     */
-    @PutMapping("/{collectionId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<UserPostCollection> updateCollection(
-            @PathVariable Long collectionId,
-            @RequestParam @Validated String folderName) {
-        try {
-            UserPostCollection collection = userPostCollectionService.updateCollection(
-                    collectionId, folderName);
-            return Result.success(collection);
-        } catch (RuntimeException e) {
-            return Result.error(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-    }
-
-    /**
      * 获取当前登录用户的全部收藏夹
      *
      * @return 收藏夹列表
@@ -143,5 +103,44 @@ public class UserPostCollectionController {
 
         long count = userPostCollectionService.countUserCollections(currentUserId);
         return Result.success(count);
+    }
+
+    /**
+     * 更新收藏夹名称
+     *
+     * @param collectionId 收藏夹主键
+     * @param folderName   新名称
+     * @return 更新后的收藏夹实体
+     */
+    @PutMapping("/{collectionId}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<UserPostCollection> updateCollection(
+            @PathVariable Long collectionId,
+            @RequestParam @Validated String folderName) {
+        try {
+            UserPostCollection collection = userPostCollectionService.updateCollection(
+                    collectionId, folderName);
+            return Result.success(collection);
+        } catch (RuntimeException e) {
+            return Result.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    /**
+     * 删除收藏夹
+     *
+     * @param collectionId 收藏夹主键
+     * @return 是否删除成功
+     */
+    @DeleteMapping("/{collectionId}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Boolean> deleteCollection(@PathVariable Long collectionId) {
+        Long userId = authService.getCurrentUserId();
+        boolean success = userPostCollectionService.deleteCollection(userId, collectionId);
+        if (success) {
+            return Result.success(true);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "删除失败，收藏夹不存在");
+        }
     }
 }

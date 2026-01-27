@@ -14,24 +14,19 @@ import java.util.List;
 @Mapper
 public interface UserPostCollectionMapper {
 
-    /* ---------- 增 ---------- */
     int insert(UserPostCollection record);
 
-    /* ---------- 删 ---------- */
-    int deleteById(@Param("id") Long id);
-
-    /* ---------- 改 ---------- */
-    int update(UserPostCollection record);
-
-    /* ---------- 查 ---------- */
     UserPostCollection selectById(@Param("id") Long id);
 
     List<UserPostCollection> selectByUserId(@Param("userId") Long userId);
 
     UserPostCollection selectByUserIdAndFolderName(@Param("userId") Long userId, @Param("folderName") String folderName);
 
-    /* ---------- 计数 ---------- */
     long countByUserId(@Param("userId") Long userId);
 
     boolean existsByUserIdAndFolderName(@Param("userId") Long userId, @Param("folderName") String folderName);
+
+    int update(UserPostCollection record);
+
+    int deleteById(@Param("id") Long id);
 }

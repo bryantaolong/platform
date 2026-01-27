@@ -51,25 +51,6 @@ public class UserPostCollectController {
     }
 
     /**
-     * 取消收藏博文
-     *
-     * @param postId 博文主键
-     * @return 是否取消成功
-     */
-    @DeleteMapping("/{postId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> uncollectPost(@PathVariable Long postId) {
-        Long currentUserId = authService.getCurrentUserId();
-
-        boolean success = userPostCollectService.uncollectPost(currentUserId, postId);
-        if (success) {
-            return Result.success(true);
-        } else {
-            return Result.error(HttpStatus.NOT_FOUND, "取消收藏失败，可能未收藏该博文");
-        }
-    }
-
-    /**
      * 分页查询指定用户的收藏列表
      * 支持按收藏夹筛选
      *
@@ -163,5 +144,24 @@ public class UserPostCollectController {
 
         long count = userPostCollectService.countUserCollects(currentUserId);
         return Result.success(count);
+    }
+
+    /**
+     * 取消收藏博文
+     *
+     * @param postId 博文主键
+     * @return 是否取消成功
+     */
+    @DeleteMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Boolean> cancelCollectPost(@PathVariable Long postId) {
+        Long currentUserId = authService.getCurrentUserId();
+
+        boolean success = userPostCollectService.cancelCollectPost(currentUserId, postId);
+        if (success) {
+            return Result.success(true);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "取消收藏失败，可能未收藏该博文");
+        }
     }
 }

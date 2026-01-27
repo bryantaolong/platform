@@ -443,7 +443,7 @@ const handleCollect = async () => {
     if (!post.value) return
 
     if (isCollected.value) {
-      const response = await userPostCollectApi.uncollectPost(post.value.id)
+      const response = await userPostCollectApi.cancelCollectPost(post.value.id)
       if (response.code === 200) {
         isCollected.value = false
         post.value.collectCount = Math.max(0, (post.value.collectCount || 0) - 1)

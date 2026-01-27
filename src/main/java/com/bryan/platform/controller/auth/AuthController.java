@@ -43,14 +43,14 @@ public class AuthController {
     @PreAuthorize("permitAll()")
     public Result<UserVO> register(@RequestBody @Valid RegisterRequest registerRequest) {
         // 1. 调用注册服务，创建新用户
-        SysUser sysUser = authService.register(registerRequest);
+        SysUser registered = authService.register(registerRequest);
 
         // 2. 初始化 UserProfile
-        UserProfile userProfile = UserProfile.builder().userId(sysUser.getId()).build();
-        userProfileService.save(userProfile);
+        UserProfile userProfile = UserProfile.builder().userId(registered.getId()).build();
+        UserProfile profile = userProfileService.createUserProfile(userProfile);
 
         // 2. 返回注册结果
-        return Result.success(UserConverter.toUserVO(sysUser));
+        return Result.success(UserConverter.toUserVO(registered));
     }
 
     /**
@@ -85,46 +85,6 @@ public class AuthController {
 
         // 3. 返回用户信息
         return Result.success(userVO);
-    }
-
-    /**
-     * 退出登录
-     *
-     * @return boolean 是否退出登录
-     */
-    @GetMapping("/logout")
-    @PreAuthorize("isAuthenticated()")
-    public boolean logout() {
-        return authService.logout();
-    }
-
-    /**
-     * 修改用户密码。
-     * 管理员可修改任意用户密码，用户本人可修改自己的密码。
-     *
-     * @param changePasswordRequest 包含旧密码和新密码的请求体
-     * @return 更新后的用户实体
-     */
-    @PutMapping("/password")
-    @PreAuthorize("isAuthenticated()")
-    public Result<UserVO> changePassword(
-            @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
-        // 1. 调用服务层执行密码修改
-        SysUser updated = authService.changePassword(changePasswordRequest.getOldPassword(),
-                                                        changePasswordRequest.getNewPassword());
-        return Result.success(UserConverter.toUserVO(updated));
-    }
-
-    /**
-     * 注销用户。
-     *
-     * @return 注销结果
-     */
-    @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
-    public Result<UserVO> deleteAccount() {
-        // 1. 调用服务层执行密码修改
-        return Result.success(UserConverter.toUserVO(authService.deleteAccount()));
     }
 
     /**
@@ -164,5 +124,45 @@ public class AuthController {
 
         // 3. 校验通过
         return Result.success("Validation passed");
+    }
+
+    /**
+     * 修改用户密码。
+     * 管理员可修改任意用户密码，用户本人可修改自己的密码。
+     *
+     * @param changePasswordRequest 包含旧密码和新密码的请求体
+     * @return 更新后的用户实体
+     */
+    @PutMapping("/password")
+    @PreAuthorize("isAuthenticated()")
+    public Result<UserVO> changePassword(
+            @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+        // 1. 调用服务层执行密码修改
+        SysUser updated = authService.changePassword(changePasswordRequest.getOldPassword(),
+                changePasswordRequest.getNewPassword());
+        return Result.success(UserConverter.toUserVO(updated));
+    }
+
+    /**
+     * 注销用户。
+     *
+     * @return 注销结果
+     */
+    @DeleteMapping
+    @PreAuthorize("isAuthenticated()")
+    public Result<UserVO> deleteAccount() {
+        // 1. 调用服务层执行密码修改
+        return Result.success(UserConverter.toUserVO(authService.deleteAccount()));
+    }
+
+    /**
+     * 退出登录
+     *
+     * @return boolean 是否退出登录
+     */
+    @GetMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public boolean logout() {
+        return authService.logout();
     }
 }

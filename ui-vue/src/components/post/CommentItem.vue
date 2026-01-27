@@ -88,7 +88,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatLineRound, ArrowUpBold, Star, Delete } from '@element-plus/icons-vue'
 import CommentForm from './CommentForm.vue'
-import { commentApi } from '@/api/comment'
+import { commentApi } from '@/api/postComment.ts'
 import { getAvatarUrl } from '@/utils/file'
 import type { CommentVO } from '@/models/vo/post/CommentVO'
 

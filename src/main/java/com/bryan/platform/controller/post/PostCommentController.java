@@ -34,6 +34,26 @@ public class PostCommentController {
     private final UserCommentLikeService userCommentLikeService;
 
     /**
+     * 创建评论
+     *
+     * @param request 创建参数
+     * @return 创建后的评论 VO
+     */
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
+    public Result<CommentVO> createComment(@RequestBody CommentCreateRequest request) {
+        Long currentUserId = authService.getCurrentUserId();
+        PostComment comment = postCommentService.createComment(
+                currentUserId,
+                request.getPostId(),
+                request.getParentId(),
+                request.getReplyToUserId(),
+                request.getContent()
+        );
+        return Result.success(CommentConverter.toCommentVO(comment));
+    }
+
+    /**
      * 根据帖子 ID 查询全部评论列表（平铺）
      *
      * @param postId 帖子主键
@@ -155,27 +175,7 @@ public class PostCommentController {
     }
 
     /**
-     * 创建评论
-     *
-     * @param request 创建参数
-     * @return 创建后的评论 VO
-     */
-    @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public Result<CommentVO> createComment(@RequestBody CommentCreateRequest request) {
-        Long currentUserId = authService.getCurrentUserId();
-        PostComment comment = postCommentService.createComment(
-                currentUserId,
-                request.getPostId(),
-                request.getParentId(),
-                request.getReplyToUserId(),
-                request.getContent()
-        );
-        return Result.success(CommentConverter.toCommentVO(comment));
-    }
-
-    /**
-     * 删除评论（软删）
+     * 删除评论（逻辑删除）
      *
      * @param id 评论主键
      * @return 是否删除成功

@@ -109,4 +109,3 @@ public class ArithmeticUtil {
         return b.divide(BigDecimal.ONE, scale, RoundingMode.HALF_UP).doubleValue();
     }
 }
-

@@ -8,14 +8,14 @@ export const commentApi = {
     getCommentsByPostId: (postId: number): Promise<Result<CommentVO[]>> => {
         return request({
             url: `/api/comments/post/${postId}`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
     pageCommentsByPostId: (postId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<CommentVO>>> => {
         return request({
             url: `/api/comments/post/${postId}/page`,
-            method: 'get',
+            method: 'GET',
             params: {
                 pageNum,
                 pageSize
@@ -26,21 +26,21 @@ export const commentApi = {
     getCommentTree: (postId: number): Promise<Result<CommentVO[]>> => {
         return request({
             url: `/api/comments/post/${postId}/tree`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
     getRepliesByCommentId: (commentId: number): Promise<Result<CommentVO[]>> => {
         return request({
             url: `/api/comments/${commentId}/replies`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
     getHotComments: (postId: number, limit: number): Promise<Result<CommentVO[]>> => {
         return request({
             url: `/api/comments/post/${postId}/hot`,
-            method: 'get',
+            method: 'GET',
             params: {
                 limit
             }
@@ -50,7 +50,7 @@ export const commentApi = {
     getLatestComments: (postId: number, limit: number): Promise<Result<CommentVO[]>> => {
         return request({
             url: `/api/comments/post/${postId}/latest`,
-            method: 'get',
+            method: 'GET',
             params: {
                 limit
             }
@@ -60,43 +60,43 @@ export const commentApi = {
     getCommentById: (id: number): Promise<Result<CommentVO>> => {
         return request({
             url: `/api/comments/${id}`,
-            method: 'get'
+            method: 'GET'
         })
     },
 
     createComment: (data: CommentCreateRequest): Promise<Result<CommentVO>> => {
         return request({
             url: '/api/comments',
-            method: 'post',
+            method: 'POST',
             data
         })
     },
 
     deleteComment: (id: number): Promise<Result<boolean>> => {
         return request({
-            url: `/api/comments/${id}`,
-            method: 'delete'
+            url: `/api/comments/delete/${id}`,
+            method: 'DELETE'
         })
     },
 
     likeComment: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/comments/${id}/like`,
-            method: 'post'
+            method: 'POST'
         })
     },
 
     unlikeComment: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/comments/${id}/unlike`,
-            method: 'post'
+            method: 'POST'
         })
     },
 
     checkLikeStatus: (id: number): Promise<Result<boolean>> => {
         return request({
             url: `/api/comments/${id}/like/status`,
-            method: 'get'
+            method: 'GET'
         })
     }
 }
