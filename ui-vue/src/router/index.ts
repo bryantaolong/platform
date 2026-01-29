@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'FollowingPosts',
                 component: () => import('@/views/post/FollowingPosts.vue'),
                 meta: {requiresAuth: true, title: '我的关注'}
+            },
+            {
+                path: 'hot',
+                name: 'HotPosts',
+                component: () => import('@/views/post/HotPosts.vue'),
+                meta: {title: '热门文章'}
             }
         ]
     },

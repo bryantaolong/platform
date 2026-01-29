@@ -49,6 +49,8 @@ public interface PostMapper {
                               @Param("offset") int offset,
                               @Param("pageSize") int pageSize);
 
+    List<Post> selectRecentPosts(@Param("limit") int limit, @Param("hours") int hours);
+
     long countByUserId(@Param("userId") Long userId);
 
     long countByStatus(@Param("status") PostStatusEnum status);

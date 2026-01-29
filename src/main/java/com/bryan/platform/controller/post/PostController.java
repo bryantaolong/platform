@@ -63,6 +63,7 @@ public class PostController {
                 .categoryId(request.getCategoryId())
                 .tags(request.getTags())
                 .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .weight(1)
                 .build();
 
         Post createdPost = postService.createPost(post);
@@ -88,6 +89,7 @@ public class PostController {
                 .categoryId(request.getCategoryId())
                 .tags(request.getTags())
                 .commentAreaStatus(CommentAreaStatusEnum.OPEN)
+                .weight(1)
                 .build();
 
         Post createdPost = postService.createPost(post);

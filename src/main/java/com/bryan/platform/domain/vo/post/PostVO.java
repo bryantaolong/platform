@@ -49,4 +49,9 @@ public class PostVO {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    /**
+     * 热度分数（仅用于热度排行榜）
+     */
+    private Double hotScore;
 }

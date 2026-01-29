@@ -392,4 +392,18 @@ public class PostService {
         }
         log.info("批量删除帖子完成，数量: {}", postIds.size());
     }
+
+    /**
+     * 查询最近发布的已发布帖子
+     * 用于热度排行榜计算
+     *
+     * @param limit  返回数量限制
+     * @param hours  时间范围（小时），只查询此时间范围内发布的帖子
+     * @return 最近发布的帖子列表
+     */
+    public List<Post> findRecentPosts(int limit, int hours) {
+        List<Post> posts = postMapper.selectRecentPosts(limit, hours);
+        log.info("查询最近发布的帖子完成，数量: {}, 时间范围: {} 小时", posts.size(), hours);
+        return posts;
+    }
 }

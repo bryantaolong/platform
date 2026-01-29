@@ -17,4 +17,8 @@ export interface PostVO {
   shareCount?: number
   createdAt: string
   updatedAt: string
+  /**
+   * 热度分数（仅用于热度排行榜）
+   */
+  hotScore?: number
 }

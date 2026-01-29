@@ -39,7 +39,7 @@
           </div>
         </div>
         <div class="post-content">
-          <p class="post-summary">{{ post.contentPreview }}</p>
+          <div class="post-summary markdown-preview" v-html="renderMarkdown(post.contentPreview)"></div>
         </div>
         <div class="post-footer">
           <div class="stats">
@@ -88,6 +88,7 @@
 <script setup lang="ts">
 import {ref, reactive, onMounted, computed} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
+import {marked} from 'marked'
 import {ElMessage} from 'element-plus'
 import {
   Search,
@@ -169,6 +170,12 @@ const formatDateTime = (dateStr: string) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString('zh-CN')
+}
+
+// Render markdown to HTML
+const renderMarkdown = (text: string): string => {
+  if (!text) return ''
+  return marked.parse(text)
 }
 
 
@@ -316,6 +323,66 @@ onMounted(() => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.markdown-preview {
+  font-size: 0.9rem;
+  color: #606266;
+}
+
+.markdown-preview :deep(p) {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.markdown-preview :deep(h1),
+.markdown-preview :deep(h2),
+.markdown-preview :deep(h3),
+.markdown-preview :deep(h4),
+.markdown-preview :deep(h5),
+.markdown-preview :deep(h6) {
+  margin: 0 0 0.5em 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.markdown-preview :deep(code) {
+  background: #f5f7fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.markdown-preview :deep(pre) {
+  display: none;
+}
+
+.markdown-preview :deep(pre code) {
+  display: none;
+}
+
+.markdown-preview :deep(blockquote) {
+  display: none;
+}
+
+.markdown-preview :deep(ul),
+.markdown-preview :deep(ol) {
+  display: none;
+  margin: 0;
+  padding-left: 1em;
+}
+
+.markdown-preview :deep(img) {
+  display: none;
+}
+
+.markdown-preview :deep(a) {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.markdown-preview :deep(a:hover) {
+  text-decoration: underline;
 }
 
 .post-footer {

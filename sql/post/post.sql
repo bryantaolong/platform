@@ -12,7 +12,7 @@ CREATE TABLE post (
                       comment_count    BIGINT       NOT NULL DEFAULT 0,
                       collect_count    BIGINT       NOT NULL DEFAULT 0,
                       share_count      BIGINT       NOT NULL DEFAULT 0,
-                      weight           INTEGER      NOT NULL DEFAULT 0,    -- 人工置顶权重，越大越靠前
+                      weight           INTEGER      NOT NULL DEFAULT 1,    -- 人工置顶权重，越大越靠前
                       deleted          SMALLINT     NOT NULL DEFAULT 0,   -- 逻辑删除 0=正常 1=删除
                       version          INTEGER      NOT NULL DEFAULT 0,   -- 乐观锁
                       created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

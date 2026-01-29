@@ -212,4 +212,13 @@ export const postApi = {
             }
         })
     },
+
+    // Get hot posts ranking
+    getHotPosts: (limit: number = 10): Promise<Result<PostVO[]>> => {
+        return request({
+            url: '/api/posts/hot',
+            method: 'GET',
+            params: { limit }
+        })
+    },
 }
