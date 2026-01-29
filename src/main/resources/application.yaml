@@ -44,6 +44,19 @@ jwt:
 # 第三方 API 配置（通用）
 llm:
   api:
-    key: "${DEEPSEEK_API_KEY}" # Set your own api key as environment variable
-    url: "https://api.deepseek.com/chat/completions"
-    model: "deepseek-chat"
+    # 默认使用的大模型提供商：deepseek、moonshot、minimax
+    default-provider: deepseek
+    # 各大模型提供商配置
+    providers:
+      deepseek:
+        key: "${DEEPSEEK_API_KEY}" # Set your own api key as environment variable
+        url: "https://api.deepseek.com/chat/completions"
+        model: "deepseek-chat"
+      moonshot:
+        key: "${MOONSHOT_API_KEY:}" # 可选：Moonshot API Key
+        url: "https://api.moonshot.cn/v1/chat/completions"
+        model: "kimi-k2-turbo-preview"
+      minimax:
+        key: "${MINIMAX_API_KEY:}" # 可选：MiniMax API Key
+        url: "https://api.minimaxi.com/v1/chat/completions"
+        model: "MiniMax-M2.1"

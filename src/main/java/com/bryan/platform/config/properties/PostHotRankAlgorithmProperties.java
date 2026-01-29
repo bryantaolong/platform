@@ -14,6 +14,7 @@ import java.util.Map;
 @Setter
 @Component
 public class PostHotRankAlgorithmProperties {
+
     private Map<String, Double> weights = new HashMap<>();
 
     public double get(String key) {

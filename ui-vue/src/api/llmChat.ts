@@ -9,10 +9,11 @@ export const llmChatApi = {
   /**
    * 与 AI 对话接口
    * @param message 用户消息
+   * @param provider 模型提供商（deepseek、moonshot、minimax），可选，默认使用服务端配置
    * @returns AI 回复内容
    */
-  sendChatMessage(message: string): Promise<{ reply: string }> {
-    return request.post('/api/llm/chat', { message })
+  sendChatMessage(message: string, provider?: string): Promise<{ reply: string }> {
+    return request.post('/api/llm/chat', { message, provider })
   },
 
   /**
