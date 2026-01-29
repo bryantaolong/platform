@@ -5,10 +5,7 @@ import com.bryan.platform.service.llm.LlmChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -111,5 +108,16 @@ public class LlmChatController {
 
         // 3. 返回成功提示信息
         return Collections.singletonMap("message", "上下文已清空");
+    }
+
+    /**
+     * 测试指定大模型提供商的连通性和实际模型信息（服务端调试用）
+     *
+     * @param provider 大模型提供商标识（deepseek、moonshot、minimax），可选；为空时使用默认提供商
+     * @return 返回包含 provider、configuredModel、actualModel、endpoint、sampleReply、status 等字段的结果
+     */
+    @GetMapping("/test/provider")
+    public Map<String, String> testProvider(@RequestParam(value = "provider", required = false) String provider) {
+        return llmChatService.testProvider(provider);
     }
 }
