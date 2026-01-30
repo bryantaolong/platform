@@ -117,6 +117,7 @@ public class LlmChatController {
      * @return 返回包含 provider、configuredModel、actualModel、endpoint、sampleReply、status 等字段的结果
      */
     @GetMapping("/test/provider")
+    @PreAuthorize("permitAll()")
     public Map<String, String> testProvider(@RequestParam(value = "provider", required = false) String provider) {
         return llmChatService.testProvider(provider);
     }

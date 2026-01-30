@@ -46,6 +46,8 @@ public class PostVO {
 
     private Long shareCount;
 
+    private Integer weight;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

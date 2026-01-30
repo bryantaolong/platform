@@ -365,10 +365,13 @@ public class PostController {
     @PutMapping("/status/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public Result<Post> updatePostStatus(@PathVariable Long id, @RequestParam PostStatusEnum status) {
-        Post post = postService.getPostById(id);
-        if (post != null) {
-            post.setStatus(status);
-            return Result.success(postService.updatePost(id, post));
+        Post post = Post.builder()
+                .id(id)
+                .status(status)
+                .build();
+        Post updated = postService.updatePost(id, post);
+        if (updated != null) {
+            return Result.success(updated);
         } else {
             return Result.error(HttpStatus.NOT_FOUND, "更新失败，文章不存在");
         }

@@ -15,6 +15,7 @@ export interface PostVO {
   commentCount?: number
   collectCount?: number
   shareCount?: number
+  weight?: number
   createdAt: string
   updatedAt: string
   /**

@@ -58,6 +58,12 @@ const routes: RouteRecordRaw[] = [
                 meta: {title: '博文管理'}
             },
             {
+                path: 'post-monitor',
+                name: 'PostMonitor',
+                component: () => import('@/views/admin/PostMonitor.vue'),
+                meta: {title: '博文数据监控'}
+            },
+            {
                 path: 'audit',
                 name: 'PostAuditList',
                 component: () => import('@/views/admin/PostAuditList.vue'),

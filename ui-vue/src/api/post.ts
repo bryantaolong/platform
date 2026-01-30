@@ -69,6 +69,23 @@ export const postApi = {
         })
     },
 
+    // Admin search posts with corrected backend path (用于后台运营配置)
+    searchPostsAdminFixed: (
+        req: PostSearchRequest,
+        pageNum: number,
+        pageSize: number
+    ): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: '/api/posts/admin/search',
+            method: 'POST',
+            data: req,
+            params: {
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
     // Get posts by user ID with pagination
     getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
@@ -154,6 +171,23 @@ export const postApi = {
             url: `/api/posts/status/${id}`,
             method: 'PUT',
             params: {status}
+        })
+    },
+
+    // Update post weight for manual ranking (admin only)
+    updatePostWeight: (id: number, weight: number): Promise<Result<Post>> => {
+        return request({
+            url: `/api/admin/post-algorithm/posts/${id}/weight`,
+            method: 'PUT',
+            params: {weight}
+        })
+    },
+
+    // Unpin post (admin only) - cancel manual pinning
+    unpinPost: (id: number): Promise<Result<Post>> => {
+        return request({
+            url: `/api/admin/post-algorithm/posts/${id}/unpin`,
+            method: 'PUT'
         })
     },
 

@@ -310,6 +310,9 @@ public class PostService {
         if (post.getCommentAreaStatus() != null) {
             existingPost.setCommentAreaStatus(post.getCommentAreaStatus());
         }
+        if (post.getWeight() != null) {
+            existingPost.setWeight(post.getWeight());
+        }
 
         int rows = postMapper.update(existingPost);
         if (rows == 0) {

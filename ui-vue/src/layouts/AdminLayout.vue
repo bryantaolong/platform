@@ -32,6 +32,7 @@
             </template>
             <el-menu-item index="/admin/posts">博文管理</el-menu-item>
             <el-menu-item index="/admin/audit">博文审核</el-menu-item>
+            <el-menu-item index="/admin/post-monitor">博文数据监控</el-menu-item>
           </el-sub-menu>
           <el-menu-item index="/admin/profile">
             <el-icon><Avatar /></el-icon>

@@ -12,7 +12,7 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
 
-# 日志配置（通用）
+# 日志配置
 logging:
   include-application-name: false
   level:
@@ -27,7 +27,7 @@ logging:
 file:
   upload-dir: ./uploads
 
-# MyBatis 配置（通用）
+# MyBatis 配置
 mybatis:
   mapper-locations: classpath*:/mapper/**/*.xml
   type-aliases-package: com.bryan.platform.domain.entity
@@ -41,12 +41,10 @@ jwt:
   expiration-ms: 86400000  # 24小时
   token-prefix: "Bearer "
 
-# 第三方 API 配置（通用）
+# 第三方 API 配置
 llm:
   api:
-    # 默认使用的大模型提供商：deepseek、moonshot、minimax
     default-provider: deepseek
-    # 各大模型提供商配置
     providers:
       deepseek:
         key: "${DEEPSEEK_API_KEY}" # Set your own api key as environment variable

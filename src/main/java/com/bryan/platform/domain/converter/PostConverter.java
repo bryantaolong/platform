@@ -40,6 +40,7 @@ public class PostConverter {
                 .commentCount(post.getCommentCount())
                 .collectCount(post.getCollectCount())
                 .shareCount(post.getShareCount())
+                .weight(post.getWeight())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
