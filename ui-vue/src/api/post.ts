@@ -59,7 +59,7 @@ export const postApi = {
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
-            url: '/api/posts/search',
+            url: '/api/posts/admin/search',
             method: 'POST',
             data: req,
             params: {
