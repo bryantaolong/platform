@@ -545,6 +545,153 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get Followed Users Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/following?pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"posts",
+								"following"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Post Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/api/posts/upload/image"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Posts by Title",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts/title?title=test&pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"posts",
+								"title"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "test"
+								},
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Search Posts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"test\",\n  \"author\": \"admin\",\n  \"tags\": \"tag1\",\n  \"status\": \"PUBLISHED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts/admin/search?pageNum=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"posts",
+								"admin",
+								"search"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1527,7 +1674,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"message\": \"Hello AI, how can you help me?\"\n}"
+							"raw": "{\n  \"message\": \"Hello AI, how can you help me?\",\n  \"provider\": \"deepseek\"\n}"
 						},
 						"url": "{{base_url}}/api/llm/chat"
 					},
@@ -1563,9 +1710,36 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"postId\": 1\n}"
+							"raw": "{\n  \"title\": \"Test Post Title\",\n  \"content\": \"This is the content of the post to be summarized.\",\n  \"provider\": \"deepseek\"\n}"
 						},
 						"url": "{{base_url}}/api/llm/chat/post/summary"
+					},
+					"response": []
+				},
+				{
+					"name": "Test LLM Provider",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/llm/chat/test/provider?provider=deepseek",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"llm",
+								"chat",
+								"test",
+								"provider"
+							],
+							"query": [
+								{
+									"key": "provider",
+									"value": "deepseek"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -1605,6 +1779,134 @@
 			]
 		},
 		{
+			"name": "Post Hot Rank",
+			"item": [
+				{
+					"name": "Get Hot Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/posts/hot?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"posts",
+								"hot"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin Post Algorithm",
+			"item": [
+				{
+					"name": "List Algorithm Weights",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/admin/post-algorithm/weights"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Algorithm Weight",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/post-algorithm/weights/1?metricValue=1.5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"post-algorithm",
+								"weights",
+								"1"
+							],
+							"query": [
+								{
+									"key": "metricValue",
+									"value": "1.5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post Weight (Pin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/post-algorithm/posts/1/weight?weight=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"post-algorithm",
+								"posts",
+								"1",
+								"weight"
+							],
+							"query": [
+								{
+									"key": "weight",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unpin Post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": "{{base_url}}/api/admin/post-algorithm/posts/1/unpin"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "User Export",
 			"item": [
 				{
@@ -1617,43 +1919,27 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"url": "{{base_url}}/api/users/export/all"
-					},
-					"response": []
-				},
-				{
-					"name": "Export Users by Fields (Admin)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"fieldNames\": [\"id\", \"username\", \"email\"],\n  \"condition\": {}\n}"
-						},
-						"url": "{{base_url}}/api/users/export/fields"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Exportable Fields (Admin)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": "{{base_url}}/api/users/export/fields"
+						"url": {
+							"raw": "{{base_url}}/api/users/export?pageNum=1&pageSize=1000",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"export"
+							],
+							"query": [
+								{
+									"key": "pageNum",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "1000"
+								}
+							]
+						}
 					},
 					"response": []
 				}
