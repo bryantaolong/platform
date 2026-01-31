@@ -153,11 +153,15 @@ const handleCommand = async (command: string) => {
 .layout-aside {
   background-color: #304156;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s;
 }
 
 .aside-header {
-  padding: 20px;
-  border-bottom: 1px solid #434a50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  border-bottom: 1px solid #2a3a4a;
 }
 
 .logo {
@@ -178,7 +182,7 @@ const handleCommand = async (command: string) => {
 }
 
 .layout-main {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: #f0f2f5;
 }
 
 .layout-header {
@@ -186,9 +190,9 @@ const handleCommand = async (command: string) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid #e4e7ed;
-  backdrop-filter: blur(10px);
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  height: 60px;
 }
 
 .header-right .user-info {
@@ -212,11 +216,18 @@ const handleCommand = async (command: string) => {
 }
 
 .layout-content {
-  padding: 20px;
-  background: #fafbfc;
+  padding: 24px;
 }
 
 :deep(.el-menu-item.is-active) {
+  background-color: #263445 !important;
+}
+
+:deep(.el-menu-item:hover) {
+  background-color: #263445 !important;
+}
+
+:deep(.el-sub-menu__title:hover) {
   background-color: #263445 !important;
 }
 </style>

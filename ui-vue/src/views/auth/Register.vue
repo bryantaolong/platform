@@ -189,7 +189,7 @@ const handleRegister = async () => {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .register-background {
@@ -308,26 +308,15 @@ const handleRegister = async () => {
 }
 
 :deep(.el-input__wrapper:hover) {
-  border-color: #f5576c;
+  border-color: #409eff;
 }
 
 :deep(.el-input__wrapper.is-focus) {
-  border-color: #f5576c;
-  box-shadow: 0 0 0 2px rgba(245, 87, 108, 0.1);
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
 }
 
 :deep(.el-form-item.is-error .el-input__wrapper) {
   border-color: #f56c6c;
-}
-
-:deep(.el-button--primary) {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border: none;
-  transition: all 0.3s;
-}
-
-:deep(.el-button--primary:hover) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
 }
 </style>
