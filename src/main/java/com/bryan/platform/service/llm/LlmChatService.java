@@ -157,67 +157,6 @@ public class LlmChatService {
     }
 
     /**
-     * 测试指定大模型提供商的连通性和实际模型信息（服务端调试用）
-     *
-     * @param provider 大模型提供商标识（deepseek、moonshot、minimax），为空时使用默认提供商
-     * @return 包含提供商、配置模型、实际返回模型和示例回复内容的 Map
-     */
-    public Map<String, String> testProvider(String provider) {
-        // 1. 解析实际使用的提供商名称（考虑默认值）
-        String effectiveProvider = (provider == null || provider.isEmpty())
-                ? properties.getDefaultProvider()
-                : provider;
-
-        // 2. 获取对应的配置
-        ProviderConfig config = properties.getProviderConfig(effectiveProvider);
-
-        // 3. 构建一条简单的测试消息
-        List<LlmChatMessage> messages = new ArrayList<>();
-        messages.add(new LlmChatMessage("user", "请仅回复一个简短标识，例如：pong。"));
-
-        LlmChatRequest request = new LlmChatRequest();
-        request.setModel(config.getModel());
-        request.setMessages(messages);
-
-        // 4. 组装请求头
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + config.getKey());
-
-        HttpEntity<LlmChatRequest> httpEntity = new HttpEntity<>(request, headers);
-
-        Map<String, String> result = new HashMap<>();
-        result.put("provider", effectiveProvider);
-        result.put("configuredModel", config.getModel());
-        result.put("endpoint", config.getUrl());
-
-        try {
-            // 5. 调用远程 API
-            ResponseEntity<LlmChatResponse> response = restTemplate.postForEntity(
-                    config.getUrl(),
-                    httpEntity,
-                    LlmChatResponse.class
-            );
-
-            LlmChatResponse body = response.getBody();
-            if (body != null) {
-                result.put("actualModel", body.getModel());
-                result.put("sampleReply", body.getFirstReply());
-            } else {
-                result.put("actualModel", "");
-                result.put("sampleReply", "");
-            }
-            result.put("status", "SUCCESS");
-        } catch (RestClientException e) {
-            // 6. 捕获异常，返回错误信息，便于定位问题（如鉴权、限流、额度不足等）
-            result.put("status", "FAILED");
-            result.put("error", e.getMessage());
-        }
-
-        return result;
-    }
-
-    /**
      * 保持上下文消息条数在限制范围内
      */
     private List<LlmChatMessage> trimContext(List<LlmChatMessage> context) {
