@@ -15,6 +15,11 @@ export interface PostVO {
   commentCount?: number
   collectCount?: number
   shareCount?: number
+  weight?: number
   createdAt: string
   updatedAt: string
+  /**
+   * 热度分数（仅用于热度排行榜）
+   */
+  hotScore?: number
 }

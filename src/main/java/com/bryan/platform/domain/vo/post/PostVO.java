@@ -46,7 +46,14 @@ public class PostVO {
 
     private Long shareCount;
 
+    private Integer weight;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    /**
+     * 热度分数（仅用于热度排行榜）
+     */
+    private Double hotScore;
 }

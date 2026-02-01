@@ -62,6 +62,7 @@
             <if test="categoryId != null">category_id = #{categoryId},</if>
             <if test="tags != null">tags = #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler},</if>
             <if test="commentAreaStatus != null">comment_area_status = #{commentAreaStatus},</if>
+            <if test="weight != null">weight = #{weight},</if>
             version = #{version},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
@@ -250,5 +251,15 @@
                 AND status = #{status}
             </if>
         </where>
+    </select>
+
+    <select id="selectRecentPosts" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE status = 0
+          AND deleted = 0
+          AND created_at >= NOW() - (#{hours} * INTERVAL '1 HOUR')
+        ORDER BY created_at DESC
+        LIMIT #{limit}
     </select>
 </mapper>

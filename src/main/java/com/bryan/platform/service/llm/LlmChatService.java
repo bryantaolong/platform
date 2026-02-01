@@ -1,6 +1,7 @@
 package com.bryan.platform.service.llm;
 
 import com.bryan.platform.config.properties.LlmChatProperties;
+import com.bryan.platform.config.properties.LlmChatProperties.ProviderConfig;
 import com.bryan.platform.domain.entity.llm.LlmChatMessage;
 import com.bryan.platform.domain.request.llm.LlmChatRequest;
 import com.bryan.platform.domain.response.LlmChatResponse;
@@ -39,32 +40,48 @@ public class LlmChatService {
      * @throws RestClientException 调用远程 API 异常
      */
     public String getChatResponse(Long userId, String userMessage) throws RestClientException {
+        return getChatResponse(userId, userMessage, null);
+    }
+
+    /**
+     * 与 AI 进行对话，包含上下文记忆，并支持按提供商切换模型
+     *
+     * @param userId 用户 ID，用于区分不同用户会话
+     * @param userMessage 用户发送的消息文本
+     * @param provider 大模型提供商标识（如 deepseek、moonshot、minimax），为空时使用默认配置
+     * @return AI 返回的回复内容
+     * @throws RestClientException 调用远程 API 异常
+     */
+    public String getChatResponse(Long userId, String userMessage, String provider) throws RestClientException {
         // 1. 获取用户历史消息上下文
         List<LlmChatMessage> context = userContextMap.computeIfAbsent(userId, k -> new ArrayList<>());
 
         // 2. 添加当前用户消息
         context.add(new LlmChatMessage("user", userMessage));
 
-        // 3. 构建请求体
+        // 3. 解析大模型配置（支持多提供商）
+        ProviderConfig config = properties.getProviderConfig(provider);
+
+        // 4. 构建请求体
         LlmChatRequest request = new LlmChatRequest();
-        request.setModel(properties.getModel());
+        request.setModel(config.getModel());
         request.setMessages(trimContext(context)); // 控制上下文数量
 
-        // 4. 设置请求头
+        // 5. 设置请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + properties.getKey());
+        headers.set("Authorization", "Bearer " + config.getKey());
 
         HttpEntity<LlmChatRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        // 5. 调用远程 API
+        // 6. 调用远程 API
         ResponseEntity<LlmChatResponse> response = restTemplate.postForEntity(
-                properties.getUrl(),
+                config.getUrl(),
                 httpEntity,
                 LlmChatResponse.class
         );
 
-        // 6. 记录 AI 回复并返回
+        // 7. 记录 AI 回复并返回
         String reply = Objects.requireNonNull(response.getBody()).getFirstReply();
         context.add(new LlmChatMessage("assistant", reply));
         return reply;
@@ -79,6 +96,19 @@ public class LlmChatService {
      * @throws RestClientException 调用远程 API 异常
      */
     public String generatePostSummary(String title, String content) throws RestClientException {
+        return generatePostSummary(title, content, null);
+    }
+
+    /**
+     * 生成文章摘要（不保留上下文），支持按提供商切换模型
+     *
+     * @param title 文章标题
+     * @param content 文章内容
+     * @param provider 大模型提供商标识（如 deepseek、moonshot、minimax），为空时使用默认配置
+     * @return AI 生成的摘要
+     * @throws RestClientException 调用远程 API 异常
+     */
+    public String generatePostSummary(String title, String content, String provider) throws RestClientException {
         // 1. 构建用于生成摘要的提示词
         String prompt = String.format(
                 "请为以下文章生成一份简洁的摘要（200-300字），突出文章的核心观点和主要内容。\n\n" +
@@ -91,26 +121,29 @@ public class LlmChatService {
         List<LlmChatMessage> messages = new ArrayList<>();
         messages.add(new LlmChatMessage("user", prompt));
 
-        // 3. 构建请求体
+        // 3. 解析大模型配置（支持多提供商）
+        ProviderConfig config = properties.getProviderConfig(provider);
+
+        // 4. 构建请求体
         LlmChatRequest request = new LlmChatRequest();
-        request.setModel(properties.getModel());
+        request.setModel(config.getModel());
         request.setMessages(messages);
 
-        // 4. 设置请求头
+        // 5. 设置请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + properties.getKey());
+        headers.set("Authorization", "Bearer " + config.getKey());
 
         HttpEntity<LlmChatRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        // 5. 调用远程 API
+        // 6. 调用远程 API
         ResponseEntity<LlmChatResponse> response = restTemplate.postForEntity(
-                properties.getUrl(),
+                config.getUrl(),
                 httpEntity,
                 LlmChatResponse.class
         );
 
-        // 6. 返回 AI 生成的摘要
+        // 7. 返回 AI 生成的摘要
         return Objects.requireNonNull(response.getBody()).getFirstReply();
     }
 
@@ -121,6 +154,67 @@ public class LlmChatService {
      */
     public void clearContext(Long userId) {
         userContextMap.remove(userId);
+    }
+
+    /**
+     * 测试指定大模型提供商的连通性和实际模型信息（服务端调试用）
+     *
+     * @param provider 大模型提供商标识（deepseek、moonshot、minimax），为空时使用默认提供商
+     * @return 包含提供商、配置模型、实际返回模型和示例回复内容的 Map
+     */
+    public Map<String, String> testProvider(String provider) {
+        // 1. 解析实际使用的提供商名称（考虑默认值）
+        String effectiveProvider = (provider == null || provider.isEmpty())
+                ? properties.getDefaultProvider()
+                : provider;
+
+        // 2. 获取对应的配置
+        ProviderConfig config = properties.getProviderConfig(effectiveProvider);
+
+        // 3. 构建一条简单的测试消息
+        List<LlmChatMessage> messages = new ArrayList<>();
+        messages.add(new LlmChatMessage("user", "请仅回复一个简短标识，例如：pong。"));
+
+        LlmChatRequest request = new LlmChatRequest();
+        request.setModel(config.getModel());
+        request.setMessages(messages);
+
+        // 4. 组装请求头
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + config.getKey());
+
+        HttpEntity<LlmChatRequest> httpEntity = new HttpEntity<>(request, headers);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("provider", effectiveProvider);
+        result.put("configuredModel", config.getModel());
+        result.put("endpoint", config.getUrl());
+
+        try {
+            // 5. 调用远程 API
+            ResponseEntity<LlmChatResponse> response = restTemplate.postForEntity(
+                    config.getUrl(),
+                    httpEntity,
+                    LlmChatResponse.class
+            );
+
+            LlmChatResponse body = response.getBody();
+            if (body != null) {
+                result.put("actualModel", body.getModel());
+                result.put("sampleReply", body.getFirstReply());
+            } else {
+                result.put("actualModel", "");
+                result.put("sampleReply", "");
+            }
+            result.put("status", "SUCCESS");
+        } catch (RestClientException e) {
+            // 6. 捕获异常，返回错误信息，便于定位问题（如鉴权、限流、额度不足等）
+            result.put("status", "FAILED");
+            result.put("error", e.getMessage());
+        }
+
+        return result;
     }
 
     /**

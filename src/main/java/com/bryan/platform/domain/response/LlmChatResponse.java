@@ -14,6 +14,12 @@ import java.util.List;
  */
 @Data
 public class LlmChatResponse {
+    /**
+     * 实际使用的模型名称，由第三方大模型服务返回
+     * 例如：deepseek-chat、kimi-k2-turbo-preview、MiniMax-M2.1 等
+     */
+    private String model;
+
     private List<Choice> choices;
 
     public String getFirstReply() {

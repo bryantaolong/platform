@@ -59,7 +59,24 @@ export const postApi = {
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
-            url: '/api/posts/search',
+            url: '/api/posts/admin/search',
+            method: 'POST',
+            data: req,
+            params: {
+                pageNum,
+                pageSize
+            }
+        })
+    },
+
+    // Admin search posts with corrected backend path (用于后台运营配置)
+    searchPostsAdminFixed: (
+        req: PostSearchRequest,
+        pageNum: number,
+        pageSize: number
+    ): Promise<Result<PageResult<PostVO>>> => {
+        return request({
+            url: '/api/posts/admin/search',
             method: 'POST',
             data: req,
             params: {
@@ -157,6 +174,23 @@ export const postApi = {
         })
     },
 
+    // Update post weight for manual ranking (admin only)
+    updatePostWeight: (id: number, weight: number): Promise<Result<Post>> => {
+        return request({
+            url: `/api/admin/post-algorithm/posts/${id}/weight`,
+            method: 'PUT',
+            params: {weight}
+        })
+    },
+
+    // Unpin post (admin only) - cancel manual pinning
+    unpinPost: (id: number): Promise<Result<Post>> => {
+        return request({
+            url: `/api/admin/post-algorithm/posts/${id}/unpin`,
+            method: 'PUT'
+        })
+    },
+
     // Delete a post
     deletePost: (id: number): Promise<Result<boolean>> => {
         return request({
@@ -210,6 +244,15 @@ export const postApi = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
+        })
+    },
+
+    // Get hot posts ranking
+    getHotPosts: (limit: number = 10): Promise<Result<PostVO[]>> => {
+        return request({
+            url: '/api/posts/hot',
+            method: 'GET',
+            params: { limit }
         })
     },
 }

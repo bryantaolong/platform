@@ -1,6 +1,23 @@
 <!-- src/components/header/LlmChatDialog.vue -->
 <template>
   <el-dialog v-model="visible" title="AI 聊天" width="600px">
+    <div class="chat-header">
+      <span class="chat-header-label">当前模型：</span>
+      <el-select
+          v-model="selectedProvider"
+          size="small"
+          style="width: 180px"
+          :disabled="loading"
+      >
+        <el-option
+            v-for="item in providerOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+        />
+      </el-select>
+    </div>
+
     <div class="chat-box">
       <div class="chat-messages">
         <div
@@ -40,6 +57,17 @@ const userMessage = ref('');
 const messages = ref<{ role: string; content: string }[]>([]);
 const loading = ref(false);
 
+const providerOptions = [
+  // DeepSeek
+  { label: 'DeepSeek V3.2', value: 'deepseek' },
+  // Moonshot (Kimi)
+  { label: 'Kimi K2.5', value: 'moonshot' },
+  // MiniMax
+  { label: 'MiniMax-M2.1', value: 'minimax' }
+];
+
+const selectedProvider = ref<string>('deepseek');
+
 // 打开对话框的方法（供外部调用）
 const open = () => {
   visible.value = true;
@@ -57,11 +85,17 @@ const sendMessage = async () => {
 
   try {
     // 2. 发送消息到后端
-    const res = await llmChatApi.sendChatMessage(input)
+    const res = await llmChatApi.sendChatMessage(input, selectedProvider.value)
     // 3. 显示 AI 回复
     messages.value.push({ role: 'ai', content: res.reply });
-  } catch (err) {
-    messages.value.push({ role: 'ai', content: '⚠️ 请求失败，请稍后重试。' });
+  } catch (err: any) {
+    // 从后端 Result 中提取更友好的错误信息
+    const errorMessage =
+        err?.message ||
+        err?.msg ||
+        (typeof err === 'string' ? err : '') ||
+        '请求失败，请稍后重试。';
+    messages.value.push({ role: 'ai', content: `⚠️ ${errorMessage}` });
   } finally {
     loading.value = false;
   }

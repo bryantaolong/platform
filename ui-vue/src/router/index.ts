@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'FollowingPosts',
                 component: () => import('@/views/post/FollowingPosts.vue'),
                 meta: {requiresAuth: true, title: '我的关注'}
+            },
+            {
+                path: 'hot',
+                name: 'HotPosts',
+                component: () => import('@/views/post/HotPosts.vue'),
+                meta: {title: '热门文章'}
             }
         ]
     },
@@ -50,6 +56,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'PostManagement',
                 component: () => import('@/views/admin/PostManagement.vue'),
                 meta: {title: '博文管理'}
+            },
+            {
+                path: 'post-monitor',
+                name: 'PostMonitor',
+                component: () => import('@/views/admin/PostMonitor.vue'),
+                meta: {title: '博文数据监控'}
             },
             {
                 path: 'audit',

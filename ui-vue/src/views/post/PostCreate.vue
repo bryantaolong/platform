@@ -122,20 +122,17 @@
 <script setup lang="ts">
 import { marked } from 'marked'
 import { ref, reactive, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ElInput, ElMessage } from 'element-plus'
 import { postApi } from '@/api/post'
 import type { Post } from '@/models/entity/post/Post'
-import type { PostUpdateRequest } from '@/models/request/post/PostUpdateRequest'
 
-const route = useRoute()
 const router = useRouter()
 const formRef = ref()
 const loading = ref(false)
 const submitting = ref(false)
 const savingDraft = ref(false)
 const uploadingImage = ref(false)
-const postId = Number(route.params.id)
 const imageInputRef = ref<HTMLInputElement>()
 const contentTextareaRef = ref<InstanceType<typeof ElInput>>()
 
@@ -167,29 +164,6 @@ const formRules = {
     { required: true, message: '请输入文章内容', trigger: 'blur' },
     { min: 10, message: '文章内容至少需要10个字符', trigger: 'blur' }
   ]
-}
-
-/* 加载文章 */
-const loadPost = async () => {
-  loading.value = true
-  try {
-    const response = await postApi.getPostById(postId)
-    if (response.code === 200) {
-      const data = response.data
-      postForm.id = data.id
-      postForm.title = data.title
-      postForm.content = data.content
-      postForm.categoryId = data.categoryId || 1
-      postForm.tags = data.tags || []
-    } else {
-      ElMessage.error(response.message || '获取文章失败')
-    }
-  } catch (error) {
-    console.error('获取文章失败:', error)
-    ElMessage.error('获取文章失败')
-  } finally {
-    loading.value = false
-  }
 }
 
 /* 添加标签 */
@@ -265,17 +239,15 @@ const submitForm = async () => {
     if (valid) {
       submitting.value = true
       try {
-        const requestData: PostUpdateRequest = {
+        const response = await postApi.createPost({
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags as any
-        }
-
-        const response = await postApi.updatePost(postId, requestData)
+          tags: postForm.tags
+        })
         if (response.code === 200) {
           ElMessage.success('文章发布成功')
-          router.push(`/post/${postId}`)
+          router.push(`/post/${response.data.id}`)
         } else {
           ElMessage.error(response.message || '发布失败')
         }
@@ -304,15 +276,12 @@ const saveDraft = async () => {
     if (valid) {
       savingDraft.value = true
       try {
-        const requestData = {
+        const response = await postApi.saveDraft({
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,
-          tags: postForm.tags as any,
-          weight: 1
-        }
-
-        const response = await postApi.saveDraft(requestData)
+          tags: postForm.tags
+        })
         if (response.code === 200) {
           ElMessage.success('草稿保存成功')
           router.push(`/post/${response.data.id}`)
@@ -332,7 +301,6 @@ const saveDraft = async () => {
 }
 
 onMounted(() => {
-  loadPost()
 })
 </script>
 

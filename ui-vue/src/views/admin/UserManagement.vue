@@ -1,29 +1,28 @@
 <template>
-  <div class="user-management">
-    <el-card class="header-card">
-      <div class="header-content">
-        <div class="title-section">
-          <h2>用户管理</h2>
-          <p class="subtitle">管理系统用户信息</p>
+  <div class="user-management-container">
+    <el-card class="main-card" shadow="never">
+      <template #header>
+        <div class="card-header">
+          <span>用户管理</span>
+          <div class="button-group">
+            <el-button type="primary" :icon="Plus" @click="handleAddUser">
+              新增用户
+            </el-button>
+            <el-button @click="handleExportAllUsers" :icon="Download">
+              导出用户
+            </el-button>
+          </div>
         </div>
-        <!-- 右侧按钮组 -->
-        <div class="button-group">
-          <el-button type="primary" :icon="Plus" @click="handleAddUser">
-            新增用户
-          </el-button>
-          <el-button type="warning" @click="handleExportAllUsers">
-            导出用户数据
-          </el-button>
-        </div>
-      </div>
-    </el-card>
+      </template>
 
-    <UserSearchForm
+      <!-- Search Form -->
+      <UserSearchForm
         @search="handleSearch"
         @reset="handleReset"
-    />
+      />
 
-    <UserTable
+      <!-- Table -->
+      <UserTable
         :loading="loading"
         :user-list="userList"
         :total="total"
@@ -37,8 +36,10 @@
         @delete="handleDeleteUser"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-    />
+      />
+    </el-card>
 
+    <!-- Dialogs -->
     <UserFormDialog
         v-model="dialogVisible"
         :dialog-type="dialogType"
@@ -58,7 +59,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Download } from '@element-plus/icons-vue'
 import { userApi } from '@/api/user'
 import { userExportApi } from '@/api/userExport'
 import { userRoleApi } from '@/api/userRole'
@@ -81,7 +82,6 @@ const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
 
-// 搜索条件（保持与后端接口一致）
 const searchFormData = reactive<UserSearchFormData>({
   username: '',
   phone: '',
@@ -106,7 +106,6 @@ const userForm = reactive<UserFormData>({
 })
 
 const currentUser = ref<SysUser | null>(null)
-
 const roleOptions = ref<UserRoleOptionVO[]>([])
 
 const loadRoleOptions = async () => {
@@ -132,18 +131,13 @@ const mapStatusToCode = (status: UserSearchFormData['status']): number | undefin
 const loadUsers = async () => {
   loading.value = true
   try {
-    // 构建搜索参数，过滤空值
     const searchParams: Record<string, any> = {}
     if (searchFormData.username) searchParams.username = searchFormData.username
     if (searchFormData.phone) searchParams.phone = searchFormData.phone
     if (searchFormData.email) searchParams.email = searchFormData.email
     if (searchFormData.status) searchParams.status = searchFormData.status
 
-    const hasSearch = Object.keys(searchParams).length > 0
-
-    const res = hasSearch
-        ? await userApi.searchUsers(searchParams, pageNum.value, pageSize.value)
-        : await userApi.getUserList(pageNum.value, pageSize.value)
+    const res = await userApi.searchUsers(searchParams, pageNum.value, pageSize.value)
 
     if (res.code === 200) {
       userList.value = res.data.rows
@@ -211,7 +205,6 @@ const handleEdit = (user: SysUser) => {
   userForm.email = user.email || ''
   userForm.roleIds = []
 
-  // 回填角色：将用户的 roles 字符串映射为 roleIds
   void (async () => {
     await loadRoleOptions()
     const roleNames = user.roles ? user.roles.split(',').map(r => r.trim()).filter(Boolean) : []
@@ -227,7 +220,6 @@ const handleView = async (user: SysUser) => {
   try {
     const res = await userProfileApi.getUserProfileByUserId(user.id)
     if (res.code === 200) {
-      // 合并详细信息和列表数据
       currentUser.value = { ...user, ...res.data }
       detailDialogVisible.value = true
     } else {
@@ -317,7 +309,6 @@ const handleDeleteUser = async (user: SysUser) => {
     const res = await userApi.deleteUser(user.id)
     if (res.code === 200) {
       ElMessage.success('用户已删除')
-      // 如果当前页只有一条数据且不是第一页，返回上一页
       if (userList.value.length === 1 && pageNum.value > 1) {
         pageNum.value--
       }
@@ -397,7 +388,6 @@ const handleDialogClose = () => {
   })
 }
 
-/* ----------------- 导出功能 ----------------- */
 const handleExportAllUsers = async () => {
   try {
     const result = await ElMessageBox.prompt(
@@ -413,7 +403,6 @@ const handleExportAllUsers = async () => {
     )
 
     const fileName = result.value || '所有用户数据'
-    // 传递当前筛选的状态
     await userExportApi.exportAllUsers(fileName, mapStatusToCode(searchFormData.status))
     ElMessage.success('所有用户数据已开始导出！')
   } catch (error: any) {
@@ -430,37 +419,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-management {
-  padding: 20px;
+.user-management-container {
+  padding: 0;
 }
 
-.header-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
+.main-card {
+  border: none;
+  border-radius: 8px;
 }
 
-.header-content {
+.main-card :deep(.el-card__header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.title-section h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
+  font-size: 18px;
+  font-weight: 500;
   color: #303133;
 }
 
-.subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: #909399;
-}
-
-/* 按钮组样式 - 右对齐 */
 .button-group {
   display: flex;
   gap: 10px;
-  align-items: center;
 }
 </style>

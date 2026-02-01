@@ -1,67 +1,56 @@
 <template>
-  <div class="following-posts-container">
-    <!-- Header Section -->
-    <div class="header-section">
-      <p class="page-subtitle">来自你关注用户的最新动态</p>
-    </div>
+  <div class="following-posts-page">
+    <div class="post-list-container">
+      <el-skeleton :rows="5" animated v-if="loading" />
+      
+      <el-empty v-if="!loading && posts.length === 0" description="还没有关注任何用户，或关注的用户暂无动态">
+        <el-button type="primary" @click="goToExplore">去发现</el-button>
+      </el-empty>
 
-    <!-- Posts Grid -->
-    <div class="posts-grid" v-loading="loading">
-      <div
+      <div v-if="!loading && posts.length > 0" class="post-list">
+        <el-card
           v-for="post in posts"
           :key="post.id"
           class="post-card"
+          shadow="hover"
           @click="viewPost(post.id)"
-      >
-        <div class="post-header">
-          <h3 class="post-title">{{ post.title }}</h3>
-          <div class="post-meta">
-            <span class="author">{{ post.author }}</span>
-            <span class="date">{{ formatDateTime(post.createdAt) }}</span>
+        >
+          <template #header>
+            <div class="post-card-header">
+              <span class="author-name">{{ post.author }}</span>
+              <span class="post-date">{{ formatDateTime(post.createdAt) }}</span>
+            </div>
+          </template>
+
+          <div class="post-content">
+            <h3 class="post-title">{{ post.title }}</h3>
+            <div class="post-summary" v-html="renderMarkdown(post.contentPreview)"></div>
           </div>
-        </div>
-        <div class="post-content">
-          <p class="post-summary">{{ post.contentPreview }}</p>
-        </div>
-        <div class="post-footer">
-          <div class="stats">
-            <span class="stat-item">
-              <el-icon><View/></el-icon>
-              {{ post.viewCount }}
-            </span>
-            <span class="stat-item">
-              <el-icon><Star/></el-icon>
-              {{ post.likeCount }}
-            </span>
-            <span class="stat-item">
-              <el-icon><ChatDotRound/></el-icon>
-              {{ post.commentCount }}
-            </span>
+
+          <div class="post-footer">
+            <div class="stats">
+              <span class="stat-item">
+                <el-icon><View /></el-icon> {{ post.viewCount }}
+              </span>
+              <span class="stat-item">
+                <el-icon><Star /></el-icon> {{ post.likeCount }}
+              </span>
+              <span class="stat-item">
+                <el-icon><ChatDotRound /></el-icon> {{ post.commentCount }}
+              </span>
+            </div>
+            <div class="tags" v-if="post.tags && post.tags.length">
+              <el-tag v-for="tag in post.tags" :key="tag" size="small" type="info" round>
+                {{ tag }}
+              </el-tag>
+            </div>
           </div>
-          <div class="tags" v-if="post.tags && post.tags.length">
-            <el-tag
-                v-for="tag in post.tags"
-                :key="tag"
-                size="small"
-                type="info"
-            >
-              {{ tag }}
-            </el-tag>
-          </div>
-        </div>
+        </el-card>
       </div>
-    </div>
 
-    <!-- Empty State -->
-    <div v-if="!loading && posts.length === 0" class="empty-state">
-      <el-empty description="还没有关注任何用户，快去发现感兴趣的内容吧！">
-        <el-button type="primary" @click="goToExplore">去发现</el-button>
-      </el-empty>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-wrapper" v-if="posts.length > 0">
-      <el-pagination
+      <!-- Pagination -->
+      <div class="pagination-wrapper" v-if="!loading && posts.length > 0">
+        <el-pagination
           v-model:current-page="pagination.currentPage"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"
@@ -69,21 +58,20 @@
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-      />
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
-import {ElMessage} from 'element-plus'
-import {
-  View,
-  Star,
-  ChatDotRound
-} from '@element-plus/icons-vue'
-import {postApi} from '@/api/post'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { marked } from 'marked'
+import { ElMessage } from 'element-plus'
+import { View, Star, ChatDotRound } from '@element-plus/icons-vue'
+import { postApi } from '@/api/post'
+import { getAvatarUrl } from '@/utils/file'
 import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
 
 interface PaginationData {
@@ -93,7 +81,7 @@ interface PaginationData {
 }
 
 const router = useRouter()
-const loading = ref(false)
+const loading = ref(true)
 const posts = ref<PostSummaryVO[]>([])
 
 const pagination = reactive<PaginationData>({
@@ -102,7 +90,6 @@ const pagination = reactive<PaginationData>({
   total: 0
 })
 
-// Load followed users' posts from API
 const loadPosts = async () => {
   loading.value = true
   try {
@@ -125,34 +112,32 @@ const loadPosts = async () => {
   }
 }
 
-// Format datetime for display
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
-  return date.toLocaleDateString('zh-CN')
+  return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+const renderMarkdown = (text: string): string => {
+  if (!text) return ''
+  return marked.parse(text)
+}
 
-
-// Handle size change
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.currentPage = 1
   loadPosts()
 }
 
-// Handle current page change
 const handleCurrentChange = (page: number) => {
   pagination.currentPage = page
   loadPosts()
 }
 
-// View post details
 const viewPost = (postId: number) => {
   router.push(`/post/${postId}`)
 }
 
-// Go to explore/discover page
 const goToExplore = () => {
   router.push('/')
 }
@@ -163,174 +148,124 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.following-posts-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  background: #f8f9fa;
-  min-height: calc(100vh - 140px);
+.following-posts-page {
+  width: 100%;
 }
 
-.header-section {
-  text-align: center;
-  margin-bottom: 40px;
+.post-list-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 24px;
 }
 
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 10px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.page-subtitle {
-  font-size: 1.1rem;
-  color: #7f8c8d;
-  margin: 0;
-}
-
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 30px;
-  margin-bottom: 40px;
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .post-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: all 0.3s ease;
   cursor: pointer;
-  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease-in-out;
 }
 
-.post-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.post-card :deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f5;
 }
 
-.post-header {
-  padding: 20px 20px 0 20px;
+.post-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-weight: 600;
+  color: #303133;
+}
+
+.post-date {
+  font-size: 13px;
+  color: #909399;
+}
+
+.post-content {
+  padding: 0;
 }
 
 .post-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 10px 0;
+  color: #303133;
+  margin: 0 0 12px 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.post-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  color: #7f8c8d;
-  margin-bottom: 15px;
-}
-
-.author {
-  font-weight: 500;
-}
-
-.date {
-  font-style: italic;
-}
-
-.post-content {
-  padding: 0 20px;
+  text-overflow: ellipsis;
 }
 
 .post-summary {
-  color: #34495e;
-  line-height: 1.6;
-  margin: 0 0 20px 0;
+  color: #606266;
+  line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 20px;
+}
+
+.post-summary :deep(*) {
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  color: #606266 !important;
 }
 
 .post-footer {
-  padding: 0 20px 20px 20px;
-  border-top: 1px solid #ecf0f1;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f0f2f5;
 }
 
 .stats {
   display: flex;
-  gap: 15px;
+  gap: 20px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.9rem;
-  color: #7f8c8d;
+  gap: 6px;
+  font-size: 14px;
+  color: #909399;
 }
 
 .tags {
   display: flex;
-  gap: 5px;
+  gap: 8px;
   flex-wrap: wrap;
-}
-
-.empty-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
 }
 
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .following-posts-container {
-    padding: 20px 15px;
-  }
-
-  .page-title {
-    font-size: 2rem;
-  }
-
-  .posts-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .post-card {
-    margin: 0;
-  }
-
-  .post-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-
-  .post-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
+  margin-top: 30px;
 }
 </style>

@@ -1,11 +1,11 @@
 <template>
-  <div class="article-layout">
+  <el-container class="app-layout">
     <!-- Top Navigation Bar -->
     <el-header class="top-nav">
       <div class="nav-container">
         <div class="nav-left">
           <div class="logo">
-            <el-icon :size="24"><Platform /></el-icon>
+            <el-icon :size="28"><Platform /></el-icon>
             <span class="logo-text">文章平台</span>
           </div>
         </div>
@@ -19,6 +19,7 @@
           >
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/post/list">文章</el-menu-item>
+            <el-menu-item index="/hot">热门</el-menu-item>
             <el-menu-item v-if="isLoggedIn" index="/following">关注</el-menu-item>
             <el-menu-item index="/post/create">写文章</el-menu-item>
             <el-menu-item @click="chatRef.open()">AI对话</el-menu-item>
@@ -30,19 +31,17 @@
             v-model="searchQuery"
             placeholder="搜索文章..."
             class="search-input"
+            :prefix-icon="Search"
             @keyup.enter="handleSearch"
-          >
-            <template #suffix>
-              <el-icon @click="handleSearch"><Search /></el-icon>
-            </template>
-          </el-input>
-          
+            clearable
+          />
+
           <!-- 未登录状态 -->
           <div v-if="!isLoggedIn" class="auth-buttons">
-            <el-button @click="handleLogin">登录</el-button>
-            <el-button type="primary" @click="handleRegister">注册</el-button>
+            <el-button round @click="handleLogin">登录</el-button>
+            <el-button round type="primary" @click="handleRegister">注册</el-button>
           </div>
-          
+
           <!-- 已登录状态 -->
           <el-dropdown v-else trigger="hover" @command="handleCommand">
             <div class="user-info">
@@ -78,16 +77,21 @@
 
     <!-- Main Content -->
     <el-main class="main-content">
-      <router-view />
+      <div class="content-wrapper">
+        <router-view />
+      </div>
     </el-main>
 
     <!-- Footer -->
     <el-footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2026 文章平台. 保留所有权利.</p>
+        <p>&copy; 2026 文章平台. All Rights Reserved.</p>
+        <p>
+          <a href="/about">关于我们</a> | <a href="/contact">联系我们</a> | <a href="/privacy">隐私政策</a>
+        </p>
       </div>
     </el-footer>
-  </div>
+  </el-container>
 </template>
 
 <script setup lang="ts">
@@ -119,6 +123,7 @@ const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
 
 const activeMenu = computed(() => {
   if (route.path === '/') return '/'
+  if (route.path.startsWith('/hot')) return '/hot'
   if (route.path.startsWith('/following')) return '/following'
   if (route.path.startsWith('/post')) return '/post/list'
   return route.path
@@ -165,20 +170,23 @@ const handleSearch = () => {
 </script>
 
 <style scoped>
-.article-layout {
+.app-layout {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background-color: #f8f9fa;
 }
 
 .top-nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e4e7ed;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(10px);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
   padding: 0;
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .nav-container {
@@ -195,43 +203,54 @@ const handleSearch = () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
 }
 
 .nav-left .logo-text {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #303133;
 }
 
 .nav-center {
-  flex: 1;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
   margin: 0 40px;
 }
 
 .top-menu {
   border-bottom: none;
   background: transparent;
+  --el-menu-active-color: #409eff;
 }
 
 .top-menu :deep(.el-menu-item) {
-  height: 60px;
-  line-height: 60px;
-  border-bottom: 3px solid transparent;
+  height: 64px;
+  line-height: 64px;
+  font-size: 15px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
 }
 
 .top-menu :deep(.el-menu-item.is-active) {
-  border-bottom-color: #409eff;
+  border-bottom-color: var(--el-menu-active-color);
   background-color: transparent;
+}
+
+.top-menu :deep(.el-menu-item:not(.is-active):hover) {
+  background-color: #f5f7fa;
+  color: #409eff;
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .search-input {
-  width: 240px;
+  width: 220px;
 }
 
 .search-input :deep(.el-input__wrapper) {
@@ -244,8 +263,8 @@ const handleSearch = () => {
   gap: 8px;
   cursor: pointer;
   padding: 8px 12px;
-  border-radius: 20px;
-  transition: all 0.3s;
+  border-radius: 24px;
+  transition: background-color 0.3s;
 }
 
 .user-info:hover {
@@ -258,11 +277,6 @@ const handleSearch = () => {
   align-items: center;
 }
 
-.auth-buttons .el-button {
-  border-radius: 20px;
-  padding: 8px 20px;
-}
-
 .username {
   font-size: 14px;
   color: #606266;
@@ -270,54 +284,68 @@ const handleSearch = () => {
 }
 
 .main-content {
-  flex: 1;
   padding: 0;
-  background: #f8f9fa;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
 }
 
 .footer {
-  background: #f5f7fa;
+  background-color: #ffffff;
   border-top: 1px solid #e4e7ed;
-  padding: 20px 0;
+  padding: 30px 0;
   text-align: center;
+  color: #909399;
 }
 
 .footer-content p {
-  margin: 0;
-  color: #909399;
+  margin: 8px 0;
   font-size: 14px;
+}
+
+.footer-content a {
+  color: #606266;
+  text-decoration: none;
+  margin: 0 10px;
+  transition: color 0.3s;
+}
+
+.footer-content a:hover {
+  color: #409eff;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .nav-container {
-    flex-direction: column;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
     padding: 10px;
   }
   
   .nav-center {
-    margin: 0;
     order: 3;
+    width: 100%;
+    margin: 0;
+    justify-content: space-around;
+  }
+  
+  .top-menu {
+    width: 100%;
+  }
+
+  .top-menu :deep(.el-menu-item) {
+    height: 50px;
+    line-height: 50px;
+    font-size: 14px;
   }
   
   .nav-right {
     order: 2;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  .search-input {
-    width: 200px;
-  }
-  
-  .auth-buttons {
-    gap: 8px;
-  }
-  
-  .auth-buttons .el-button {
-    padding: 6px 16px;
-    font-size: 12px;
+    flex-grow: 1;
+    justify-content: flex-end;
   }
 }
 </style>
