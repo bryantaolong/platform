@@ -67,7 +67,7 @@ const pageSize = ref(10)
 const loadAuditPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.searchPostsAdmin(
+    const res = await postApi.queryPosts(
       {
         title: '',
         author: '',

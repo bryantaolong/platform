@@ -118,7 +118,7 @@ const searchForm = reactive({
 const loadPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.searchPostsAdmin(
+    const res = await postApi.queryPosts(
       {
         title: searchForm.title,
         author: searchForm.author,

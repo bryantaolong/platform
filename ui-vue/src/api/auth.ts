@@ -32,10 +32,10 @@ export const authApi = {
   },
 
   /**
-   * 退出登录
+   * 验证Token
    */
-  logout(): Promise<boolean> {
-    return request.get('/api/auth/logout')
+  validate(token: string): Promise<Result<string>> {
+    return request.get('/api/auth/validate', { params: { token } })
   },
 
   /**
@@ -53,16 +53,9 @@ export const authApi = {
   },
 
   /**
-   * 验证Token
+   * 退出登录
    */
-  validateToken(token: string): Promise<Result<string>> {
-    return request.get('/api/auth/validate', { params: { token } })
-  },
-
-  /**
-   * 获取当前用户详情
-   */
-  getCurrentUserProfile(): Promise<Result<UserProfileVO>> {
-    return request.get('/api/user-profiles/me')
+  logout(): Promise<boolean> {
+    return request.get('/api/auth/logout')
   }
 }

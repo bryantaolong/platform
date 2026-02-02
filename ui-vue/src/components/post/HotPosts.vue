@@ -58,7 +58,7 @@ const limit = ref(10)
 const loadHotPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.getHotPosts(limit.value)
+    const res = await postApi.listHotPosts(limit.value)
     if (res.code === 200 && res.data) {
       hotPosts.value = res.data as PostVO[]
     }

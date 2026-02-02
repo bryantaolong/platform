@@ -75,14 +75,14 @@ const loadComments = async (reset = true) => {
         hasMore.value = false
       }
     } else if (activeTab.value === 'hot') {
-      response = await commentApi.getHotComments(props.postId, props.pageSize)
+      response = await commentApi.listHotComments(props.postId, props.pageSize)
       if (response.code === 200) {
         comments.value = response.data || []
         totalCount.value = comments.value.length
         hasMore.value = false
       }
     } else if (activeTab.value === 'latest') {
-      response = await commentApi.getLatestComments(props.postId, props.pageSize)
+      response = await commentApi.listLatestComments(props.postId, props.pageSize)
       if (response.code === 200) {
         comments.value = response.data || []
         totalCount.value = comments.value.length

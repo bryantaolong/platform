@@ -21,7 +21,7 @@ export const userApi = {
   /**
    * 获取用户列表（分页）
    */
-  getUserList(pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
+  listUsers(pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
     return request.get('/api/users', {
       params: { pageNum, pageSize }
     })
@@ -44,7 +44,7 @@ export const userApi = {
   /**
    * 搜索用户
    */
-  searchUsers(data: UserSearchRequest, pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
+  queryUsers(data: UserSearchRequest, pageNum = 1, pageSize = 10): Promise<Result<PageResult<SysUser>>> {
     return request.post('/api/users/search', data, {
       params: { pageNum, pageSize }
     })

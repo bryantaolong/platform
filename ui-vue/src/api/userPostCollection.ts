@@ -16,16 +16,6 @@ export interface UserPostCollection {
 
 export const userPostCollectionApi = {
   /**
-   * 获取当前登录用户的收藏夹列表
-   */
-  getCollections: (): Promise<Result<UserPostCollection[]>> => {
-    return request({
-      url: '/api/user/post-collections',
-      method: 'GET'
-    })
-  },
-
-  /**
    * 创建收藏夹
    */
   createCollection: (folderName: string): Promise<Result<UserPostCollection>> => {
@@ -37,12 +27,63 @@ export const userPostCollectionApi = {
   },
 
   /**
+   * 获取当前登录用户的收藏夹列表
+   */
+  listCollections: (): Promise<Result<UserPostCollection[]>> => {
+    return request({
+      url: '/api/user/post-collections',
+      method: 'GET'
+    })
+  },
+
+  /**
    * 获取指定用户的收藏夹列表（用于在用户主页查看其收藏夹）
    */
-  getCollectionsByUser: (userId: number): Promise<Result<UserPostCollection[]>> => {
+  listCollectionsByUser: (userId: number): Promise<Result<UserPostCollection[]>> => {
     return request({
       url: `/api/user/post-collections/user/${userId}`,
       method: 'GET'
+    })
+  },
+
+  /**
+   * 根据主键查询单个收藏夹详情
+   */
+  getCollectionById: (collectionId: number): Promise<Result<UserPostCollection>> => {
+    return request({
+      url: `/api/user/post-collections/${collectionId}`,
+      method: 'GET'
+    })
+  },
+
+  /**
+   * 获取当前用户收藏夹数量
+   */
+  getUserCollectionCount: (): Promise<Result<number>> => {
+    return request({
+      url: '/api/user/post-collections/count',
+      method: 'GET'
+    })
+  },
+
+  /**
+   * 更新收藏夹名称
+   */
+  updateCollection: (collectionId: number, folderName: string): Promise<Result<UserPostCollection>> => {
+    return request({
+      url: `/api/user/post-collections/${collectionId}`,
+      method: 'PUT',
+      params: { folderName }
+    })
+  },
+
+  /**
+   * 删除收藏夹
+   */
+  deleteCollection: (collectionId: number): Promise<Result<boolean>> => {
+    return request({
+      url: `/api/user/post-collections/${collectionId}`,
+      method: 'DELETE'
     })
   }
 }

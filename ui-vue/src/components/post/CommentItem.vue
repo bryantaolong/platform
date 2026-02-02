@@ -205,7 +205,7 @@ const handleDelete = async () => {
 
 const loadMoreReplies = async () => {
   try {
-    const response = await commentApi.getRepliesByCommentId(props.comment.id)
+    const response = await commentApi.listRepliesByCommentId(props.comment.id)
     if (response.code === 200 && response.data) {
       if (!props.comment.replies) {
         props.comment.replies = []

@@ -10,7 +10,7 @@ export const logApi = {
    * @param lines 返回的最大行数，默认 200
    * @param file 日志文件名，可选
    */
-  getLatestLogs(lines = 200, file?: string): Promise<Result<string[]>> {
+  listLatestLogs(lines = 200, file?: string): Promise<Result<string[]>> {
     return request.get('/api/admin/logs', {
       params: { lines, file }
     })
@@ -19,7 +19,7 @@ export const logApi = {
   /**
    * 获取可用的日志文件列表
    */
-  getLogFiles(): Promise<Result<string[]>> {
+  listLogFiles(): Promise<Result<string[]>> {
     return request.get('/api/admin/logs/files')
   }
 }

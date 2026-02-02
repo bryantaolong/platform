@@ -137,7 +137,7 @@ const loadUsers = async () => {
     if (searchFormData.email) searchParams.email = searchFormData.email
     if (searchFormData.status) searchParams.status = searchFormData.status
 
-    const res = await userApi.searchUsers(searchParams, pageNum.value, pageSize.value)
+    const res = await userApi.queryUsers(searchParams, pageNum.value, pageSize.value)
 
     if (res.code === 200) {
       userList.value = res.data.rows

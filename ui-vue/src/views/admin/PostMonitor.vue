@@ -346,6 +346,7 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { postApi } from '@/api/post'
+import {postAlgorithmAdminApi} from "@/api/postAlgorithmAdmin.ts";
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
 import { postHotRankApi } from '@/api/postHotRank'
@@ -369,7 +370,7 @@ const postSearchForm = reactive({
 const loadAdminPosts = async () => {
   postTableLoading.value = true
   try {
-    const res = await postApi.searchPostsAdminFixed(
+    const res = await postApi.queryPosts(
       {
         title: postSearchForm.title,
         author: '',
@@ -450,7 +451,7 @@ const handlePinPost = async (row: PostVO) => {
         type: 'warning'
       }
     )
-    const res = await postApi.pinPost(row.id)
+    const res = await postAlgorithmAdminApi.pinPost(row.id)
     if (res.code === 200) {
       ElMessage.success('已设置为置顶内容')
       await loadAdminPosts()
@@ -471,7 +472,7 @@ const handleUnpinPost = async (row: PostVO) => {
         type: 'info'
       }
     )
-    const res = await postApi.unpinPost(row.id)
+    const res = await postAlgorithmAdminApi.unpinPost(row.id)
     if (res.code === 200) {
       ElMessage.success('已取消置顶')
       await loadAdminPosts()
@@ -727,7 +728,7 @@ const handleResize = () => {
 const loadHotPosts = async () => {
   hotLoading.value = true
   try {
-    const res = await postApi.getHotPosts(10)
+    const res = await postApi.listHotPosts(10)
     if (res.code === 200) {
       hotPosts.value = res.data || []
       calcKpiFromHotPosts()

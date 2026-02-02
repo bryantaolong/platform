@@ -194,7 +194,7 @@ const loadUserStats = async () => {
 /* --- 关注/粉丝列表逻辑 (一致化处理) --- */
 const showFollowingList = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await userFollowApi.getFollowingUsers(userStore.userInfo.id, 1, 50)
+  const res = await userFollowApi.listFollowingUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
     followingUsers.value = res.data.rows
     showFollowingDialog.value = true
@@ -203,7 +203,7 @@ const showFollowingList = async () => {
 
 const showFollowerList = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await userFollowApi.getFollowerUsers(userStore.userInfo.id, 1, 50)
+  const res = await userFollowApi.listFollowerUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
     followerUsers.value = res.data.rows
     showFollowerDialog.value = true
