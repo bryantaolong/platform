@@ -135,15 +135,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted} from 'vue'
-import {ElMessage, ElMessageBox} from 'element-plus'
-import {Camera} from '@element-plus/icons-vue'
-import {useUserStore} from '@/stores/user'
-import {userApi} from '@/api/user'
-import {userProfileApi} from '@/api/userProfile'
-import {userFollowApi} from '@/api/userFollow'
-import {getAvatarUrl} from '@/utils/file'
-import {getLocationFromIp} from '@/utils/ipLocation'
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Camera } from '@element-plus/icons-vue'
+import { useUserStore} from '@/stores/user'
+import * as userApi from '@/api/user'
+import * as userProfileApi from '@/api/userProfile'
+import * as userFollowApi from '@/api/userFollow'
+import { getAvatarUrl } from '@/utils/file'
+import { getLocationFromIp } from '@/utils/ipLocation'
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
 import UserList from '../../components/user/UserList.vue'
 
@@ -194,7 +194,7 @@ const loadUserStats = async () => {
 /* --- 关注/粉丝列表逻辑 (一致化处理) --- */
 const showFollowingList = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await userFollowApi.getFollowingUsers(userStore.userInfo.id, 1, 50)
+  const res = await userFollowApi.listFollowingUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
     followingUsers.value = res.data.rows
     showFollowingDialog.value = true
@@ -203,7 +203,7 @@ const showFollowingList = async () => {
 
 const showFollowerList = async () => {
   if (!userStore.userInfo?.id) return
-  const res = await userFollowApi.getFollowerUsers(userStore.userInfo.id, 1, 50)
+  const res = await userFollowApi.listFollowerUsers(userStore.userInfo.id, 1, 50)
   if (res.code === 200) {
     followerUsers.value = res.data.rows
     showFollowerDialog.value = true

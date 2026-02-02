@@ -61,8 +61,8 @@ public class PostCommentController {
      */
     @GetMapping("/post/{postId}")
     @PreAuthorize("permitAll()")
-    public Result<List<CommentVO>> getCommentsByPostId(@PathVariable Long postId) {
-        List<PostComment> comments = postCommentService.getCommentsByPostId(postId);
+    public Result<List<CommentVO>> listCommentsByPostId(@PathVariable Long postId) {
+        List<PostComment> comments = postCommentService.listCommentsByPostId(postId);
         List<CommentVO> commentVOs = comments.stream()
                 .map(CommentConverter::toCommentVO)
                 .toList();
@@ -79,7 +79,7 @@ public class PostCommentController {
      */
     @GetMapping("/post/{postId}/page")
     @PreAuthorize("permitAll()")
-    public Result<PageResult<CommentVO>> pageCommentsByPostId(
+    public Result<PageResult<CommentVO>> listCommentsByPostId(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -111,8 +111,8 @@ public class PostCommentController {
      */
     @GetMapping("/{commentId}/replies")
     @PreAuthorize("permitAll()")
-    public Result<List<CommentVO>> getRepliesByCommentId(@PathVariable Long commentId) {
-        List<PostComment> replies = postCommentService.getRepliesByCommentId(commentId);
+    public Result<List<CommentVO>> listRepliesByCommentId(@PathVariable Long commentId) {
+        List<PostComment> replies = postCommentService.listRepliesByCommentId(commentId);
         List<CommentVO> replyVOs = replies.stream()
                 .map(CommentConverter::toCommentVO)
                 .toList();
@@ -128,10 +128,10 @@ public class PostCommentController {
      */
     @GetMapping("/post/{postId}/hot")
     @PreAuthorize("permitAll()")
-    public Result<List<CommentVO>> getHotComments(
+    public Result<List<CommentVO>> listHotComments(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "10") int limit) {
-        List<PostComment> comments = postCommentService.getHotComments(postId, limit);
+        List<PostComment> comments = postCommentService.listHotComments(postId, limit);
         List<CommentVO> commentVOs = comments.stream()
                 .map(CommentConverter::toCommentVO)
                 .toList();
@@ -147,10 +147,10 @@ public class PostCommentController {
      */
     @GetMapping("/post/{postId}/latest")
     @PreAuthorize("permitAll()")
-    public Result<List<CommentVO>> getLatestComments(
+    public Result<List<CommentVO>> listLatestComments(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "10") int limit) {
-        List<PostComment> comments = postCommentService.getLatestComments(postId, limit);
+        List<PostComment> comments = postCommentService.listLatestComments(postId, limit);
         List<CommentVO> commentVOs = comments.stream()
                 .map(CommentConverter::toCommentVO)
                 .toList();

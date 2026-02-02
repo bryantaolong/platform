@@ -109,7 +109,7 @@ import {
   ChatLineRound,
   Collection
 } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
+import * as postApi from '@/api/post'
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
 
@@ -142,7 +142,7 @@ const loadPost = async () => {
   }
   try {
     // 关键：用审核接口，而不是普通详情接口
-    const res = await postApi.getPostAuditById(postId)
+    const res = await postApi.getPostById(postId)
     if (res.code === 200) {
       post.value = res.data as PostVO
     } else {

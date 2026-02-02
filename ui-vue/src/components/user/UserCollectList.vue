@@ -74,8 +74,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { userPostCollectApi } from '@/api/userPostCollect.ts'
-import { userPostCollectionApi, type UserPostCollection } from '@/api/userPostCollection.ts'
+import * as userPostCollectApi from '@/api/userPostCollect.ts'
+import * as userPostCollectionApi from '@/api/userPostCollection.ts'
+import type { UserPostCollection } from "@/models/entity/post/UserPostCollection.ts";
+
 
 /**
  * UserCollectList 组件
@@ -132,8 +134,8 @@ const loadCollections = async () => {
   if (!props.userId && !isOwner.value) return
 
   const res = isOwner.value
-    ? await userPostCollectionApi.getCollections()
-    : await userPostCollectionApi.getCollectionsByUser(props.userId as number)
+    ? await userPostCollectionApi.listCollections()
+    : await userPostCollectionApi.listCollectionsByUser(props.userId as number)
 
   if (res.code === 200 && Array.isArray(res.data)) {
     collections.value = res.data
@@ -145,12 +147,12 @@ const loadCollects = async () => {
   const collectionId = getSelectedCollectionId()
 
   const res = isOwner.value
-    ? await userPostCollectApi.getUserCollects(
+    ? await userPostCollectApi.listUserCollects(
         currentPage.value,
         pageSize.value,
         collectionId
       )
-    : await userPostCollectApi.getUserCollectsByUser(
+    : await userPostCollectApi.listUserCollectsByUser(
         props.userId as number,
         currentPage.value,
         pageSize.value,

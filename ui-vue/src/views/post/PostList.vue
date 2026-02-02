@@ -75,13 +75,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import { View, Star, ChatDotRound } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
-import { getAvatarUrl } from '@/utils/file'
+import * as postApi from '@/api/post'
 import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
 import HotPosts from '@/components/post/HotPosts.vue'
 
@@ -109,13 +108,13 @@ const loadPosts = async () => {
     let response;
 
     if (searchQuery) {
-      response = await postApi.searchPostsByTitle(
+      response = await postApi.listPostsByTitle(
         searchQuery,
         pagination.currentPage,
         pagination.pageSize
       );
     } else {
-      response = await postApi.getAllPublishedPosts(
+      response = await postApi.listAllPublishedPosts(
         pagination.currentPage,
         pagination.pageSize
       );

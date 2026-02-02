@@ -57,7 +57,7 @@ public class UserPostCollectionController {
     public Result<List<UserPostCollection>> getUserCollections() {
         Long currentUserId = authService.getCurrentUserId();
 
-        List<UserPostCollection> collections = userPostCollectionService.getUserCollections(currentUserId);
+        List<UserPostCollection> collections = userPostCollectionService.listUserCollections(currentUserId);
         return Result.success(collections);
     }
 
@@ -70,7 +70,7 @@ public class UserPostCollectionController {
     @GetMapping("/user/{userId}")
     @PreAuthorize("isAuthenticated()")
     public Result<List<UserPostCollection>> getUserCollectionsByUserId(@PathVariable Long userId) {
-        List<UserPostCollection> collections = userPostCollectionService.getUserCollections(userId);
+        List<UserPostCollection> collections = userPostCollectionService.listUserCollections(userId);
         return Result.success(collections);
     }
 

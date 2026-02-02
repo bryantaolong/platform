@@ -88,7 +88,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatLineRound, ArrowUpBold, Star, Delete } from '@element-plus/icons-vue'
 import CommentForm from './CommentForm.vue'
-import { commentApi } from '@/api/postComment.ts'
+import * as commentApi from '@/api/postComment.ts'
 import { getAvatarUrl } from '@/utils/file'
 import type { CommentVO } from '@/models/vo/post/CommentVO'
 
@@ -205,7 +205,7 @@ const handleDelete = async () => {
 
 const loadMoreReplies = async () => {
   try {
-    const response = await commentApi.getRepliesByCommentId(props.comment.id)
+    const response = await commentApi.listRepliesByCommentId(props.comment.id)
     if (response.code === 200 && response.data) {
       if (!props.comment.replies) {
         props.comment.replies = []

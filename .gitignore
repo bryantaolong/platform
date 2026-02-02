@@ -1,6 +1,9 @@
 ### Custom ###
-.claude/
 .model/
+.claude/
+.gemini/
+.qwen/
+.qoder/
 
 ### Java ###
 HELP.md

@@ -35,7 +35,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import CommentItem from './CommentItem.vue'
-import { commentApi } from '@/api/postComment.ts'
+import * as commentApi from '@/api/postComment.ts'
 import type { CommentVO } from '@/models/vo/post/CommentVO'
 
 interface Props {
@@ -75,14 +75,14 @@ const loadComments = async (reset = true) => {
         hasMore.value = false
       }
     } else if (activeTab.value === 'hot') {
-      response = await commentApi.getHotComments(props.postId, props.pageSize)
+      response = await commentApi.listHotComments(props.postId, props.pageSize)
       if (response.code === 200) {
         comments.value = response.data || []
         totalCount.value = comments.value.length
         hasMore.value = false
       }
     } else if (activeTab.value === 'latest') {
-      response = await commentApi.getLatestComments(props.postId, props.pageSize)
+      response = await commentApi.listLatestComments(props.postId, props.pageSize)
       if (response.code === 200) {
         comments.value = response.data || []
         totalCount.value = comments.value.length

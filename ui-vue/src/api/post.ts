@@ -10,249 +10,185 @@ import type {Result} from "@/models/response/Result.ts";
 import type {PageResult} from "@/models/response/PageResult.ts";
 
 // Define Post API endpoints
-export const postApi = {
-    // Get all posts with pagination
-    getAllPosts: (pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: '/api/posts/all',
-            method: 'GET',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
 
-    // 全站已发布文章分页（新增）
-    getAllPublishedPosts: (
-        pageNum: number,
-        pageSize: number
-    ): Promise<Result<PageResult<PostSummaryVO>>> => {
-        return request({
-            url: '/api/posts/published',
-            method: 'GET',
-            params: {pageNum, pageSize}
-        })
-    },
+// 创建博文（提交审核）
+export function createPost(data: PostCreateRequest): Promise<Result<Post>> {
+    return request({
+        url: '/api/posts',
+        method: 'POST',
+        data
+    })
+}
 
-    // Search posts with pagination
-    searchPostsByTitle: (
-        title: string,
-        pageNum: number,
-        pageSize: number
-    ): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: '/api/posts/title',
-            method: 'POST',
-            params: {
-                title,
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 保存博文草稿
+export function savePostDraft(data: PostCreateRequest): Promise<Result<Post>> {
+    return request({
+        url: '/api/posts/draft',
+        method: 'POST',
+        data
+    })
+}
 
-    // Admin search posts with pagination
-    searchPostsAdmin: (
-        req: PostSearchRequest,
-        pageNum: number,
-        pageSize: number
-    ): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: '/api/posts/admin/search',
-            method: 'POST',
-            data: req,
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 上传博文图片
+export function uploadPostImage(formData: FormData): Promise<Result<{ url: string }>> {
+    return request({
+        url: '/api/posts/upload/image',
+        method: 'POST',
+        data: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+}
 
-    // Admin search posts with corrected backend path (用于后台运营配置)
-    searchPostsAdminFixed: (
-        req: PostSearchRequest,
-        pageNum: number,
-        pageSize: number
-    ): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: '/api/posts/admin/search',
-            method: 'POST',
-            data: req,
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 管理员分页查询所有博文（含草稿/已删除）
+export function listAllPosts(pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+    return request({
+        url: '/api/posts/all',
+        method: 'GET',
+        params: {
+            pageNum,
+            pageSize
+        }
+    })
+}
 
-    // Get posts by user ID with pagination
-    getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: `/api/posts/${userId}/all`,
-            method: 'GET',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 全站已发布文章分页（任何用户可见）
+export function listAllPublishedPosts(
+    pageNum: number,
+    pageSize: number
+): Promise<Result<PageResult<PostSummaryVO>>> {
+    return request({
+        url: '/api/posts/published',
+        method: 'GET',
+        params: {pageNum, pageSize}
+    })
+}
 
-    // Get post audit VOs by user ID with pagination
-    getPostVOsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: `/api/posts/${userId}/audit/all`,
-            method: 'GET',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 获取当前用户关注用户的已发布文章分页列表
+export function listFollowedUsersPosts(
+    pageNum: number,
+    pageSize: number
+): Promise<Result<PageResult<PostSummaryVO>>> {
+    return request({
+        url: '/api/posts/following',
+        method: 'GET',
+        params: {pageNum, pageSize}
+    })
+}
 
-    // Get published posts by user ID with pagination
-    getPublishedPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: `/api/posts/${userId}/published`,
-            method: 'GET',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
+// 查询指定用户的全部博文（含草稿、已删除）
+export function listAllPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+    return request({
+        url: `/api/posts/${userId}/all`,
+        method: 'GET',
+        params: {
+            pageNum,
+            pageSize
+        }
+    })
+}
 
-    // Get a single post by ID
-    getPostById: (id: number): Promise<Result<PostVO>> => {
-        return request({
-            url: `/api/posts/${id}`,
-            method: 'GET'
-        })
-    },
+// 查询指定用户已发布的博文
+export function listPublishedPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+    return request({
+        url: `/api/posts/${userId}/published`,
+        method: 'GET',
+        params: {
+            pageNum,
+            pageSize
+        }
+    })
+}
 
-    // Get a post VO by ID
-    getPostAuditById: (id: number): Promise<Result<PostVO>> => {
-        return request({
-            url: `/api/posts/audit/${id}`,
-            method: 'GET'
-        })
-    },
+// 根据主键查询单条博文
+export function getPostById(id: number): Promise<Result<PostVO>> {
+    return request({
+        url: `/api/posts/${id}`,
+        method: 'GET'
+    })
+}
 
-    // Create a new post
-    createPost: (data: PostCreateRequest): Promise<Result<Post>> => {
-        return request({
-            url: '/api/posts',
-            method: 'POST',
-            data
-        })
-    },
+// 管理员多条件搜索博文 (按标题)
+export function listPostsByTitle(
+    title: string,
+    pageNum: number,
+    pageSize: number
+): Promise<Result<PageResult<PostVO>>> {
+    return request({
+        url: '/api/posts/title',
+        method: 'POST',
+        params: {
+            title,
+            pageNum,
+            pageSize
+        }
+    })
+}
 
-    // Save a draft post
-    saveDraft: (data: PostCreateRequest): Promise<Result<Post>> => {
-        return request({
-            url: '/api/posts/draft',
-            method: 'POST',
-            data
-        })
-    },
+// 管理员多条件搜索博文 (admin/query)
+export function queryPosts(
+    req: PostSearchRequest,
+    pageNum: number,
+    pageSize: number
+): Promise<Result<PageResult<PostVO>>> {
+    return request({
+        url: '/api/posts/admin/query',
+        method: 'POST',
+        data: req,
+        params: {
+            pageNum,
+            pageSize
+        }
+    })
+}
 
-    // Update an existing post
-    updatePost: (id: number, data: PostUpdateRequest): Promise<Result<Post>> => {
-        return request({
-            url: `/api/posts/${id}`,
-            method: 'PUT',
-            data
-        })
-    },
+// 更新博文
+export function updatePost(id: number, data: PostUpdateRequest): Promise<Result<Post>> {
+    return request({
+        url: `/api/posts/${id}`,
+        method: 'PUT',
+        data
+    })
+}
 
-    // Update post's status
-    updatePostStatus: (id: number, status: PostStatusEnum): Promise<Result<Post>> => {
-        return request({
-            url: `/api/posts/status/${id}`,
-            method: 'PUT',
-            params: {status}
-        })
-    },
+// 管理员修改博文状态
+export function updatePostStatus(id: number, status: PostStatusEnum): Promise<Result<Post>> {
+    return request({
+        url: `/api/posts/status/${id}`,
+        method: 'PUT',
+        params: {status}
+    })
+}
 
-    // Update post weight for manual ranking (admin only)
-    updatePostWeight: (id: number, weight: number): Promise<Result<Post>> => {
-        return request({
-            url: `/api/admin/post-algorithm/posts/${id}/weight`,
-            method: 'PUT',
-            params: {weight}
-        })
-    },
+// 删除博文（逻辑删除）
+export function deletePost(id: number): Promise<Result<boolean>> {
+    return request({
+        url: `/api/posts/${id}`,
+        method: 'DELETE'
+    })
+}
 
-    // Unpin post (admin only) - cancel manual pinning
-    unpinPost: (id: number): Promise<Result<Post>> => {
-        return request({
-            url: `/api/admin/post-algorithm/posts/${id}/unpin`,
-            method: 'PUT'
-        })
-    },
+// 点赞博文
+export function likePost(id: number): Promise<Result<boolean>> {
+    return request({
+        url: `/api/posts/${id}/like`,
+        method: 'POST'
+    })
+}
 
-    // Delete a post
-    deletePost: (id: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/posts/${id}`,
-            method: 'DELETE'
-        })
-    },
+// 取消点赞博文
+export function unlikePost(id: number): Promise<Result<boolean>> {
+    return request({
+        url: `/api/posts/${id}/unlike`,
+        method: 'POST'
+    })
+}
 
-    // Like a post
-    likePost: (id: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/posts/${id}/like`,
-            method: 'POST'
-        })
-    },
-
-    // Unlike a post
-    unlikePost: (id: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/posts/${id}/unlike`,
-            method: 'POST'
-        })
-    },
-
-    // Check if post is liked by current user
-    checkLikeStatus: (postId: number): Promise<Result<boolean>> => {
-        return request({
-            url: `/api/posts/${postId}/like/status`,
-            method: 'GET'
-        })
-    },
-
-    // Get followed users' posts with pagination
-    getFollowedUsersPosts: (
-        pageNum: number,
-        pageSize: number
-    ): Promise<Result<PageResult<PostSummaryVO>>> => {
-        return request({
-            url: '/api/posts/following',
-            method: 'GET',
-            params: {pageNum, pageSize}
-        })
-    },
-
-    // Upload post image
-    uploadPostImage: (formData: FormData): Promise<Result<{ url: string }>> => {
-        return request({
-            url: '/api/posts/upload/image',
-            method: 'POST',
-            data: formData,
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-    },
-
-    // Get hot posts ranking
-    getHotPosts: (limit: number = 10): Promise<Result<PostVO[]>> => {
-        return request({
-            url: '/api/posts/hot',
-            method: 'GET',
-            params: { limit }
-        })
-    },
+// 查询当前用户对某条博文的点赞状态
+export function checkLikeStatus(postId: number): Promise<Result<boolean>> {
+    return request({
+        url: `/api/posts/${postId}/like/status`,
+        method: 'GET'
+    })
 }

@@ -207,13 +207,13 @@ import {
   Delete,
   MagicStick
 } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
-import { userProfileApi } from '@/api/userProfile'
-import { userFollowApi } from '@/api/userFollow'
+import * as postApi from '@/api/post'
+import * as userProfileApi from '@/api/userProfile'
+import * as userFollowApi from '@/api/userFollow'
 import { getAvatarUrl } from '@/utils/file'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
-import {userPostCollectApi} from "@/api/userPostCollect.ts";
+import * as userPostCollectApi from "@/api/userPostCollect.ts";
 import CommentForm from '@/components/post/CommentForm.vue'
 import CommentList from '@/components/post/CommentList.vue'
 import LlmSummaryPostDialog from '@/components/llm/LlmSummaryPostDialog.vue'
@@ -316,7 +316,7 @@ const checkFollowingStatus = async (userId: number) => {
   }
   
   try {
-    const response = await userFollowApi.checkFollowing(userId)
+    const response = await userFollowApi.isFollowing(userId)
     if (response.code === 200) {
       isFollowing.value = response.data
       showFollowButton.value = true

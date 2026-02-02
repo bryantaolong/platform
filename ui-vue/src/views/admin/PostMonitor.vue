@@ -345,12 +345,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { postApi } from '@/api/post'
+import * as postApi from '@/api/post'
+import * as postAlgorithmAdminApi from "@/api/postAlgorithmAdmin.ts";
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
-import { postHotRankApi } from '@/api/postHotRank'
-import type { PostHotRankWeight } from '@/api/postHotRank'
+import * as postHotRankApi  from '@/api/postHotRank'
 import type { PageResult } from '@/models/response/PageResult'
+import type {PostHotRankWeight} from "@/models/entity/algorithm/PostHotRankWeight.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const echarts: any = (window as any).echarts
@@ -369,7 +370,7 @@ const postSearchForm = reactive({
 const loadAdminPosts = async () => {
   postTableLoading.value = true
   try {
-    const res = await postApi.searchPostsAdminFixed(
+    const res = await postApi.queryPosts(
       {
         title: postSearchForm.title,
         author: '',
@@ -450,7 +451,7 @@ const handlePinPost = async (row: PostVO) => {
         type: 'warning'
       }
     )
-    const res = await postApi.updatePostWeight(row.id, 10)
+    const res = await postAlgorithmAdminApi.pinPost(row.id)
     if (res.code === 200) {
       ElMessage.success('已设置为置顶内容')
       await loadAdminPosts()
@@ -471,7 +472,7 @@ const handleUnpinPost = async (row: PostVO) => {
         type: 'info'
       }
     )
-    const res = await postApi.unpinPost(row.id)
+    const res = await postAlgorithmAdminApi.unpinPost(row.id)
     if (res.code === 200) {
       ElMessage.success('已取消置顶')
       await loadAdminPosts()
@@ -534,7 +535,7 @@ const algoWeights = ref<PostHotRankWeight[]>([])
 const loadAlgoWeights = async () => {
   algoLoading.value = true
   try {
-    const res = await postHotRankApi.getWeights()
+    const res = await postAlgorithmAdminApi.listWeights()
     if (res.code === 200) {
       algoWeights.value = res.data || []
     } else {
@@ -550,7 +551,7 @@ const loadAlgoWeights = async () => {
 
 const handleUpdateAlgoWeight = async (row: PostHotRankWeight) => {
   try {
-    const res = await postHotRankApi.updateWeight(row.id, row.metricValue)
+    const res = await postAlgorithmAdminApi.updateWeight(row.id, row.metricValue)
     if (res.code === 200) {
       ElMessage.success('已更新算法权重')
       await loadAlgoWeights()
@@ -727,7 +728,7 @@ const handleResize = () => {
 const loadHotPosts = async () => {
   hotLoading.value = true
   try {
-    const res = await postApi.getHotPosts(10)
+    const res = await postHotRankApi.listHotPosts(10)
     if (res.code === 200) {
       hotPosts.value = res.data || []
       calcKpiFromHotPosts()

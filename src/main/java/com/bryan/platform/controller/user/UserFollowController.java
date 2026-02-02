@@ -55,11 +55,11 @@ public class UserFollowController {
      */
     @GetMapping("/following/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<UserProfileVO>> getFollowingUsers(
+    public Result<PageResult<UserProfileVO>> listFollowingUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageResult<SysUser> pageResult = userFollowService.getFollowingUsers(userId, pageNum, pageSize);
+        PageResult<SysUser> pageResult = userFollowService.pageFollowingUsers(userId, pageNum, pageSize);
         List<UserProfileVO> vos = pageResult.getRows().stream()
                 .map(user -> {
                     UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());
@@ -79,11 +79,11 @@ public class UserFollowController {
      */
     @GetMapping("/followers/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<UserProfileVO>> getFollowerUsers(
+    public Result<PageResult<UserProfileVO>> listFollowerUsers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageResult<SysUser> pageResult = userFollowService.getFollowerUsers(userId, pageNum, pageSize);
+        PageResult<SysUser> pageResult = userFollowService.pageFollowerUsers(userId, pageNum, pageSize);
         List<UserProfileVO> vos = pageResult.getRows().stream()
                 .map(user -> {
                     UserProfile profile = userProfileService.getUserProfileByUserId(user.getId());

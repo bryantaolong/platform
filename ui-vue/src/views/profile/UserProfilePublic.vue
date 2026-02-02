@@ -123,17 +123,17 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {ElMessage} from 'element-plus'
-import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
-import {useUserStore} from '@/stores/user'
-import { userProfileApi } from '@/api/userProfile'
-import {userFollowApi} from '@/api/userFollow.ts'
-import {postApi} from '@/api/post.ts'
-import {getAvatarUrl} from '@/utils/file'
-import type {UserProfileVO} from '@/models/vo/user/UserProfileVO.ts'
-import type {PostVO} from '@/models/vo/post/PostVO.ts'
+import { ref, onMounted} from 'vue'
+import { useRoute, useRouter} from 'vue-router'
+import { ElMessage} from 'element-plus'
+import { Star, View, ChatLineRound } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+import * as userProfileApi from '@/api/userProfile'
+import * as userFollowApi from '@/api/userFollow.ts'
+import * as postApi from '@/api/post.ts'
+import { getAvatarUrl } from '@/utils/file'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
+import type { PostVO} from '@/models/vo/post/PostVO.ts'
 import UserList from '../../components/user/UserList.vue'
 import UserCollectList from '@/components/user/UserCollectList.vue'
 
@@ -193,7 +193,7 @@ const checkFollowingStatus = async () => {
     return
   }
 
-  const response = await userFollowApi.checkFollowing(userId.value)
+  const response = await userFollowApi.isFollowing(userId.value)
   if (response.code === 200) {
     isFollowing.value = response.data
     showFollowButton.value = true
@@ -201,7 +201,7 @@ const checkFollowingStatus = async () => {
 }
 
 const loadUserPosts = async () => {
-  const response = await postApi.getPublishedPostsByUserId(userId.value, currentPage.value, pageSize.value)
+  const response = await postApi.listPublishedPostsByUserId(userId.value, currentPage.value, pageSize.value)
   if (response.code === 200) {
     posts.value = response.data.rows
     totalPosts.value = response.data.total
@@ -229,7 +229,7 @@ const toggleFollow = async () => {
 }
 
 const showFollowingList = async () => {
-  const response = await userFollowApi.getFollowingUsers(userId.value, 1, 50)
+  const response = await userFollowApi.listFollowingUsers(userId.value, 1, 50)
   if (response.code === 200) {
     followingUsers.value = response.data.rows
     showFollowingDialog.value = true
@@ -237,7 +237,7 @@ const showFollowingList = async () => {
 }
 
 const showFollowerList = async () => {
-  const response = await userFollowApi.getFollowerUsers(userId.value, 1, 50)
+  const response = await userFollowApi.listFollowerUsers(userId.value, 1, 50)
   if (response.code === 200) {
     followerUsers.value = response.data.rows
     showFollowerDialog.value = true

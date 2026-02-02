@@ -70,8 +70,7 @@ import { useRouter } from 'vue-router'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import { View, Star, ChatDotRound } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
-import { getAvatarUrl } from '@/utils/file'
+import * as postApi from '@/api/post'
 import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
 
 interface PaginationData {
@@ -93,7 +92,7 @@ const pagination = reactive<PaginationData>({
 const loadPosts = async () => {
   loading.value = true
   try {
-    const response = await postApi.getFollowedUsersPosts(
+    const response = await postApi.listFollowedUsersPosts(
         pagination.currentPage,
         pagination.pageSize
     )

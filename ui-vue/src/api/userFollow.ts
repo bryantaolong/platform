@@ -6,50 +6,49 @@ import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 /**
  * 用户关注API
  */
-export const userFollowApi = {
-  /**
-   * 关注用户
-   */
-  followUser(followingId: number): Promise<Result<boolean>> {
-    return request.post(`/api/user-follows/follow/${followingId}`)
-  },
 
-  /**
-   * 取消关注用户
-   */
-  unfollowUser(followingId: number): Promise<Result<boolean>> {
-    return request.post(`/api/user-follows/unfollow/${followingId}`)
-  },
+/**
+ * 关注用户
+ */
+export function followUser(followingId: number): Promise<Result<boolean>> {
+  return request.post(`/api/user-follows/follow/${followingId}`)
+}
 
-  /**
-   * 获取用户的关注列表
-   */
-  getFollowingUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
-    return request.get(`/api/user-follows/following/${userId}`, {
-      params: { pageNum, pageSize }
-    })
-  },
+/**
+ * 查询指定用户关注的用户列表（分页）。
+ */
+export function listFollowingUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
+  return request.get(`/api/user-follows/following/${userId}`, {
+    params: { pageNum, pageSize }
+  })
+}
 
-  /**
-   * 获取用户的粉丝列表
-   */
-  getFollowerUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
-    return request.get(`/api/user-follows/followers/${userId}`, {
-      params: { pageNum, pageSize }
-    })
-  },
+/**
+ * 查询指定用户的粉丝列表（分页）。
+ */
+export function listFollowerUsers(userId: number, pageNum = 1, pageSize = 10): Promise<Result<PageResult<UserProfileVO>>> {
+  return request.get(`/api/user-follows/followers/${userId}`, {
+    params: { pageNum, pageSize }
+  })
+}
 
-  /**
-   * 检查是否关注了指定用户
-   */
-  checkFollowing(followingId: number): Promise<Result<boolean>> {
-    return request.get(`/api/user-follows/check/${followingId}`)
-  },
+/**
+ * 检查当前用户是否关注指定用户。
+ */
+export function isFollowing(followingId: number): Promise<Result<boolean>> {
+  return request.get(`/api/user-follows/check/${followingId}`)
+}
 
-  /**
-   * 获取用户的关注数和粉丝数
-   */
-  getUserFollowStats(userId: number): Promise<Result<{ followingCount: number, followerCount: number }>> {
-    return request.get(`/api/user-follows/stats/${userId}`)
-  }
+/**
+ * 获取指定用户的关注数和粉丝数。
+ */
+export function getUserFollowStats(userId: number): Promise<Result<{ followingCount: number, followerCount: number }>> {
+  return request.get(`/api/user-follows/stats/${userId}`)
+}
+
+/**
+ * 当前用户取消关注指定用户。
+ */
+export function unfollowUser(followingId: number): Promise<Result<boolean>> {
+  return request.post(`/api/user-follows/unfollow/${followingId}`)
 }

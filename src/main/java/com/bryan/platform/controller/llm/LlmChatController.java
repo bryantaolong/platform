@@ -72,7 +72,7 @@ public class LlmChatController {
         String title = payload.get("title");
         String content = payload.get("content");
         String provider = payload.get("provider");
-        log.info("接收到摘要生成请求，文章标题: {}", title);
+        log.info("接收到摘要生成请求，文章标题: {}，模型提供商：{}", title, provider);
 
         // 2. 校验标题和内容是否为空
         if (title == null || title.trim().isEmpty()) {
@@ -85,7 +85,7 @@ public class LlmChatController {
         }
 
         // 3. 调用 AI 服务生成摘要（支持按提供商切换模型）
-        String summary = llmChatService.generatePostSummary(title, content, provider);
+        String summary = llmChatService.generatePostSummary(title, content, "moonshot");
 
         // 4. 封装结果返回
         return Collections.singletonMap("summary", summary);
@@ -108,17 +108,5 @@ public class LlmChatController {
 
         // 3. 返回成功提示信息
         return Collections.singletonMap("message", "上下文已清空");
-    }
-
-    /**
-     * 测试指定大模型提供商的连通性和实际模型信息（服务端调试用）
-     *
-     * @param provider 大模型提供商标识（deepseek、moonshot、minimax），可选；为空时使用默认提供商
-     * @return 返回包含 provider、configuredModel、actualModel、endpoint、sampleReply、status 等字段的结果
-     */
-    @GetMapping("/test/provider")
-    @PreAuthorize("permitAll()")
-    public Map<String, String> testProvider(@RequestParam(value = "provider", required = false) String provider) {
-        return llmChatService.testProvider(provider);
     }
 }

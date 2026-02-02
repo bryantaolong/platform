@@ -88,10 +88,10 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
-import {marked} from 'marked'
-import {ElMessage} from 'element-plus'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { marked } from 'marked'
+import { ElMessage } from 'element-plus'
 import {
   TrendCharts,
   View,
@@ -100,8 +100,8 @@ import {
   Collection,
   Sunrise
 } from '@element-plus/icons-vue'
-import {postApi} from '@/api/post'
 import type {PostVO} from '@/models/vo/post/PostVO'
+import * as postHotRankApi from "@/api/postHotRank.ts";
 
 const router = useRouter()
 const loading = ref(true)
@@ -112,7 +112,7 @@ const topPosts = computed(() => hotPosts.value.slice(0, 5))
 const loadHotPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.getHotPosts(20)
+    const res = await postHotRankApi.listHotPosts(20)
     if (res.code === 200 && res.data) {
       hotPosts.value = res.data as PostVO[]
     } else {

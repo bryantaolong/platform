@@ -97,7 +97,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Edit, Delete, Check } from '@element-plus/icons-vue'
-import { postApi } from '@/api/post'
+import * as postApi from '@/api/post'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { dayjs } from 'element-plus'
@@ -118,7 +118,7 @@ const searchForm = reactive({
 const loadPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.searchPostsAdmin(
+    const res = await postApi.queryPosts(
       {
         title: searchForm.title,
         author: searchForm.author,

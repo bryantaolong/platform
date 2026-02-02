@@ -74,7 +74,7 @@ public class UserPostCollectionService {
      * @param userId 用户主键
      * @return 收藏夹列表
      */
-    public List<UserPostCollection> getUserCollections(Long userId) {
+    public List<UserPostCollection> listUserCollections(Long userId) {
         List<UserPostCollection> collections = userPostCollectionMapper.selectByUserId(userId);
         log.info("获取用户收藏夹列表完成，用户ID: {} , 数量: {}", userId, collections.size());
         return collections;

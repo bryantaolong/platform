@@ -126,7 +126,7 @@ public class PostCommentService {
      * @param postId 博文主键
      * @return 评论实体列表
      */
-    public List<PostComment> getCommentsByPostId(Long postId) {
+    public List<PostComment> listCommentsByPostId(Long postId) {
         return postCommentMapper.selectByPostId(postId);
     }
 
@@ -151,7 +151,7 @@ public class PostCommentService {
      * @param commentId 父评论主键
      * @return 回复列表
      */
-    public List<PostComment> getRepliesByCommentId(Long commentId) {
+    public List<PostComment> listRepliesByCommentId(Long commentId) {
         return postCommentMapper.selectByRootId(commentId);
     }
 
@@ -162,7 +162,7 @@ public class PostCommentService {
      * @param limit  返回条数
      * @return 评论实体列表
      */
-    public List<PostComment> getHotComments(Long postId, int limit) {
+    public List<PostComment> listHotComments(Long postId, int limit) {
         return postCommentMapper.selectHotCommentsByPostId(postId, limit);
     }
 
@@ -173,7 +173,7 @@ public class PostCommentService {
      * @param limit  返回条数
      * @return 评论实体列表
      */
-    public List<PostComment> getLatestComments(Long postId, int limit) {
+    public List<PostComment> listLatestComments(Long postId, int limit) {
         return postCommentMapper.selectLatestCommentsByPostId(postId, limit);
     }
 

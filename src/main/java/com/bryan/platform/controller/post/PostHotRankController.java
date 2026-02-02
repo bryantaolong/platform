@@ -44,9 +44,9 @@ public class PostHotRankController {
      */
     @GetMapping
     @PreAuthorize("permitAll()")
-    public Result<List<PostVO>> getHotPosts(@RequestParam(defaultValue = "10") int limit) {
+    public Result<List<PostVO>> listHotPosts(@RequestParam(defaultValue = "10") int limit) {
         int validLimit = Math.min(Math.max(limit, 1), MAX_LIMIT);
-        List<Post> posts = postService.findRecentPosts(validLimit * 10, DEFAULT_HOURS);
+        List<Post> posts = postService.listRecentPosts(validLimit * 10, DEFAULT_HOURS);
 
         List<PostVO> hotPosts = posts.stream()
                 .map(p -> {
