@@ -46,8 +46,8 @@
 import {ref, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
 import {TrendCharts, Sunrise, View, ChatLineRound, Star} from '@element-plus/icons-vue'
-import {postApi} from '@/api/post.ts'
 import type {PostVO} from '@/models/vo/post/PostVO'
+import {postHotRankApi} from "@/api/postHotRank.ts";
 
 const router = useRouter()
 
@@ -58,7 +58,7 @@ const limit = ref(10)
 const loadHotPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.listHotPosts(limit.value)
+    const res = await postHotRankApi.listHotPosts(limit.value)
     if (res.code === 200 && res.data) {
       hotPosts.value = res.data as PostVO[]
     }

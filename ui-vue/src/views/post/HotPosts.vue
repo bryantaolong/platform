@@ -102,6 +102,7 @@ import {
 } from '@element-plus/icons-vue'
 import {postApi} from '@/api/post'
 import type {PostVO} from '@/models/vo/post/PostVO'
+import {postHotRankApi} from "@/api/postHotRank.ts";
 
 const router = useRouter()
 const loading = ref(true)
@@ -112,7 +113,7 @@ const topPosts = computed(() => hotPosts.value.slice(0, 5))
 const loadHotPosts = async () => {
   loading.value = true
   try {
-    const res = await postApi.listHotPosts(20)
+    const res = await postHotRankApi.listHotPosts(20)
     if (res.code === 200 && res.data) {
       hotPosts.value = res.data as PostVO[]
     } else {

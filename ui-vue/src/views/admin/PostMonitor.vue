@@ -535,7 +535,7 @@ const algoWeights = ref<PostHotRankWeight[]>([])
 const loadAlgoWeights = async () => {
   algoLoading.value = true
   try {
-    const res = await postHotRankApi.getWeights()
+    const res = await postAlgorithmAdminApi.listWeights()
     if (res.code === 200) {
       algoWeights.value = res.data || []
     } else {
@@ -551,7 +551,7 @@ const loadAlgoWeights = async () => {
 
 const handleUpdateAlgoWeight = async (row: PostHotRankWeight) => {
   try {
-    const res = await postHotRankApi.updateWeight(row.id, row.metricValue)
+    const res = await postAlgorithmAdminApi.updateWeight(row.id, row.metricValue)
     if (res.code === 200) {
       ElMessage.success('已更新算法权重')
       await loadAlgoWeights()
@@ -728,7 +728,7 @@ const handleResize = () => {
 const loadHotPosts = async () => {
   hotLoading.value = true
   try {
-    const res = await postApi.listHotPosts(10)
+    const res = await postHotRankApi.listHotPosts(10)
     if (res.code === 200) {
       hotPosts.value = res.data || []
       calcKpiFromHotPosts()
