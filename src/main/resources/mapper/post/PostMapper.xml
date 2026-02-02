@@ -249,7 +249,7 @@
         WHERE status = 0
           AND deleted = 0
           AND created_at >= NOW() - (#{hours} * INTERVAL '1 HOUR')
-        ORDER BY created_at DESC
+        ORDER BY weight DESC, created_at DESC
         LIMIT #{limit}
     </select>
 </mapper>
