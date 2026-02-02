@@ -1,10 +1,8 @@
 package com.bryan.platform.service.post;
 
-import com.bryan.platform.domain.converter.PostConverter;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
-import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.service.user.UserFollowService;
@@ -45,19 +43,6 @@ public class PostService {
     }
 
     /**
-     * 保存博文并返回主键
-     * 适用于只需主键的场景，减少一次查询
-     *
-     * @param post 待保存博文实体
-     * @return 博文主键
-     */
-    public Long savePost(Post post) {
-        postMapper.insert(post);
-        log.info("保存博文草稿成功，帖子ID: {}", post.getId());
-        return post.getId();
-    }
-
-    /**
      * 根据主键查询博文
      * 同时自动递增浏览数
      *
@@ -79,18 +64,6 @@ public class PostService {
     }
 
     /**
-     * 批量查询博文
-     *
-     * @param postIds 博文主键列表
-     * @return 博文实体列表
-     */
-    public List<Post> getPostsByIds(List<Long> postIds) {
-        List<Post> posts = postMapper.selectByIds(postIds);
-        log.info("批量查询帖子完成，数量: {} , 请求IDs: {}", posts.size(), postIds);
-        return posts;
-    }
-
-    /**
      * 分页查询指定用户的全部博文（含草稿、已删除）
      *
      * @param userId   用户主键
@@ -104,26 +77,6 @@ public class PostService {
         long total = postMapper.countByUserId(userId);
 
         return PageResult.of(rows, total, pageNum, pageSize);
-    }
-
-    /**
-     * 分页查询指定用户的博文审核视图（VO）
-     *
-     * @param userId   用户主键
-     * @param pageNum  当前页码
-     * @param pageSize 每页条数
-     * @return 博文 VO 分页结果
-     */
-    public PageResult<PostVO> pageUserPostAuditVos(Long userId, int pageNum, int pageSize) {
-        int offset = (pageNum - 1) * pageSize;
-        List<Post> rows = postMapper.selectByUserId(userId, offset, pageSize);
-        long total = postMapper.countByUserId(userId);
-
-        List<PostVO> auditVos = rows.stream()
-                .map(PostConverter::toPostVO)
-                .toList();
-
-        return PageResult.of(auditVos, total, pageNum, pageSize);
     }
 
     /**
@@ -181,7 +134,7 @@ public class PostService {
      */
     public PageResult<Post> pageFollowedUsersPosts(Long followerId, int pageNum, int pageSize) {
         // 1. 通过 UserFollowService 获取关注用户ID列表（遵循架构原则）
-        List<Long> followingIds = userFollowService.getFollowingUserIds(followerId);
+        List<Long> followingIds = userFollowService.listFollowingUserIds(followerId);
 
         if (followingIds.isEmpty()) {
             // 如果没有关注任何用户，返回空结果
@@ -241,35 +194,12 @@ public class PostService {
      * @param pageSize 每页条数
      * @return 博文分页结果
      */
-    public PageResult<Post> searchPosts(String title, String author, String tags, PostStatusEnum status, int pageNum, int pageSize) {
+    public PageResult<Post> queryPosts(String title, String author, String tags, PostStatusEnum status, int pageNum, int pageSize) {
         int offset = (pageNum - 1) * pageSize;
         List<Post> rows = postMapper.selectBySearch(title, author, tags, status, offset, pageSize);
         long total = postMapper.countBySearch(title, author, tags, status);
 
         return PageResult.of(rows, total, pageNum, pageSize);
-    }
-
-    /**
-     * 统计指定用户的博文数
-     *
-     * @param userId 用户主键
-     * @return 博文数量
-     */
-    public long countUserPosts(Long userId) {
-        long count = postMapper.countByUserId(userId);
-        log.info("统计用户帖子数量，用户ID: {} , 结果: {}", userId, count);
-        return count;
-    }
-
-    /**
-     * 统计全局博文总数
-     *
-     * @return 博文数量
-     */
-    public long countAllPosts() {
-        long count = postMapper.countAll();
-        log.info("统计全局帖子数量，结果: {}", count);
-        return count;
     }
 
     /**
@@ -383,20 +313,6 @@ public class PostService {
     }
 
     /**
-     * 批量删除博文（逻辑删除）
-     *
-     * @param postIds 博文主键列表
-     */
-    @Transactional
-    public void deletePostBatch(List<Long> postIds) {
-        for (Long id : postIds) {
-            postMapper.deleteById(id);
-            log.info("帖子ID: {} 删除成功 (逻辑删除)", id);
-        }
-        log.info("批量删除帖子完成，数量: {}", postIds.size());
-    }
-
-    /**
      * 查询最近发布的已发布帖子
      * 用于热度排行榜计算
      *
@@ -404,7 +320,7 @@ public class PostService {
      * @param hours  时间范围（小时），只查询此时间范围内发布的帖子
      * @return 最近发布的帖子列表
      */
-    public List<Post> findRecentPosts(int limit, int hours) {
+    public List<Post> listRecentPosts(int limit, int hours) {
         List<Post> posts = postMapper.selectRecentPosts(limit, hours);
         log.info("查询最近发布的帖子完成，数量: {}, 时间范围: {} 小时", posts.size(), hours);
         return posts;

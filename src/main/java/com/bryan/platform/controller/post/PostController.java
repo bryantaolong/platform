@@ -133,7 +133,7 @@ public class PostController {
      */
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public Result<PageResult<Post>> getAllPosts(
+    public Result<PageResult<Post>> listAllPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
         // 1. 调用服务层获取所有用户列表
@@ -149,7 +149,7 @@ public class PostController {
      */
     @GetMapping("/published")
     @PreAuthorize("permitAll()")
-    public Result<PageResult<PostSummaryVO>> getAllPublishedPosts(
+    public Result<PageResult<PostSummaryVO>> listAllPublishedPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
 
@@ -171,7 +171,7 @@ public class PostController {
      */
     @GetMapping("/following")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<PostSummaryVO>> getFollowedUsersPosts(
+    public Result<PageResult<PostSummaryVO>> listFollowedUsersPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
         Long currentUserId = authService.getCurrentUserId();
@@ -194,7 +194,7 @@ public class PostController {
      */
     @GetMapping("/{userId}/all")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<PostVO>> getAllPostsByUserId(
+    public Result<PageResult<PostVO>> listAllPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -207,23 +207,6 @@ public class PostController {
     }
 
     /**
-     * 管理员分页查询指定用户的博文审核视图
-     *
-     * @param userId   用户主键
-     * @param pageNum  当前页码
-     * @param pageSize 每页条数
-     * @return 博文审核 VO 分页结果
-     */
-    @GetMapping("/{userId}/audit/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<PageResult<PostVO>> getPostAuditVosByUserId(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return Result.success(postService.pageUserPostAuditVos(userId, pageNum, pageSize));
-    }
-
-    /**
      * 查询指定用户已发布的博文
      *
      * @param userId   用户主键
@@ -233,7 +216,7 @@ public class PostController {
      */
     @GetMapping("/{userId}/published")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<PostVO>> getPublishedPostsByUserId(
+    public Result<PageResult<PostVO>> listPublishedPostsByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -263,23 +246,6 @@ public class PostController {
     }
 
     /**
-     * 管理员根据主键查询单条博文（含敏感字段）
-     *
-     * @param id 博文主键
-     * @return 博文 VO 或错误提示
-     */
-    @GetMapping("/audit/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<PostVO> getPostAuditById(@PathVariable Long id) {
-        Post post = postService.getPostById(id);
-        if (post != null) {
-            return Result.success(PostConverter.toPostVO(post));
-        } else {
-            return Result.error(HttpStatus.NOT_FOUND, "文章不存在");
-        }
-    }
-
-    /**
      * 管理员多条件搜索博文
      * <p>
      *
@@ -290,7 +256,7 @@ public class PostController {
      */
     @PostMapping("/title")
     @PreAuthorize("isAuthenticated()")
-    public Result<PageResult<PostVO>> getPostsByTitle(
+    public Result<PageResult<PostVO>> listPostsByTitle(
             @RequestParam String title,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -311,13 +277,13 @@ public class PostController {
      * @param pageSize 每页条数
      * @return 博文 VO 分页结果
      */
-    @PostMapping("/admin/search")
+    @PostMapping("/admin/query")
     @PreAuthorize("hasRole('ADMIN')")
-    public Result<PageResult<PostVO>> searchPosts(
+    public Result<PageResult<PostVO>> queryPosts(
             @RequestBody PostSearchRequest req,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        PageResult<Post> page = postService.searchPosts(req.getTitle(),
+        PageResult<Post> page = postService.queryPosts(req.getTitle(),
                 req.getAuthor(), req.getTags(), req.getStatus(), pageNum, pageSize);
         List<PostVO> rows = page.getRows().stream()
                 .map(PostConverter::toPostVO)

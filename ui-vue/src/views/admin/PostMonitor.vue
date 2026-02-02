@@ -450,7 +450,7 @@ const handlePinPost = async (row: PostVO) => {
         type: 'warning'
       }
     )
-    const res = await postApi.updatePostWeight(row.id, 10)
+    const res = await postApi.pinPost(row.id)
     if (res.code === 200) {
       ElMessage.success('已设置为置顶内容')
       await loadAdminPosts()

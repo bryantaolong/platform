@@ -35,10 +35,6 @@ public class PostAlgorithmAdminController {
     private final PostService postService;
 
     /**
-     * ========== 算法权重配置相关接口 ==========
-     */
-
-    /**
      * 查询全部算法权重配置
      *
      * @return 权重配置列表
@@ -81,10 +77,6 @@ public class PostAlgorithmAdminController {
     }
 
     /**
-     * ========== 博文置顶管理相关接口 ==========
-     */
-
-    /**
      * 管理员设置博文权重（用于人工置顶与排序干预）
      *
      * @param postId 博文主键
@@ -94,7 +86,7 @@ public class PostAlgorithmAdminController {
     @PutMapping("/posts/{postId}/weight")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Post> updatePostWeight(
-            @PathVariable("postId") Long postId,
+            @PathVariable Long postId,
             @RequestParam Integer weight) {
         Post post = Post.builder()
                 .id(postId)
@@ -109,6 +101,28 @@ public class PostAlgorithmAdminController {
     }
 
     /**
+     * 管理员置顶博文
+     * 将博文权重设置为 10，人工置顶
+     *
+     * @param postId 博文主键
+     * @return 更新后的博文实体或错误提示
+     */
+    @PutMapping("/posts/{postId}/pin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<Post> pinPost(@PathVariable Long postId) {
+        Post post = Post.builder()
+                .id(postId)
+                .weight(10)
+                .build();
+        Post updated = postService.updatePost(postId, post);
+        if (updated != null) {
+            return Result.success(updated);
+        } else {
+            return Result.error(HttpStatus.NOT_FOUND, "取消置顶失败，文章不存在");
+        }
+    }
+
+    /**
      * 管理员取消博文置顶
      * 将博文权重恢复为默认值 1，取消人工置顶状态
      *
@@ -117,7 +131,7 @@ public class PostAlgorithmAdminController {
      */
     @PutMapping("/posts/{postId}/unpin")
     @PreAuthorize("hasRole('ADMIN')")
-    public Result<Post> unpinPost(@PathVariable("postId") Long postId) {
+    public Result<Post> unpinPost(@PathVariable Long postId) {
         Post post = Post.builder()
                 .id(postId)
                 .weight(1)

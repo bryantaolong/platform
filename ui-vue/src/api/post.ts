@@ -59,7 +59,7 @@ export const postApi = {
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
-            url: '/api/posts/admin/search',
+            url: '/api/posts/admin/query',
             method: 'POST',
             data: req,
             params: {
@@ -76,7 +76,7 @@ export const postApi = {
         pageSize: number
     ): Promise<Result<PageResult<PostVO>>> => {
         return request({
-            url: '/api/posts/admin/search',
+            url: '/api/posts/admin/query',
             method: 'POST',
             data: req,
             params: {
@@ -90,18 +90,6 @@ export const postApi = {
     getPostsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
         return request({
             url: `/api/posts/${userId}/all`,
-            method: 'GET',
-            params: {
-                pageNum,
-                pageSize
-            }
-        })
-    },
-
-    // Get post audit VOs by user ID with pagination
-    getPostVOsByUserId: (userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> => {
-        return request({
-            url: `/api/posts/${userId}/audit/all`,
             method: 'GET',
             params: {
                 pageNum,
@@ -126,14 +114,6 @@ export const postApi = {
     getPostById: (id: number): Promise<Result<PostVO>> => {
         return request({
             url: `/api/posts/${id}`,
-            method: 'GET'
-        })
-    },
-
-    // Get a post VO by ID
-    getPostAuditById: (id: number): Promise<Result<PostVO>> => {
-        return request({
-            url: `/api/posts/audit/${id}`,
             method: 'GET'
         })
     },
@@ -180,6 +160,14 @@ export const postApi = {
             url: `/api/admin/post-algorithm/posts/${id}/weight`,
             method: 'PUT',
             params: {weight}
+        })
+    },
+
+    // Pin post (admin only) - manual pinning
+    pinPost: (id: number): Promise<Result<Post>> => {
+        return request({
+            url: `/api/admin/post-algorithm/posts/${id}/pin`,
+            method: 'PUT'
         })
     },
 

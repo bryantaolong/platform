@@ -19,8 +19,6 @@ public interface PostMapper {
 
     Post selectById(@Param("id") Long id);
 
-    List<Post> selectByIds(@Param("ids") List<Long> ids);
-
     List<Post> selectByUserId(@Param("userId") Long userId,
                               @Param("offset") int offset,
                               @Param("pageSize") int pageSize);

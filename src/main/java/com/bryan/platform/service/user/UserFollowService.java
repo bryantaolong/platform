@@ -72,7 +72,7 @@ public class UserFollowService {
      * @return 分页的用户列表
      * @throws BusinessException 若用户不存在
      */
-    public PageResult<SysUser> getFollowingUsers(Long userId,
+    public PageResult<SysUser> pageFollowingUsers(Long userId,
                                                  Integer pageNum,
                                                  Integer pageSize) {
         if (!userService.existsById(userId)) {
@@ -100,7 +100,7 @@ public class UserFollowService {
      * @return 分页的粉丝用户列表
      * @throws BusinessException 若用户不存在
      */
-    public PageResult<SysUser> getFollowerUsers(Long userId,
+    public PageResult<SysUser> pageFollowerUsers(Long userId,
                                                 Integer pageNum,
                                                 Integer pageSize) {
         if (!userService.existsById(userId)) {
@@ -146,7 +146,7 @@ public class UserFollowService {
      * @param followerId 关注者用户 ID
      * @return 被关注用户ID列表
      */
-    public List<Long> getFollowingUserIds(Long followerId) {
+    public List<Long> listFollowingUserIds(Long followerId) {
         List<UserFollow> follows = userFollowMapper.selectAllByFollowerId(followerId);
         return follows.stream()
                 .map(UserFollow::getFollowingId)
