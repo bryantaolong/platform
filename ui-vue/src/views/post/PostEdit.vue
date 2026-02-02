@@ -106,7 +106,7 @@ import { marked } from 'marked'
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElInput } from 'element-plus'
-import { postApi } from '@/api/post'
+import * as postApi from '@/api/post'
 import type { Post } from '@/models/entity/post/Post'
 import type { PostUpdateRequest } from '@/models/request/post/PostUpdateRequest'
 

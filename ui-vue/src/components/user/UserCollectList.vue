@@ -74,8 +74,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { userPostCollectApi } from '@/api/userPostCollect.ts'
-import { userPostCollectionApi, type UserPostCollection } from '@/api/userPostCollection.ts'
+import * as userPostCollectApi from '@/api/userPostCollect.ts'
+import * as userPostCollectionApi from '@/api/userPostCollection.ts'
+import type { UserPostCollection } from "@/models/entity/post/UserPostCollection.ts";
+
 
 /**
  * UserCollectList 组件

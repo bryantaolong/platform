@@ -50,13 +50,13 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import {View, ChatLineRound, Star} from '@element-plus/icons-vue'
-import {useRouter} from 'vue-router'
-import {useUserStore} from '@/stores/user.ts'
-import {postApi} from '@/api/post.ts'
-import type {PostVO} from '@/models/vo/post/PostVO'
-import {PostStatusEnum} from '@/models/enum/PostStatusEnum.ts'
+import { ref, onMounted } from 'vue'
+import { View, ChatLineRound, Star } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.ts'
+import * as postApi from '@/api/post.ts'
+import type { PostVO } from '@/models/vo/post/PostVO'
+import { PostStatusEnum } from '@/models/enum/PostStatusEnum.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -68,12 +68,12 @@ const totalPosts = ref(0)
 const statusFilter = ref('')
 
 const statusOptions = [
-  { label: '全部', value: '' },
-  { label: '已发布', value: PostStatusEnum.PUBLISHED },
-  { label: '草稿', value: PostStatusEnum.DRAFT },
-  { label: '私密', value: PostStatusEnum.PRIVATE },
-  { label: '审核中', value: PostStatusEnum.AUDITING },
-  { label: '已回收', value: PostStatusEnum.RECYCLED }
+  {label: '全部', value: ''},
+  {label: '已发布', value: PostStatusEnum.PUBLISHED},
+  {label: '草稿', value: PostStatusEnum.DRAFT},
+  {label: '私密', value: PostStatusEnum.PRIVATE},
+  {label: '审核中', value: PostStatusEnum.AUDITING},
+  {label: '已回收', value: PostStatusEnum.RECYCLED}
 ]
 
 const formatDate = (dateStr?: string) => dateStr ? new Date(dateStr).toLocaleDateString('zh-CN') : ''

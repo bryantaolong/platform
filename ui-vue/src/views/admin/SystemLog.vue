@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { logApi } from '@/api/log'
+import * as logApi from '@/api/log'
 
 const loading = ref(false)
 const logs = ref<string[]>([])

@@ -88,10 +88,10 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
-import {marked} from 'marked'
-import {ElMessage} from 'element-plus'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { marked } from 'marked'
+import { ElMessage } from 'element-plus'
 import {
   TrendCharts,
   View,
@@ -100,9 +100,8 @@ import {
   Collection,
   Sunrise
 } from '@element-plus/icons-vue'
-import {postApi} from '@/api/post'
 import type {PostVO} from '@/models/vo/post/PostVO'
-import {postHotRankApi} from "@/api/postHotRank.ts";
+import * as postHotRankApi from "@/api/postHotRank.ts";
 
 const router = useRouter()
 const loading = ref(true)

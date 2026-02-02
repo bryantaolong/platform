@@ -38,7 +38,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { MagicStick } from '@element-plus/icons-vue'
-import { llmChatApi } from '@/api/llmChat'
+import * as llmChatApi from '@/api/llmChat'
 
 // Props
 interface Props {

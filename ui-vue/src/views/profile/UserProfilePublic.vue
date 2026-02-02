@@ -123,17 +123,17 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {ElMessage} from 'element-plus'
-import {Star, View, ChatLineRound} from '@element-plus/icons-vue'
-import {useUserStore} from '@/stores/user'
-import { userProfileApi } from '@/api/userProfile'
-import {userFollowApi} from '@/api/userFollow.ts'
-import {postApi} from '@/api/post.ts'
-import {getAvatarUrl} from '@/utils/file'
-import type {UserProfileVO} from '@/models/vo/user/UserProfileVO.ts'
-import type {PostVO} from '@/models/vo/post/PostVO.ts'
+import { ref, onMounted} from 'vue'
+import { useRoute, useRouter} from 'vue-router'
+import { ElMessage} from 'element-plus'
+import { Star, View, ChatLineRound } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+import * as userProfileApi from '@/api/userProfile'
+import * as userFollowApi from '@/api/userFollow.ts'
+import * as postApi from '@/api/post.ts'
+import { getAvatarUrl } from '@/utils/file'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
+import type { PostVO} from '@/models/vo/post/PostVO.ts'
 import UserList from '../../components/user/UserList.vue'
 import UserCollectList from '@/components/user/UserCollectList.vue'
 
@@ -193,7 +193,7 @@ const checkFollowingStatus = async () => {
     return
   }
 
-  const response = await userFollowApi.checkFollowing(userId.value)
+  const response = await userFollowApi.isFollowing(userId.value)
   if (response.code === 200) {
     isFollowing.value = response.data
     showFollowButton.value = true

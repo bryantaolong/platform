@@ -124,7 +124,7 @@ import { marked } from 'marked'
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElInput, ElMessage } from 'element-plus'
-import { postApi } from '@/api/post'
+import * as postApi from '@/api/post'
 import type { Post } from '@/models/entity/post/Post'
 
 const router = useRouter()
@@ -276,7 +276,7 @@ const saveDraft = async () => {
     if (valid) {
       savingDraft.value = true
       try {
-        const response = await postApi.saveDraft({
+        const response = await postApi.savePostDraft({
           title: postForm.title,
           content: postForm.content,
           categoryId: postForm.categoryId,

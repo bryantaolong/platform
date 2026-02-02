@@ -43,11 +43,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
-import {TrendCharts, Sunrise, View, ChatLineRound, Star} from '@element-plus/icons-vue'
-import type {PostVO} from '@/models/vo/post/PostVO'
-import {postHotRankApi} from "@/api/postHotRank.ts";
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { TrendCharts, Sunrise, View, ChatLineRound, Star } from '@element-plus/icons-vue'
+import type { PostVO } from '@/models/vo/post/PostVO'
+import * as postHotRankApi from "@/api/postHotRank.ts";
 
 const router = useRouter()
 

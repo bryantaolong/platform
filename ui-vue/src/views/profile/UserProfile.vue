@@ -135,15 +135,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted} from 'vue'
-import {ElMessage, ElMessageBox} from 'element-plus'
-import {Camera} from '@element-plus/icons-vue'
-import {useUserStore} from '@/stores/user'
-import {userApi} from '@/api/user'
-import {userProfileApi} from '@/api/userProfile'
-import {userFollowApi} from '@/api/userFollow'
-import {getAvatarUrl} from '@/utils/file'
-import {getLocationFromIp} from '@/utils/ipLocation'
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Camera } from '@element-plus/icons-vue'
+import { useUserStore} from '@/stores/user'
+import * as userApi from '@/api/user'
+import * as userProfileApi from '@/api/userProfile'
+import * as userFollowApi from '@/api/userFollow'
+import { getAvatarUrl } from '@/utils/file'
+import { getLocationFromIp } from '@/utils/ipLocation'
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
 import UserList from '../../components/user/UserList.vue'
 
