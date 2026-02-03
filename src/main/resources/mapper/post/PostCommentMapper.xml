@@ -74,9 +74,9 @@
     <update id="increaseLikeCount">
         UPDATE post_comment
         SET like_count = like_count + 1,
-            version = #{version},
-            updated_at = #{updatedAt},
-            updated_by = #{updatedBy}
+            version = #{comment.version},
+            updated_at = #{comment.updatedAt},
+            updated_by = #{comment.updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
@@ -84,9 +84,9 @@
     <update id="increaseDislikeCount">
         UPDATE post_comment
         SET dislike_count = dislike_count + 1,
-            version = #{version},
-            updated_at = #{updatedAt},
-            updated_by = #{updatedBy}
+            version = #{comment.version},
+            updated_at = #{comment.updatedAt},
+            updated_by = #{comment.updatedBy}
         WHERE id = #{id}
           AND deleted = 0
     </update>
@@ -94,9 +94,9 @@
     <update id="increaseChildCount">
         UPDATE post_comment
         SET child_count = child_count + 1,
-            version = #{version},
-            updated_at = #{updatedAt},
-            updated_by = #{updatedBy}
+            version = #{comment.version},
+            updated_at = #{comment.updatedAt},
+            updated_by = #{comment.updatedBy}
         WHERE id = #{rootId}
           AND deleted = 0
     </update>
@@ -183,12 +183,12 @@
           AND id != #{rootId}
     </select>
 
-    <select id="selectMaxFloorByRootId" resultType="int">
+    <select id="selectMaxFloorByPostId" resultType="int">
         SELECT COALESCE(MAX(floor), 0)
         FROM post_comment
-        WHERE root_id = #{rootId}
+        WHERE post_id = #{postId}
+          AND root_id = 0
           AND deleted = 0
-          AND type = 1
     </select>
 
     <select id="selectHotCommentsByPostId" resultMap="BaseResultMap">

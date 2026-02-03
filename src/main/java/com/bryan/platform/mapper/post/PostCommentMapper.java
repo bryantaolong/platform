@@ -33,7 +33,7 @@ public interface PostCommentMapper {
 
     long countByRootId(@Param("rootId") Long rootId);
 
-    int selectMaxFloorByRootId(@Param("rootId") Long rootId);
+    int selectMaxFloorByPostId(@Param("postId") Long postId);
 
     List<PostComment> selectHotCommentsByPostId(@Param("postId") Long postId,
                                                 @Param("limit") int limit);
@@ -46,11 +46,11 @@ public interface PostCommentMapper {
 
     List<PostComment> selectByPostIdWithUser(@Param("postId") Long postId);
 
-    int increaseLikeCount(@Param("id") Long id);
+    int increaseLikeCount(@Param("id") Long id, PostComment comment);
 
-    int increaseDislikeCount(@Param("id") Long id);
+    int increaseDislikeCount(@Param("id") Long id, PostComment comment);
 
-    int increaseChildCount(@Param("rootId") Long rootId);
+    int increaseChildCount(@Param("rootId") Long rootId, PostComment comment);
 
     int updateById(PostComment comment);
 
