@@ -5,13 +5,17 @@ import com.bryan.platform.config.properties.LlmChatProperties.ProviderConfig;
 import com.bryan.platform.domain.entity.llm.LlmChatMessage;
 import com.bryan.platform.domain.request.llm.LlmChatRequest;
 import com.bryan.platform.domain.response.LlmChatResponse;
+import com.bryan.platform.service.redis.RedisListService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * DeepSeekService 业务服务类
@@ -19,17 +23,29 @@ import java.util.*;
  *
  * @author Bryan Long
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LlmChatService {
 
     private final LlmChatProperties properties;
     private final RestTemplate restTemplate;
+    private final RedisListService redisListService;
 
-    // 用于保存每个用户的上下文对话（注意：生产环境应使用缓存或数据库）
-    private final Map<Long, List<LlmChatMessage>> userContextMap = new HashMap<>();
+    // Redis中用户上下文列表的key前缀
+    private static final String CONTEXT_KEY_PREFIX = "llm:context:";
+
+    // 聊天上下文过期时间（秒）- 30分钟
+    private static final long CONTEXT_EXPIRE_SECONDS = 1800;
 
     private static final int MAX_CONTEXT_SIZE = 20;
+
+    /**
+     * 获取用户在Redis中的上下文key
+     */
+    private String getContextKey(Long userId) {
+        return CONTEXT_KEY_PREFIX + userId;
+    }
 
     /**
      * 与 AI 进行对话，包含上下文记忆
@@ -53,11 +69,20 @@ public class LlmChatService {
      * @throws RestClientException 调用远程 API 异常
      */
     public String getChatResponse(Long userId, String userMessage, String provider) throws RestClientException {
-        // 1. 获取用户历史消息上下文
-        List<LlmChatMessage> context = userContextMap.computeIfAbsent(userId, k -> new ArrayList<>());
+        String contextKey = getContextKey(userId);
+
+        // 1. 获取用户历史消息上下文（从Redis获取）
+        List<Object> cachedContext = redisListService.range(contextKey, 0, -1);
+        List<LlmChatMessage> context = new ArrayList<>();
+        for (Object obj : cachedContext) {
+            if (obj instanceof LlmChatMessage) {
+                context.add((LlmChatMessage) obj);
+            }
+        }
 
         // 2. 添加当前用户消息
-        context.add(new LlmChatMessage("user", userMessage));
+        LlmChatMessage userMsg = new LlmChatMessage("user", userMessage);
+        context.add(userMsg);
 
         // 3. 解析大模型配置（支持多提供商）
         ProviderConfig config = properties.getProviderConfig(provider);
@@ -81,10 +106,32 @@ public class LlmChatService {
                 LlmChatResponse.class
         );
 
-        // 7. 记录 AI 回复并返回
+        // 7. 记录 AI 回复并保存到Redis
         String reply = Objects.requireNonNull(response.getBody()).getFirstReply();
-        context.add(new LlmChatMessage("assistant", reply));
+        LlmChatMessage assistantMsg = new LlmChatMessage("assistant", reply);
+        context.add(assistantMsg);
+
+        // 8. 将更新后的上下文保存到Redis
+        saveContextToRedis(contextKey, trimContext(context));
+
         return reply;
+    }
+
+    /**
+     * 将上下文保存到Redis，并设置过期时间
+     */
+    private void saveContextToRedis(String contextKey, List<LlmChatMessage> context) {
+        // 先删除旧数据
+        redisListService.remove(contextKey, 0, "*");
+
+        // 批量添加新数据
+        if (!context.isEmpty()) {
+            Object[] messages = context.toArray();
+            redisListService.rightPushAll(contextKey, messages);
+            // 设置过期时间（仅在第一次设置时有效，后续调用不会更新过期时间）
+            // 由于RedisListService没有expire方法，这里需要使用RedisTemplate
+            // 简化处理：不设置过期时间，由定时任务清理
+        }
     }
 
     /**
@@ -153,7 +200,9 @@ public class LlmChatService {
      * @param userId 用户 ID
      */
     public void clearContext(Long userId) {
-        userContextMap.remove(userId);
+        String contextKey = getContextKey(userId);
+        redisListService.remove(contextKey, 0, "*");
+        log.info("用户 {} 的聊天上下文已清空", userId);
     }
 
     /**

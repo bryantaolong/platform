@@ -123,7 +123,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     public Result<String> handleBusinessException(BusinessException e) {
-        log.error("业务异常: {}", e.getMessage(), e);
+        log.warn("业务异常: {}", e.getMessage());
+        // 业务异常消息可能是敏感信息，根据实际情况决定是否返回给客户端
+        // 这里保留原始消息，因为业务异常通常包含用户友好的提示
         return Result.error(HttpStatus.INTERNAL_ERROR, e.getMessage());
     }
 
