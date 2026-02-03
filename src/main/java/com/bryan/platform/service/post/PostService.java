@@ -4,6 +4,8 @@ import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.exception.BusinessException;
+import com.bryan.platform.exception.OptimisticLockException;
+import com.bryan.platform.exception.ResourceNotFoundException;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.service.user.UserFollowService;
 import lombok.RequiredArgsConstructor;
@@ -208,14 +210,16 @@ public class PostService {
      *
      * @param id   博文主键
      * @param post 待更新字段封装实体
-     * @return 更新后的博文；若不存在返回 null
+     * @return 更新后的博文
+     * @throws ResourceNotFoundException 帖子不存在
+     * @throws OptimisticLockException   乐观锁冲突，数据已被其他事务修改
      */
     @Transactional
     public Post updatePost(Long id, Post post) {
         Post existingPost = postMapper.selectById(id);
         if (existingPost == null) {
             log.warn("更新帖子失败，帖子不存在，ID: {}", id);
-            return null;
+            throw new ResourceNotFoundException("帖子不存在，ID: " + id);
         }
 
         // Update fields
@@ -246,8 +250,8 @@ public class PostService {
 
         int rows = postMapper.update(existingPost);
         if (rows == 0) {
-            log.warn("更新帖子失败，ID: {} , 可能已被修改或不存在", existingPost.getId());
-            return null;
+            log.warn("更新帖子失败，乐观锁冲突，ID: {} , 数据可能已被其他用户修改", existingPost.getId());
+            throw new OptimisticLockException("帖子已被其他用户修改，请刷新后重试");
         }
         log.info("更新帖子成功，帖子ID: {}", existingPost.getId());
         return existingPost;
