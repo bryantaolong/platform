@@ -40,7 +40,7 @@ public class PostAlgorithmAdminController {
      * @return 权重配置列表
      */
     @GetMapping("/weights")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<List<PostHotRankAlgorithmVO>> listWeights() {
         List<PostHotRankAlgorithm> list = postHotRankAlgorithmService.listAll();
         List<PostHotRankAlgorithmVO> vos = list.stream()
@@ -62,7 +62,7 @@ public class PostAlgorithmAdminController {
      * @return 更新后的配置
      */
     @PutMapping("/weights/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<PostHotRankAlgorithmVO> updateWeight(
             @PathVariable Long id,
             @RequestParam BigDecimal metricValue) {
@@ -84,7 +84,7 @@ public class PostAlgorithmAdminController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/posts/{postId}/weight")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Post> updatePostWeight(
             @PathVariable Long postId,
             @RequestParam Integer weight) {
@@ -108,7 +108,7 @@ public class PostAlgorithmAdminController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/posts/{postId}/pin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Post> pinPost(@PathVariable Long postId) {
         Post post = Post.builder()
                 .id(postId)
@@ -130,7 +130,7 @@ public class PostAlgorithmAdminController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/posts/{postId}/unpin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Post> unpinPost(@PathVariable Long postId) {
         Post post = Post.builder()
                 .id(postId)

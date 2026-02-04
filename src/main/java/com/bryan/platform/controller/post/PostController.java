@@ -132,7 +132,7 @@ public class PostController {
      * @return 博文实体分页结果
      */
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<PageResult<Post>> listAllPosts(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -278,7 +278,7 @@ public class PostController {
      * @return 博文 VO 分页结果
      */
     @PostMapping("/admin/query")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<PageResult<PostVO>> queryPosts(
             @RequestBody PostSearchRequest req,
             @RequestParam(defaultValue = "1") int pageNum,
@@ -329,7 +329,7 @@ public class PostController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/status/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Post> updatePostStatus(@PathVariable Long id, @RequestParam PostStatusEnum status) {
         Post post = Post.builder()
                 .id(id)

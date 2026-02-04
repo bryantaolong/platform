@@ -177,8 +177,8 @@ router.beforeEach(async (to, _from, next) => {
         }
     }
 
-    // 检查需要管理员权限的页面
-    if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    // 检查需要管理员权限的页面（ADMIN 或 REVIEWER 均可访问）
+    if (to.meta.requiresAdmin && !userStore.isAdmin && !userStore.isModerator) {
         alert('您没有权限访问此页面！')
         return next('/')
     }

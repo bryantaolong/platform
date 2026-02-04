@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "3a0af1e3-3f25-4cb4-b34c-2e3e903f52c5",
 		"name": "Platform API Collection",
-		"description": "Postman collection for testing Platform backend APIs",
+		"description": "Postman collection for testing Platform backend APIs\n\n## Roles\n- **ADMIN**: Full access to all admin endpoints including user management, system logs, and content management\n- **REVIEWER**: Access to content management endpoints (post list, audit, status update) but NOT user management or system logs\n- **USER**: Regular authenticated user access",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38978191"
 	},

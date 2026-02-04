@@ -21,7 +21,7 @@
             <el-icon><House /></el-icon>
             <span>返回首页</span>
           </el-menu-item>
-          <el-menu-item index="/admin/users">
+          <el-menu-item v-if="isAdmin" index="/admin/users">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
@@ -38,11 +38,11 @@
             <el-icon><Avatar /></el-icon>
             <span>个人中心</span>
           </el-menu-item>
-          <el-menu-item index="/admin/logs">
+          <el-menu-item v-if="isAdmin" index="/admin/logs">
             <el-icon><Document /></el-icon>
             <span>系统日志</span>
           </el-menu-item>
-          <el-menu-item index="/admin/settings">
+          <el-menu-item v-if="isAdmin" index="/admin/settings">
             <el-icon><Setting /></el-icon>
             <span>系统设置</span>
           </el-menu-item>
@@ -119,6 +119,8 @@ const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
 const breadcrumbs = computed(() => route.matched.filter(item => item.meta?.title))
+const isAdmin = computed(() => userStore.isAdmin)
+const isModerator = computed(() => userStore.isModerator)
 
 const handleCommand = async (command: string) => {
   switch (command) {
