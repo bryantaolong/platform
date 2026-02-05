@@ -82,6 +82,17 @@ create unique index uk_user_role_default_true
     on user_role (is_default)
     where (is_default = true);
 
+-- 插入管理员角色
+INSERT INTO user_role (id, role_name, is_default, deleted, version, created_at, updated_at)
+VALUES (1, 'ROLE_ADMIN', false, 0, 0, now(), now());
+
+-- 插入普通用户
+INSERT INTO user_role (id, role_name, is_default, deleted, version, created_at, updated_at)
+VALUES (2, 'ROLE_USER', true, 0, 0, now(), now());
+
+-- 插入审核员角色
+INSERT INTO user_role (id, role_name, is_default, deleted, version, created_at, updated_at)
+VALUES (3, 'ROLE_MODERATOR', false, 0, 0, now(), now());
 
 -- user_profile
 CREATE TABLE "user_profile" (

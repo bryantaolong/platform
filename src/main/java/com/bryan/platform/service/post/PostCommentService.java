@@ -73,7 +73,7 @@ public class PostCommentService {
         if (parentId == null || parentId == 0) {
             // 根评论
             comment.setType(1);
-            int maxFloor = postCommentMapper.selectMaxFloorByRootId(postId);
+            int maxFloor = postCommentMapper.selectMaxFloorByPostId(postId);
             comment.setFloor(maxFloor + 1);
         } else {
             // 回复
@@ -92,7 +92,8 @@ public class PostCommentService {
             comment.setRootId(rootId);
             comment.setFloor(null);
             if (rootId != null && rootId > 0) {
-                postCommentMapper.increaseChildCount(rootId);
+                PostComment rootComment = postCommentMapper.selectById(rootId);
+                postCommentMapper.increaseChildCount(rootId, rootComment);
             }
         }
 
@@ -263,7 +264,7 @@ public class PostCommentService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        return postCommentMapper.increaseLikeCount(commentId);
+        return postCommentMapper.increaseLikeCount(commentId, comment);
     }
 
     /**
@@ -278,7 +279,7 @@ public class PostCommentService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        return postCommentMapper.increaseDislikeCount(commentId);
+        return postCommentMapper.increaseDislikeCount(commentId, comment);
     }
 
     /**

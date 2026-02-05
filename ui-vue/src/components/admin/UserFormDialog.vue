@@ -12,9 +12,9 @@
       label-width="100px"
       class="user-form"
     >
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="localUserForm.username" />
-      </el-form-item>
+<el-form-item label="用户名" prop="username">
+          <el-input v-model="localUserForm.username" :disabled="dialogType === 'edit'" />
+        </el-form-item>
       <el-form-item label="手机号" prop="phone">
         <el-input v-model="localUserForm.phone" />
       </el-form-item>
@@ -51,7 +51,8 @@ import type { UserUpdateRequest } from '@/models/request/user/UserUpdateRequest.
 import * as  userRoleApi from '@/api/userRole'
 import type { UserRoleOptionVO } from '@/models/vo/user/UserRoleOptionVO.ts'
 
-export interface UserFormData extends UserUpdateRequest {
+export interface UserFormData extends UserUpdateRequest{
+  username?: string
   password?: string
   roleIds?: number[]
 }
@@ -121,16 +122,16 @@ watch(visible, async (isVisible) => {
 // 动态验证规则
 const userRules = computed<FormRules>(() => {
   const rules: FormRules = {
-    username: [
-      { required: true, message: '请输入用户名', trigger: 'blur' },
-      { min: 2, max: 20, message: '用户名长度应在2-20个字符之间', trigger: 'blur' }
-    ],
     phone: [{ pattern: /^1[3-9]\d{9}$/, message: '电话号码格式不正确', trigger: 'blur' }],
     email: [{ type: 'email', message: '邮箱格式不正确', trigger: 'blur' }],
     roleIds: [{ required: true, message: '请选择角色', trigger: 'change' }]
   }
 
   if (props.dialogType === 'add') {
+    rules.username = [
+      { required: true, message: '请输入用户名', trigger: 'blur' },
+      { min: 2, max: 20, message: '用户名长度应在2-20个字符之间', trigger: 'blur' }
+    ]
     rules.password = [
       { required: true, message: '请输入密码', trigger: 'blur' },
       { min: 6, message: '密码至少6位', trigger: 'blur' }

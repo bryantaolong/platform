@@ -69,9 +69,27 @@ public class MyBatisAuditFieldInterceptor implements Interceptor {
      */
     private void fillUpdate(Object param) {
         MetaObject meta = SystemMetaObject.forObject(param);
-        setValue(meta, "updatedAt", LocalDateTime.now());
-        setValue(meta, "updatedBy", this.currentUser());
-        this.incrementVersion(meta);
+        // 实体对象直接处理
+        if (meta.hasGetter("version")) {
+            setValue(meta, "updatedAt", LocalDateTime.now());
+            setValue(meta, "updatedBy", this.currentUser());
+            this.incrementVersion(meta);
+            return;
+        }
+        // 处理 @Param 注解的多个参数 (Map)
+        if (param instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<Object, Object> paramMap = (java.util.Map<Object, Object>) param;
+            for (Object value : paramMap.values()) {
+                if (value == null) continue;
+                MetaObject valueMeta = SystemMetaObject.forObject(value);
+                if (valueMeta.hasGetter("version")) {
+                    setValue(valueMeta, "updatedAt", LocalDateTime.now());
+                    setValue(valueMeta, "updatedBy", this.currentUser());
+                    this.incrementVersion(valueMeta);
+                }
+            }
+        }
     }
 
     /**

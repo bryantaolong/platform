@@ -285,10 +285,12 @@ const loadLoginHistory = async () => {
   if (userStore.userInfo?.lastLoginAt) {
     try {
       const ipAddress = userStore.userInfo.lastLoginIp || 'Unknown'
-      const location = ipAddress !== 'Unknown' 
-        ? await getLocationFromIp(ipAddress) 
-        : 'Unknown'
-      
+      let location = 'Unknown'
+
+      if (ipAddress !== 'Unknown') {
+        location = await getLocationFromIp(ipAddress)
+      }
+
       loginHistory.value = [{
         loginTime: userStore.userInfo.lastLoginAt.replace('T', ' ').substring(0, 19),
         ipAddress: ipAddress,

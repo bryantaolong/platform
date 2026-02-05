@@ -57,7 +57,7 @@
                   <el-icon><User /></el-icon>
                   个人中心
                 </el-dropdown-item>
-                <el-dropdown-item command="admin" v-if="isAdmin">
+                <el-dropdown-item command="admin" v-if="isAdmin || isModerator">
                   <el-icon><Setting /></el-icon>
                   管理后台
                 </el-dropdown-item>
@@ -118,6 +118,7 @@ const searchQuery = ref('')
 
 const isLoggedIn = computed(() => userStore.isAuthenticated)
 const isAdmin = computed(() => userStore.isAdmin)
+const isModerator = computed(() => userStore.isModerator)
 
 const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
 
@@ -135,7 +136,11 @@ const handleCommand = async (command: string) => {
       router.push('/profile')
       break
     case 'admin':
-      router.push('/admin/users')
+      if (isAdmin.value) {
+        router.push('/admin/users')
+      } else if (isModerator.value) {
+        router.push('/admin/post-monitor')
+      }
       break
     case 'logout':
       try {
