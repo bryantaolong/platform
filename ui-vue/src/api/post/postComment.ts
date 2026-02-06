@@ -1,5 +1,5 @@
-import request from '@/utils/request'
-import type {CommentVO} from '@/models/vo/post/CommentVO'
+import request from '@/utils/request.ts'
+import type {CommentVO} from '@/models/vo/post/CommentVO.ts'
 import type {CommentCreateRequest} from "@/models/request/post/CommentCreateRequest.ts";
 import type {Result} from "@/models/response/Result.ts";
 import type {PageResult} from "@/models/response/PageResult.ts";

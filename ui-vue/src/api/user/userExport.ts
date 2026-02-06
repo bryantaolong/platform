@@ -1,5 +1,5 @@
 // src/api/userExport.ts
-import request from '@/utils/request'
+import request from '@/utils/request.ts'
 
 /**
  * 用户数据导出 API

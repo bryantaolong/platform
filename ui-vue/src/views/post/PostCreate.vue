@@ -124,7 +124,7 @@ import { marked } from 'marked'
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElInput, ElMessage } from 'element-plus'
-import * as postApi from '@/api/post'
+import * as postApi from '@/api/post/post.ts'
 import type { Post } from '@/models/entity/post/Post'
 
 const router = useRouter()

@@ -54,8 +54,8 @@ public class RecommendationService {
      */
     public List<PostVO> getPersonalizedFeed(Long userId, int page, int pageSize) {
         // 1. 多路召回
-        List<Post> interestPosts = recallByInterest(userId, RECALL_LIMIT_INTEREST);
-        List<Post> followingPosts = recallByFollowing(userId, RECALL_LIMIT_FOLLOWING);
+        List<Post> interestPosts = recallByInterest(userId);
+        List<Post> followingPosts = recallByFollowing(userId);
         List<Post> hotPosts = recallByHot(RECALL_LIMIT_HOT);
 
         // 2. 合并去重
@@ -114,7 +114,7 @@ public class RecommendationService {
         }
 
         return hotPosts.subList(fromIndex, toIndex).stream()
-                .map(post -> PostConverter.toPostVO(post))
+                .map(PostConverter::toPostVO)
                 .collect(Collectors.toList());
     }
 
@@ -122,7 +122,7 @@ public class RecommendationService {
      * 兴趣标签召回
      * 根据用户画像中的兴趣标签，召回包含这些标签的帖子
      */
-    private List<Post> recallByInterest(Long userId, int limit) {
+    private List<Post> recallByInterest(Long userId) {
         List<String> interests = userProfileService.getUserTopInterests(userId, 5);
         if (interests.isEmpty()) {
             log.debug("用户 {} 没有兴趣标签数据，跳过兴趣召回", userId);
@@ -130,14 +130,14 @@ public class RecommendationService {
         }
 
         log.debug("用户 {} 兴趣标签: {}", userId, interests);
-        return postMapper.selectByTags(interests, limit);
+        return postMapper.selectByTags(interests, RecommendationService.RECALL_LIMIT_INTEREST);
     }
 
     /**
      * 关注用户内容召回
      * 召回用户关注用户发布的帖子
      */
-    private List<Post> recallByFollowing(Long userId, int limit) {
+    private List<Post> recallByFollowing(Long userId) {
         List<Long> followingIds = userFollowMapper.selectFollowingIdsByFollowerId(userId);
         if (followingIds.isEmpty()) {
             log.debug("用户 {} 没有关注任何用户，跳过关注召回", userId);
@@ -145,7 +145,7 @@ public class RecommendationService {
         }
 
         log.debug("用户 {} 关注了 {} 个用户", userId, followingIds.size());
-        return postMapper.selectByUserIds(followingIds, limit);
+        return postMapper.selectByUserIds(followingIds, RecommendationService.RECALL_LIMIT_FOLLOWING);
     }
 
     /**

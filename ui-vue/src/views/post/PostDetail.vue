@@ -207,13 +207,13 @@ import {
   Delete,
   MagicStick
 } from '@element-plus/icons-vue'
-import * as postApi from '@/api/post'
-import * as userProfileApi from '@/api/userProfile'
-import * as userFollowApi from '@/api/userFollow'
+import * as postApi from '@/api/post/post.ts'
+import * as userProfileApi from '@/api/user/userProfile.ts'
+import * as userFollowApi from '@/api/user/userFollow.ts'
 import { getAvatarUrl } from '@/utils/file'
 import type { PostVO } from "@/models/vo/post/PostVO";
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
-import * as userPostCollectApi from "@/api/userPostCollect.ts";
+import * as userPostCollectApi from "@/api/post/userPostCollect.ts";
 import CommentForm from '@/components/post/CommentForm.vue'
 import CommentList from '@/components/post/CommentList.vue'
 import LlmSummaryPostDialog from '@/components/llm/LlmSummaryPostDialog.vue'

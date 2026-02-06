@@ -1,5 +1,5 @@
-import request from '@/utils/request'
-import type {Result} from '@/models/response/Result'
+import request from '@/utils/request.ts'
+import type {Result} from '@/models/response/Result.ts'
 import type {UserVO} from '@/models/vo/user/UserVO.ts'
 import type {LoginRequest} from '@/models/request/auth/LoginRequest.ts'
 import type {RegisterRequest} from '@/models/request/auth/RegisterRequest.ts'

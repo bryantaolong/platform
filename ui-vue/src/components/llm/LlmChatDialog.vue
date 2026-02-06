@@ -50,7 +50,7 @@
 import { ref } from 'vue';
 import { marked } from 'marked';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import * as llmChatApi from '@/api/llmChat'
+import * as llmChatApi from '@/api/llm/llmChat.ts'
 
 const visible = ref(false);
 const userMessage = ref('');

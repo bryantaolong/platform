@@ -1,6 +1,6 @@
-import request from '@/utils/request'
-import type { Result } from '@/models/response/Result'
-import type { PageResult } from '@/models/response/PageResult'
+import request from '@/utils/request.ts'
+import type { Result } from '@/models/response/Result.ts'
+import type { PageResult } from '@/models/response/PageResult.ts'
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 
 /**

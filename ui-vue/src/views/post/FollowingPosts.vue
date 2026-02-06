@@ -70,7 +70,7 @@ import { useRouter } from 'vue-router'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import { View, Star, ChatDotRound } from '@element-plus/icons-vue'
-import * as postApi from '@/api/post'
+import * as postApi from '@/api/post/post.ts'
 import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
 
 interface PaginationData {

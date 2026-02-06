@@ -109,7 +109,7 @@ import {
   ChatLineRound,
   Collection
 } from '@element-plus/icons-vue'
-import * as postApi from '@/api/post'
+import * as postApi from '@/api/post/post.ts'
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
 

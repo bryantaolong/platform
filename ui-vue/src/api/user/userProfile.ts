@@ -1,7 +1,7 @@
-import request from '@/utils/request'
-import type { Result } from '@/models/response/Result'
-import type { UserUpdateRequest } from '@/models/request/user/UserUpdateRequest'
-import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
+import request from '@/utils/request.ts'
+import type { Result } from '@/models/response/Result.ts'
+import type { UserUpdateRequest } from '@/models/request/user/UserUpdateRequest.ts'
+import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
 
 /**
  * 用户资料 API

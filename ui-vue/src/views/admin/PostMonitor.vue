@@ -345,11 +345,11 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import * as postApi from '@/api/post'
-import * as postAlgorithmAdminApi from "@/api/postAlgorithmAdmin.ts";
+import * as postApi from '@/api/post/post.ts'
+import * as postAlgorithmAdminApi from "@/api/post/postAlgorithmAdmin.ts";
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
-import * as postHotRankApi  from '@/api/postHotRank'
+import * as postHotRankApi  from '@/api/post/postHotRank.ts'
 import type { PageResult } from '@/models/response/PageResult'
 import type {PostHotRankWeight} from "@/models/entity/algorithm/PostHotRankWeight.ts";
 

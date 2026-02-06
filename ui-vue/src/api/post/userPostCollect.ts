@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/request.ts'
 import type {Result} from "@/models/response/Result.ts";
 import type {PageResult} from "@/models/response/PageResult.ts";
 

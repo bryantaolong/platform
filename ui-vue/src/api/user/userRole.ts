@@ -1,5 +1,5 @@
-import request from '@/utils/request'
-import type { Result } from '@/models/response/Result'
+import request from '@/utils/request.ts'
+import type { Result } from '@/models/response/Result.ts'
 import type { UserRoleOptionVO } from '@/models/vo/user/UserRoleOptionVO.ts'
 
 /**
