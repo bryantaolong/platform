@@ -36,6 +36,8 @@ public interface UserMapper {
 
     SysUser selectByStatus(@Param("status") UserStatusEnum status);
 
+    List<Long> selectActiveUserIds(@Param("days") int days);
+
     long count(@Param("req") UserSearchRequest search);
 
     int update(SysUser user);

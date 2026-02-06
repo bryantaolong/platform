@@ -252,4 +252,37 @@
         ORDER BY weight DESC, created_at DESC
         LIMIT #{limit}
     </select>
+
+    <select id="selectByTags" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE status = 'PUBLISHED'
+        AND deleted = 0
+        AND tags &amp;&amp; #{tags,typeHandler=com.bryan.platform.handler.PostgreSqlTextArrayTypeHandler}
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByUserIds" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND status = 'PUBLISHED'
+        AND deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectHotPosts" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM post
+        WHERE status = 'PUBLISHED'
+        AND deleted = 0
+        AND created_at >= NOW() - INTERVAL '7 DAYS'
+        ORDER BY (view_count * 0.1 + like_count * 3 + comment_count * 10) DESC
+        LIMIT #{limit}
+    </select>
 </mapper>

@@ -44,4 +44,7 @@ public interface UserPostCollectMapper {
     int deleteById(@Param("id") Long id);
 
     int deleteByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
+
+    /* ---------- 推荐相关 ---------- */
+    List<Long> selectPostIdsByUserId(@Param("userId") Long userId);
 }

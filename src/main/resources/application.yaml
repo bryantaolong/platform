@@ -11,6 +11,24 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 10
+        queue-capacity: 100
+      thread-name-prefix: task-
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: scheduled-
+
+# 异步配置
+async:
+  core-pool-size: 4
+  max-pool-size: 10
+  queue-capacity: 100
+  thread-name-prefix: async-
 
 # 日志配置
 logging:

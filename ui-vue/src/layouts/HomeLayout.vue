@@ -20,6 +20,7 @@
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/post/list">文章</el-menu-item>
             <el-menu-item index="/hot">热门</el-menu-item>
+            <el-menu-item v-if="isLoggedIn" index="/recommend">推荐</el-menu-item>
             <el-menu-item v-if="isLoggedIn" index="/following">关注</el-menu-item>
             <el-menu-item index="/post/create">写文章</el-menu-item>
             <el-menu-item @click="chatRef.open()">AI对话</el-menu-item>
@@ -125,6 +126,7 @@ const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
 const activeMenu = computed(() => {
   if (route.path === '/') return '/'
   if (route.path.startsWith('/hot')) return '/hot'
+  if (route.path.startsWith('/recommend')) return '/recommend'
   if (route.path.startsWith('/following')) return '/following'
   if (route.path.startsWith('/post')) return '/post/list'
   return route.path
