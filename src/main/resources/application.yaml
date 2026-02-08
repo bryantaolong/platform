@@ -11,6 +11,24 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 10
+        queue-capacity: 100
+      thread-name-prefix: task-
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: scheduled-
+
+# 异步配置
+async:
+  core-pool-size: 4
+  max-pool-size: 10
+  queue-capacity: 100
+  thread-name-prefix: async-
 
 # 日志配置
 logging:
@@ -63,7 +81,7 @@ llm:
       moonshot:
         key: "${MOONSHOT_API_KEY:}" # 可选：Moonshot API Key
         url: "https://api.moonshot.cn/v1/chat/completions"
-        model: "kimi-k2-turbo-preview"
+        model: "kimi-k2.5"
       minimax:
         key: "${MINIMAX_API_KEY:}" # 可选：MiniMax API Key
         url: "https://api.minimaxi.com/v1/chat/completions"

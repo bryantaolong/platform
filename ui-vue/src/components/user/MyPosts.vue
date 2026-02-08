@@ -54,7 +54,7 @@ import { ref, onMounted } from 'vue'
 import { View, ChatLineRound, Star } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.ts'
-import * as postApi from '@/api/post.ts'
+import * as postApi from '@/api/post/post.ts'
 import type { PostVO } from '@/models/vo/post/PostVO'
 import { PostStatusEnum } from '@/models/enum/PostStatusEnum.ts'
 

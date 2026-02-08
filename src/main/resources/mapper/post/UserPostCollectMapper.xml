@@ -138,4 +138,13 @@
           AND post_id = #{postId}
     </update>
 
+    <!-- 推荐相关：查询用户收藏的帖子ID列表 -->
+    <select id="selectPostIdsByUserId" resultType="java.lang.Long">
+        SELECT post_id
+        FROM user_post_collect
+        WHERE user_id = #{userId}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
 </mapper>

@@ -94,4 +94,12 @@
         ORDER BY id DESC
     </select>
 
+    <select id="selectFollowingIdsByFollowerId" resultType="java.lang.Long">
+        SELECT following_id
+        FROM user_follow
+        WHERE follower_id = #{followerId}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
 </mapper>

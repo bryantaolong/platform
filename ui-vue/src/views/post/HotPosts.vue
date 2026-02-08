@@ -101,7 +101,7 @@ import {
   Sunrise
 } from '@element-plus/icons-vue'
 import type {PostVO} from '@/models/vo/post/PostVO'
-import * as postHotRankApi from "@/api/postHotRank.ts";
+import * as postHotRankApi from "@/api/post/postHotRank.ts";
 
 const router = useRouter()
 const loading = ref(true)

@@ -1,9 +1,9 @@
 ### Custom ###
-.model/
+.agent/
 .claude/
-.gemini/
-.qwen/
 .qoder/
+
+CLAUDE.md
 
 ### Java ###
 HELP.md

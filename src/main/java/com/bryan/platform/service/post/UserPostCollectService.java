@@ -6,6 +6,8 @@ import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.mapper.post.UserPostCollectMapper;
 import com.bryan.platform.mapper.post.UserPostCollectionMapper;
+import com.bryan.platform.service.user.UserBehaviorService;
+import com.bryan.platform.service.user.UserInterestProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class UserPostCollectService {
     private final UserPostCollectMapper userPostCollectMapper;
     private final UserPostCollectionMapper userPostCollectionMapper;
     private final PostMapper postMapper;
+    private final UserBehaviorService userBehaviorService;
+    private final UserInterestProfileService userInterestProfileService;
 
     /**
      * 收藏博文（幂等）
@@ -91,6 +95,16 @@ public class UserPostCollectService {
 
         // 更新博文收藏数 +1
         postMapper.updateCollectCount(postId, 1);
+
+        // 记录收藏行为
+        userBehaviorService.recordCollect(userId, postId);
+
+        // 异步更新用户画像
+        try {
+            userInterestProfileService.updateUserProfile(userId);
+        } catch (Exception e) {
+            log.warn("更新用户画像失败，userId: {}", userId, e);
+        }
 
         log.info("用户收藏博文成功，用户ID: {}, 博文ID: {}, 收藏夹ID: {}, 收藏ID: {}", userId, postId, collectionId, collect.getId());
         return collect;

@@ -49,6 +49,12 @@ public interface PostMapper {
 
     List<Post> selectRecentPosts(@Param("limit") int limit, @Param("hours") int hours);
 
+    List<Post> selectByTags(@Param("tags") List<String> tags, @Param("limit") int limit);
+
+    List<Post> selectByUserIds(@Param("userIds") List<Long> userIds, @Param("limit") int limit);
+
+    List<Post> selectHotPosts(@Param("limit") int limit);
+
     long countByUserId(@Param("userId") Long userId);
 
     long countByStatus(@Param("status") PostStatusEnum status);

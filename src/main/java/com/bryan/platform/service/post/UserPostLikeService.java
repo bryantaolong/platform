@@ -2,6 +2,8 @@ package com.bryan.platform.service.post;
 
 import com.bryan.platform.domain.entity.post.UserPostLike;
 import com.bryan.platform.mapper.post.UserPostLikeMapper;
+import com.bryan.platform.service.user.UserBehaviorService;
+import com.bryan.platform.service.user.UserInterestProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class UserPostLikeService {
 
     private final UserPostLikeMapper userPostLikeMapper;
     private final PostService postService;
+    private final UserBehaviorService userBehaviorService;
+    private final UserInterestProfileService userInterestProfileService;
 
     /**
      * 点赞博文（幂等）
@@ -80,6 +84,16 @@ public class UserPostLikeService {
             throw new RuntimeException("帖子点赞计数更新失败");
         }
 
+        // 记录点赞行为
+        userBehaviorService.recordLike(userId, postId);
+
+        // 异步更新用户画像
+        try {
+            userInterestProfileService.updateUserProfile(userId);
+        } catch (Exception e) {
+            log.warn("更新用户画像失败，userId: {}", userId, e);
+        }
+
         return true;
     }
 
@@ -116,6 +130,8 @@ public class UserPostLikeService {
             log.warn("帖子取消点赞计数更新失败，postId: {}", postId);
             throw new RuntimeException("帖子取消点赞计数更新失败");
         }
+
+        // 取消点赞也记录行为（可选）
         return true;
     }
 }

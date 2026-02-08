@@ -1,7 +1,7 @@
-import request from '@/utils/request'
-import type {Post} from '@/models/entity/post/Post'
-import type {PostSummaryVO} from '@/models/vo/post/PostSummaryVO'
-import type {PostVO} from '@/models/vo/post/PostVO'
+import request from '@/utils/request.ts'
+import type {Post} from '@/models/entity/post/Post.ts'
+import type {PostSummaryVO} from '@/models/vo/post/PostSummaryVO.ts'
+import type {PostVO} from '@/models/vo/post/PostVO.ts'
 import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
 import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
 import type {PostSearchRequest} from "@/models/request/post/PostSearchRequest.ts";

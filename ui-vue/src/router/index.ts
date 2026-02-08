@@ -25,6 +25,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'HotPosts',
                 component: () => import('@/views/post/HotPosts.vue'),
                 meta: {title: '热门文章'}
+            },
+            {
+                path: 'recommend',
+                name: 'RecommendFeed',
+                component: () => import('@/views/post/RecommendFeed.vue'),
+                meta: {title: '为你推荐'}
             }
         ]
     },

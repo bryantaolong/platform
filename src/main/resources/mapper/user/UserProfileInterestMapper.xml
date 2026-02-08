@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bryan.platform.mapper.user.UserProfileInterestMapper">
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.user.UserProfileInterest">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="interest_tag" property="interestTag"/>
+        <result column="weight" property="weight"/>
+        <result column="source" property="source"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, user_id, interest_tag, weight, source, deleted, version,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_profile_interest (
+            user_id, interest_tag, weight, source,
+            deleted, version, created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{userId}, #{interestTag}, #{weight}, #{source},
+            #{deleted}, #{version}, #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_profile_interest
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_profile_interest
+        WHERE user_id = #{userId}
+        AND deleted = 0
+        ORDER BY weight DESC
+    </select>
+
+    <select id="selectTopInterestsByUserId" resultType="java.lang.String">
+        SELECT interest_tag
+        FROM user_profile_interest
+        WHERE user_id = #{userId}
+        AND deleted = 0
+        ORDER BY weight DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByUserIdAndTag" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_profile_interest
+        WHERE user_id = #{userId}
+        AND interest_tag = #{interestTag}
+        AND deleted = 0
+    </select>
+
+    <update id="updateWeight">
+        UPDATE user_profile_interest
+        SET weight = #{weight},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND interest_tag = #{interestTag}
+        AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE user_profile_interest
+        SET deleted = 1,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteByUserId">
+        UPDATE user_profile_interest
+        SET deleted = 1,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

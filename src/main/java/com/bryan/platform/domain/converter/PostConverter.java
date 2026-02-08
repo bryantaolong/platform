@@ -81,4 +81,40 @@ public class PostConverter {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+
+    /**
+     * 将博文VO转换为摘要VO
+     *
+     * @param postVO 博文VO
+     * @return 博文摘要VO；若入参为 null 则返回 null
+     */
+    public static PostSummaryVO vo2SummaryVO(PostVO postVO) {
+        if (postVO == null) {
+            return null;
+        }
+
+        String contentPreview = postVO.getContent();
+        if (contentPreview != null && contentPreview.length() > CONTENT_PREVIEW_LENGTH) {
+            contentPreview = contentPreview.substring(0, CONTENT_PREVIEW_LENGTH) + "...";
+        }
+
+        return PostSummaryVO.builder()
+                .id(postVO.getId())
+                .userId(postVO.getUserId())
+                .author(postVO.getAuthor())
+                .title(postVO.getTitle())
+                .contentPreview(contentPreview)
+                .status(postVO.getStatus())
+                .categoryId(postVO.getCategoryId())
+                .tags(postVO.getTags())
+                .commentAreaStatus(postVO.getCommentAreaStatus())
+                .viewCount(postVO.getViewCount())
+                .likeCount(postVO.getLikeCount())
+                .commentCount(postVO.getCommentCount())
+                .collectCount(postVO.getCollectCount())
+                .shareCount(postVO.getShareCount())
+                .createdAt(postVO.getCreatedAt())
+                .updatedAt(postVO.getUpdatedAt())
+                .build();
+    }
 }

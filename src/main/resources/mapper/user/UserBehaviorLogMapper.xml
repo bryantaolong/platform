@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bryan.platform.mapper.user.UserBehaviorLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.user.UserBehaviorLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="post_id" property="postId"/>
+        <result column="behavior_type" property="behaviorType"/>
+        <result column="duration_seconds" property="durationSeconds"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, user_id, post_id, behavior_type, duration_seconds, deleted, version,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_behavior_log (
+            user_id, post_id, behavior_type, duration_seconds,
+            deleted, version, created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{userId}, #{postId}, #{behaviorType}, #{durationSeconds},
+            #{deleted}, #{version}, #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_behavior_log
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_behavior_log
+        WHERE user_id = #{userId}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByUserIdAndType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumns"/>
+        FROM user_behavior_log
+        WHERE user_id = #{userId}
+        AND behavior_type = #{behaviorType}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectPostIdsByUserIdAndType" resultType="java.lang.Long">
+        SELECT post_id
+        FROM user_behavior_log
+        WHERE user_id = #{userId}
+        AND behavior_type = #{behaviorType}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="deleteById">
+        UPDATE user_behavior_log
+        SET deleted = 1,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -97,6 +97,15 @@
         AND deleted = 0
     </select>
 
+    <select id="selectActiveUserIds" resultType="java.lang.Long">
+        SELECT id
+        FROM sys_user
+        WHERE deleted = 0
+        AND status = 'ACTIVE'
+        AND last_login_at >= NOW() - (#{days} * INTERVAL '1 DAY')
+        ORDER BY last_login_at DESC
+    </select>
+
     <update id="update" parameterType="com.bryan.platform.domain.entity.user.SysUser">
         UPDATE sys_user
         <set>
