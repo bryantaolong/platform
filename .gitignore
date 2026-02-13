@@ -1,9 +1,14 @@
 ### Custom ###
-.agent/
+.agents/
 .claude/
+.codex/
+.gemini/
+.qwen/
+.cursor/
 .qoder/
 
 CLAUDE.md
+AGENTS.md
 
 ### Java ###
 HELP.md

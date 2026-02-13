@@ -1,5 +1,6 @@
 package com.bryan.platform.service.post;
 
+import com.bryan.platform.util.MarkdownImageUtils;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
@@ -7,6 +8,7 @@ import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.exception.OptimisticLockException;
 import com.bryan.platform.exception.ResourceNotFoundException;
 import com.bryan.platform.mapper.post.PostMapper;
+import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.user.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * 博文业务服务
@@ -29,6 +32,7 @@ public class PostService {
 
     private final PostMapper postMapper;
     private final UserFollowService userFollowService;
+    private final LocalFileService localFileService;
 
     /**
      * 创建博文（含草稿）
@@ -207,6 +211,7 @@ public class PostService {
     /**
      * 更新博文（全字段可选更新）
      * 仅对非 null 字段执行修改，事务控制
+     * 如果内容发生变更，会自动删除不再引用的本地图片
      *
      * @param id   博文主键
      * @param post 待更新字段封装实体
@@ -220,6 +225,11 @@ public class PostService {
         if (existingPost == null) {
             log.warn("更新帖子失败，帖子不存在，ID: {}", id);
             throw new ResourceNotFoundException("帖子不存在，ID: " + id);
+        }
+
+        // 如果内容发生变更，处理图片清理
+        if (post.getContent() != null && !post.getContent().equals(existingPost.getContent())) {
+            deleteRemovedImages(existingPost.getContent(), post.getContent());
         }
 
         // Update fields
@@ -255,6 +265,29 @@ public class PostService {
         }
         log.info("更新帖子成功，帖子ID: {}", existingPost.getId());
         return existingPost;
+    }
+
+    /**
+     * 删除旧内容中有但新内容中没有的本地图片
+     *
+     * @param oldContent 旧内容
+     * @param newContent 新内容
+     */
+    private void deleteRemovedImages(String oldContent, String newContent) {
+        Set<String> oldImages = MarkdownImageUtils.extractLocalImagePaths(oldContent);
+        Set<String> newImages = MarkdownImageUtils.extractLocalImagePaths(newContent);
+
+        // 找出被移除的图片
+        oldImages.removeAll(newImages);
+
+        for (String imagePath : oldImages) {
+            boolean deleted = localFileService.deleteFile(imagePath);
+            if (deleted) {
+                log.info("删除旧图片成功: {}", imagePath);
+            } else {
+                log.warn("删除旧图片失败或文件不存在: {}", imagePath);
+            }
+        }
     }
 
     /**
@@ -300,6 +333,7 @@ public class PostService {
 
     /**
      * 删除单篇博文（逻辑删除）
+     * 同时删除博文中引用的所有本地图片
      *
      * @param postId 博文主键
      * @return 是否删除成功
@@ -311,9 +345,34 @@ public class PostService {
             log.warn("删除帖子失败，帖子不存在，ID: {}", postId);
             return false;
         }
+
+        // 删除博文中引用的所有本地图片
+        deletePostImages(post.getContent());
+
         postMapper.deleteById(postId);
         log.info("帖子ID: {} 删除成功 (逻辑删除)", postId);
         return true;
+    }
+
+    /**
+     * 删除博文中引用的所有本地图片
+     *
+     * @param content 博文内容
+     */
+    private void deletePostImages(String content) {
+        if (content == null || content.isEmpty()) {
+            return;
+        }
+
+        Set<String> imagePaths = MarkdownImageUtils.extractLocalImagePaths(content);
+        for (String imagePath : imagePaths) {
+            boolean deleted = localFileService.deleteFile(imagePath);
+            if (deleted) {
+                log.info("删除博文图片成功: {}", imagePath);
+            } else {
+                log.warn("删除博文图片失败或文件不存在: {}", imagePath);
+            }
+        }
     }
 
     /**
