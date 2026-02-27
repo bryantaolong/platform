@@ -1,6 +1,5 @@
 package com.bryan.platform.service.post;
 
-import com.bryan.platform.util.MarkdownImageUtils;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
@@ -10,6 +9,7 @@ import com.bryan.platform.exception.ResourceNotFoundException;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.user.UserFollowService;
+import com.bryan.platform.util.MarkdownImageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
