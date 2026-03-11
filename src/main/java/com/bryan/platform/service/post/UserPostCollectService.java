@@ -8,6 +8,7 @@ import com.bryan.platform.mapper.post.UserPostCollectMapper;
 import com.bryan.platform.mapper.post.UserPostCollectionMapper;
 import com.bryan.platform.service.user.UserBehaviorService;
 import com.bryan.platform.service.user.UserInterestProfileService;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

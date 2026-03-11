@@ -74,7 +74,7 @@ public class UserService {
                 .collect(Collectors.joining(","));
 
         LocalDateTime now = LocalDateTime.now();
-        String operator = String.valueOf(JwtUtils.getCurrentUserId());
+        Long operator = JwtUtils.getCurrentUserId();
 
         SysUser sysUser = SysUser.builder()
                 .username(req.getUsername())
@@ -84,12 +84,13 @@ public class UserService {
                 .roles(roleNames)
                 .status(UserStatusEnum.NORMAL)
                 .loginFailCount(0)
+                // 手动设置审计字段（插入时）
                 .deleted(0)
                 .version(0)
                 .createdAt(now)
                 .updatedAt(now)
-                .createdBy(operator)
-                .updatedBy(operator)
+                .createdBy(operator.toString())
+                .updatedBy(operator.toString())
                 .passwordResetAt(now)
                 .build();
 
@@ -196,6 +197,11 @@ public class UserService {
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
 
+        // 手动设置审计字段（更新时）
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
+        user.setVersion(user.getVersion() + 1);
+
         userMapper.update(user);
         log.info("用户ID: {} 的信息更新成功", userId);
         return user;
@@ -226,6 +232,12 @@ public class UserService {
                 .collect(Collectors.joining(","));
         SysUser user = this.getUserById(userId);
         user.setRoles(roleNames);
+
+        // 手动设置审计字段（更新时）
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
+        user.setVersion(user.getVersion() + 1);
+
         userMapper.update(user);
         return user;
     }
@@ -243,6 +255,12 @@ public class UserService {
         SysUser user = this.getUserById(userId);
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setPasswordResetAt(LocalDateTime.now());
+
+        // 手动设置审计字段（更新时）
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
+        user.setVersion(user.getVersion() + 1);
+
         userMapper.update(user);
         log.info("用户ID: {} 的密码强制修改成功", userId);
         return user;
@@ -258,6 +276,12 @@ public class UserService {
     public SysUser blockUser(Long userId) {
         SysUser user = this.getUserById(userId);
         user.setStatus(UserStatusEnum.BANNED);
+
+        // 手动设置审计字段（更新时）
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
+        user.setVersion(user.getVersion() + 1);
+
         userMapper.update(user);
         log.info("用户ID: {} 封禁成功", userId);
         return user;
@@ -273,6 +297,12 @@ public class UserService {
     public SysUser unblockUser(Long userId) {
         SysUser user = this.getUserById(userId);
         user.setStatus(UserStatusEnum.NORMAL);
+
+        // 手动设置审计字段（更新时）
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
+        user.setVersion(user.getVersion() + 1);
+
         userMapper.update(user);
         log.info("用户ID: {} 解封成功", userId);
         return user;
