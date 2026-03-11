@@ -3,6 +3,7 @@ package com.bryan.platform.service.post;
 import com.bryan.platform.domain.entity.post.UserPostCollection;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.UserPostCollectionMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -159,12 +160,17 @@ public class UserPostCollectionService {
             throw new BusinessException("用户尝试删除无权限的收藏夹");
         }
 
-        int rows = userPostCollectionMapper.deleteById(collectionId);
+        int rows = userPostCollectionMapper.deleteById(
+                collectionId,
+                collection.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
         if (rows > 0) {
             log.info("删除收藏夹成功，收藏夹ID: {}", collectionId);
             return true;
         } else {
-            log.warn("删除收藏夹失败，收藏夹ID: {}，可能不存在", collectionId);
+            log.warn("删除收藏夹失败，收藏夹ID: {}，可能已被其他用户修改", collectionId);
             return false;
         }
     }

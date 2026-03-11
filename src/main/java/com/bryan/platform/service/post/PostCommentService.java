@@ -9,6 +9,7 @@ import com.bryan.platform.domain.vo.post.CommentVO;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.PostCommentMapper;
 import com.bryan.platform.mapper.post.PostMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -296,12 +297,18 @@ public class PostCommentService {
             return false;
         }
 
-        int rows = postCommentMapper.deleteById(commentId);
+        int rows = postCommentMapper.deleteById(
+                commentId,
+                comment.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
         if (rows > 0) {
             postMapper.updateCommentCount(comment.getPostId(), -1);
             log.info("评论ID: {} 删除成功 (逻辑删除)", commentId);
             return true;
         }
+        log.warn("评论ID: {} 删除失败，可能已被其他用户修改", commentId);
         return false;
     }
 }

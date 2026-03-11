@@ -19,11 +19,22 @@ public interface UserPostLikeMapper {
 
     boolean existsByUserIdAndPostIdIncludeDeleted(@Param("userId") Long userId, @Param("postId") Long postId);
 
-    int restoreLike(@Param("userId") Long userId, @Param("postId") Long postId);
+    int restoreLike(@Param("userId") Long userId,
+                    @Param("postId") Long postId,
+                    @Param("version") Integer version,
+                    @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                    @Param("updatedBy") String updatedBy);
 
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("version") Integer version,
+                   @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                   @Param("updatedBy") String updatedBy);
 
-    int deleteByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
+    int deleteByUserIdAndPostId(@Param("userId") Long userId,
+                                @Param("postId") Long postId,
+                                @Param("version") Integer version,
+                                @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                                @Param("updatedBy") String updatedBy);
 
     /* ---------- 推荐相关 ---------- */
     List<Long> selectPostIdsByUserId(@Param("userId") Long userId);

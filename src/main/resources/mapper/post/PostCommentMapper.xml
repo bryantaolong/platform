@@ -74,31 +74,34 @@
     <update id="increaseLikeCount">
         UPDATE post_comment
         SET like_count = like_count + 1,
-            version = #{comment.version},
+            version = #{comment.version} + 1,
             updated_at = #{comment.updatedAt},
             updated_by = #{comment.updatedBy}
         WHERE id = #{id}
           AND deleted = 0
+          AND version = #{comment.version}
     </update>
 
     <update id="increaseDislikeCount">
         UPDATE post_comment
         SET dislike_count = dislike_count + 1,
-            version = #{comment.version},
+            version = #{comment.version} + 1,
             updated_at = #{comment.updatedAt},
             updated_by = #{comment.updatedBy}
         WHERE id = #{id}
           AND deleted = 0
+          AND version = #{comment.version}
     </update>
 
     <update id="increaseChildCount">
         UPDATE post_comment
         SET child_count = child_count + 1,
-            version = #{comment.version},
+            version = #{comment.version} + 1,
             updated_at = #{comment.updatedAt},
             updated_by = #{comment.updatedBy}
         WHERE id = #{rootId}
           AND deleted = 0
+          AND version = #{comment.version}
     </update>
 
     <update id="updateById">
@@ -118,11 +121,12 @@
     <update id="deleteById">
         UPDATE post_comment
         SET deleted = 1,
-            version = #{version},
+            version = #{version} + 1,
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
+          AND version = #{version}
     </update>
 
     <select id="selectById" resultMap="BaseResultMap">

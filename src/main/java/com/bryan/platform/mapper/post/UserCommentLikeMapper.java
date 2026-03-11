@@ -18,11 +18,21 @@ public interface UserCommentLikeMapper {
 
     UserCommentLike selectByUserIdAndCommentIdIncludeDeleted(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
+    UserCommentLike selectById(@Param("id") Long id);
+
     boolean existsByUserIdAndCommentId(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
     boolean existsByUserIdAndCommentIdIncludeDeleted(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-    int restoreLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+    int restoreLike(@Param("userId") Long userId,
+                    @Param("commentId") Long commentId,
+                    @Param("version") Integer version,
+                    @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                    @Param("updatedBy") String updatedBy);
 
-    int deleteByUserIdAndCommentId(@Param("userId") Long userId, @Param("commentId") Long commentId);
+    int deleteByUserIdAndCommentId(@Param("userId") Long userId,
+                                   @Param("commentId") Long commentId,
+                                   @Param("version") Integer version,
+                                   @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                                   @Param("updatedBy") String updatedBy);
 }

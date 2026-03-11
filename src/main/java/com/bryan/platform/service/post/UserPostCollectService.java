@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -187,14 +188,25 @@ public class UserPostCollectService {
      */
     @Transactional
     public boolean cancelCollectPost(Long userId, Long postId) {
-        int rows = userPostCollectMapper.deleteByUserIdAndPostId(userId, postId);
+        UserPostCollect collect = userPostCollectMapper.selectByUserIdAndPostId(userId, postId);
+        if (collect == null) {
+            log.warn("取消收藏失败，用户ID: {}, 博文ID: {}，可能未收藏", userId, postId);
+            return false;
+        }
+        int rows = userPostCollectMapper.deleteByUserIdAndPostId(
+                userId,
+                postId,
+                collect.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
         if (rows > 0) {
             // 更新博文收藏数 -1
             postMapper.updateCollectCount(postId, -1);
             log.info("用户取消收藏成功，用户ID: {}, 博文ID: {}", userId, postId);
             return true;
         } else {
-            log.warn("取消收藏失败，用户ID: {}, 博文ID: {}，可能未收藏", userId, postId);
+            log.warn("取消收藏失败，可能已被其他用户修改，用户ID: {}, 博文ID: {}", userId, postId);
             return false;
         }
     }

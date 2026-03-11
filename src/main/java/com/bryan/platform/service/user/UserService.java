@@ -286,7 +286,10 @@ public class UserService {
      * @throws ResourceNotFoundException 用户不存在时抛出
      */
     public Long deleteUser(Long userId) {
-        userMapper.deleteById(userId);
+        int rows = userMapper.deleteById(userId, LocalDateTime.now(), JwtUtils.getCurrentUsername());
+        if (rows == 0) {
+            throw new ResourceNotFoundException("用户不存在或已被删除");
+        }
         log.info("用户ID: {} 删除成功 (逻辑删除)", userId);
         return userId;
     }

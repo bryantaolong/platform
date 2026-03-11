@@ -42,5 +42,7 @@ public interface UserMapper {
 
     int update(SysUser user);
 
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                   @Param("updatedBy") String updatedBy);
 }

@@ -46,13 +46,16 @@ public interface PostCommentMapper {
 
     List<PostComment> selectByPostIdWithUser(@Param("postId") Long postId);
 
-    int increaseLikeCount(@Param("id") Long id, PostComment comment);
+    int increaseLikeCount(@Param("id") Long id, @Param("comment") PostComment comment);
 
-    int increaseDislikeCount(@Param("id") Long id, PostComment comment);
+    int increaseDislikeCount(@Param("id") Long id, @Param("comment") PostComment comment);
 
-    int increaseChildCount(@Param("rootId") Long rootId, PostComment comment);
+    int increaseChildCount(@Param("rootId") Long rootId, @Param("comment") PostComment comment);
 
     int updateById(PostComment comment);
 
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("version") Integer version,
+                   @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                   @Param("updatedBy") String updatedBy);
 }
