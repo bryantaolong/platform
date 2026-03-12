@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bryan.platform.mapper.user.UserMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.bryan.platform.domain.entity.user.UserMessage">
+        <id column="id" property="id"/>
+        <result column="sender_id" property="senderId"/>
+        <result column="receiver_id" property="receiverId"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="read_status" property="readStatus"/>
+        <result column="read_at" property="readAt"/>
+        <result column="recalled_at" property="recalledAt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, sender_id, receiver_id, content, status, read_status,
+        read_at, recalled_at, deleted, version,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <!-- ========== 增 ========== -->
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_message (
+            sender_id, receiver_id, content, status, read_status,
+            read_at, recalled_at, deleted, version,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{senderId}, #{receiverId}, #{content}, #{status}, #{readStatus},
+            #{readAt}, #{recalledAt}, #{deleted}, #{version},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <!-- ========== 查 ========== -->
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM user_message
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+
+    <select id="selectPageBetweenUsers" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM user_message
+        WHERE deleted = 0
+        AND status != 1
+        AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+        )
+        ORDER BY created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countBetweenUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM user_message
+        WHERE deleted = 0
+        AND status != 1
+        AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+        )
+    </select>
+
+    <!--
+        查询会话列表：对于每个联系人，获取最后一条消息
+        使用子查询方式获取每个会话的最新消息
+    -->
+    <select id="selectConversationList" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM user_message um
+        INNER JOIN (
+            SELECT
+                CASE
+                    WHEN sender_id = #{userId} THEN receiver_id
+                    ELSE sender_id
+                END as contact_id,
+                MAX(created_at) as last_msg_time
+            FROM user_message
+            WHERE deleted = 0
+            AND status != 1
+            AND (sender_id = #{userId} OR receiver_id = #{userId})
+            GROUP BY CASE
+                WHEN sender_id = #{userId} THEN receiver_id
+                ELSE sender_id
+            END
+        ) latest ON (
+            (um.sender_id = #{userId} AND um.receiver_id = latest.contact_id)
+            OR (um.receiver_id = #{userId} AND um.sender_id = latest.contact_id)
+        )
+        AND um.created_at = latest.last_msg_time
+        AND um.deleted = 0
+        AND um.status != 1
+        ORDER BY um.created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countConversations" resultType="long">
+        SELECT COUNT(DISTINCT
+            CASE
+                WHEN sender_id = #{userId} THEN receiver_id
+                ELSE sender_id
+            END
+        )
+        FROM user_message
+        WHERE deleted = 0
+        AND status != 1
+        AND (sender_id = #{userId} OR receiver_id = #{userId})
+    </select>
+
+    <select id="countUnreadByReceiverId" resultType="long">
+        SELECT COUNT(*)
+        FROM user_message
+        WHERE receiver_id = #{receiverId}
+        AND read_status = 0
+        AND deleted = 0
+        AND status != 1
+    </select>
+
+    <select id="countUnreadBetweenUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM user_message
+        WHERE receiver_id = #{userId}
+        AND sender_id = #{contactId}
+        AND read_status = 0
+        AND deleted = 0
+        AND status != 1
+    </select>
+
+    <!-- ========== 改 ========== -->
+
+    <update id="updateReadStatus">
+        UPDATE user_message
+        SET read_status = #{readStatus},
+            read_at = #{readAt},
+            version = #{version} + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+        AND version = #{version}
+    </update>
+
+    <update id="updateRecallStatus">
+        UPDATE user_message
+        SET status = #{status},
+            recalled_at = #{recalledAt},
+            version = #{version} + 1,
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+        AND version = #{version}
+    </update>
+
+    <update id="updateReadStatusByContact">
+        UPDATE user_message
+        SET read_status = 1,
+            read_at = #{readAt},
+            version = version + 1,
+            updated_at = #{readAt},
+            updated_by = CAST(#{userId} AS VARCHAR)
+        WHERE receiver_id = #{userId}
+        AND sender_id = #{contactId}
+        AND read_status = 0
+        AND deleted = 0
+        AND status != 1
+    </update>
+
+</mapper>
