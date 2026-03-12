@@ -519,8 +519,8 @@ const loadRecommendations = async () => {
 
 | 文件 | 职责 |
 |------|------|
-| [`RecommendationController.java`](../src/main/java/com/bryan/platform/controller/algorithm/RecommendationController.java) | 推荐API控制器 |
-| [`RecommendationService.java`](../src/main/java/com/bryan/platform/service/algorithm/RecommendationService.java) | 核心推荐逻辑 |
+| [`RecommendationController.java`](../src/main/java/com/bryan/platform/controller/recommendation/RecommendationController.java) | 推荐API控制器 |
+| [`RecommendationService.java`](../src/main/java/com/bryan/platform/service/recommendation/RecommendationService.java) | 核心推荐逻辑 |
 | [`PostHotRankService.java`](../src/main/java/com/bryan/platform/service/algorithm/PostHotRankService.java) | 热度计算服务 |
 | [`UserInterestProfileService.java`](../src/main/java/com/bryan/platform/service/user/UserInterestProfileService.java) | 用户画像管理 |
 | [`UserProfileUpdateJob.java`](../src/main/java/com/bryan/platform/service/job/UserProfileUpdateJob.java) | 定时更新任务 |

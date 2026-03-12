@@ -1,9 +1,9 @@
-package com.bryan.platform.controller.algorithm;
+package com.bryan.platform.controller.recommendation;
 
 import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
-import com.bryan.platform.service.algorithm.RecommendationService;
+import com.bryan.platform.service.recommendation.RecommendationService;
 import com.bryan.platform.service.user.UserInterestProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
