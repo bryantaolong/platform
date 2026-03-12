@@ -62,6 +62,7 @@ public class UserFollowService {
                 .followerId(followerId)
                 .followingId(followingId)
                 .build();
+        this.fillInsert(uf);
         return userFollowMapper.insert(uf);
     }
 
@@ -183,5 +184,17 @@ public class UserFollowService {
             throw new BusinessException("取关失败，请稍后重试");
         }
         return rows;
+    }
+
+    private void fillInsert(UserFollow uf) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        uf.setDeleted(0);
+        uf.setVersion(0);
+        uf.setCreatedAt(now);
+        uf.setUpdatedAt(now);
+        uf.setUpdatedBy(operator.toString());
+        uf.setCreatedBy(operator.toString());
     }
 }

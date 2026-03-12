@@ -72,13 +72,8 @@ public class UserCommentLikeService {
         UserCommentLike like = UserCommentLike.builder()
                 .userId(userId)
                 .commentId(commentId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(like);
         userCommentLikeMapper.insert(like);
         log.info("新增点赞记录，userId: {}, commentId: {}", userId, commentId);
 
@@ -135,5 +130,17 @@ public class UserCommentLikeService {
             throw new RuntimeException("评论取消点赞计数更新失败");
         }
         return true;
+    }
+
+    private void fillInsert(UserCommentLike like) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        like.setDeleted(0);
+        like.setVersion(0);
+        like.setCreatedAt(now);
+        like.setUpdatedAt(now);
+        like.setUpdatedBy(operator.toString());
+        like.setCreatedBy(operator.toString());
     }
 }

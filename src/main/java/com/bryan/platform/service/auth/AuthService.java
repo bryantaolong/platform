@@ -62,8 +62,6 @@ public class AuthService implements UserDetailsService {
             throw new BusinessException("系统未配置默认角色");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-
         // 3. 构建用户实体，密码加密
         SysUser sysUser = SysUser.builder()
                 .username(registerRequest.getUsername())
@@ -72,15 +70,9 @@ public class AuthService implements UserDetailsService {
                 .email(registerRequest.getEmail())
                 .roles(defaultRole.getRoleName())
                 .status(UserStatusEnum.NORMAL)
-                .passwordResetAt(now)
-                // 手动设置审计字段
-                .createdAt(now)
-                .updatedAt(now)
-                .createdBy("SYSTEM")
-                .updatedBy("SYSTEM")
-                .deleted(0)
-                .version(0)
                 .build();
+
+        this.fillInsert(sysUser);
 
         // 4. 插入用户数据
         int saved = userMapper.insert(sysUser);
@@ -116,10 +108,8 @@ public class AuthService implements UserDetailsService {
         if(!passwordEncoder.matches(loginRequest.getPassword(), sysUser.getPassword())){
             LocalDateTime now = LocalDateTime.now();
             sysUser.setLoginFailCount(sysUser.getLoginFailCount() + 1);
-            // 手动设置审计字段（更新时）
-            sysUser.setUpdatedAt(now);
-            sysUser.setUpdatedBy(sysUser.getId().toString());
-            sysUser.setVersion(sysUser.getVersion() + 1);
+            // 手动设置审计字段（更新时）- 登录失败时使用用户自己的ID
+            this.fillUpdate(sysUser);
 
             // 如果输入密码错误次数达到限额，则锁定账号
             if(sysUser.getLoginFailCount() >= securityProperties.getLoginFailLimit()) {
@@ -148,10 +138,8 @@ public class AuthService implements UserDetailsService {
         sysUser.setLastLoginIp(HttpUtils.getClientIp());
         sysUser.setLastLoginDevice(HttpUtils.getClientOS() + " / " + HttpUtils.getClientBrowser());
         sysUser.setLoginFailCount(0); // 重置密码输入错误次数
-        // 手动设置审计字段（更新时）
-        sysUser.setUpdatedAt(now);
-        sysUser.setUpdatedBy(sysUser.getId().toString());
-        sysUser.setVersion(sysUser.getVersion() + 1);
+        // 登录成功时使用用户自己的ID作为updatedBy
+        this.fillUpdate(sysUser);
         userMapper.update(sysUser);
 
 
@@ -304,17 +292,14 @@ public class AuthService implements UserDetailsService {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException("旧密码不正确");
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
-        Long currentUserId = JwtUtils.getCurrentUserId();
 
         // 更新密码
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setPasswordResetAt(now);
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(now);
-        user.setUpdatedBy(currentUserId.toString());
-        user.setVersion(user.getVersion() + 1);
+
+        this.fillUpdate(user);
         userMapper.update(user);
         
         // 清除 Redis 中的旧 Token，强制用户重新登录
@@ -358,5 +343,27 @@ public class AuthService implements UserDetailsService {
         userMapper.deleteById(user.getId(), LocalDateTime.now(), user.getId().toString());
         log.info("用户ID: {} 注销成功", user.getId());
         return user;
+    }
+
+    private void fillInsert(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        String operator = user.getUsername();
+
+        user.setDeleted(0);
+        user.setVersion(0);
+        user.setPasswordResetAt(now);
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator != null ? operator.toString() : "SYSTEM");
+        user.setCreatedBy(operator != null ? operator.toString() : "SYSTEM");
+    }
+
+    private void fillUpdate(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        user.setVersion(user.getVersion() + 1);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator.toString());
     }
 }

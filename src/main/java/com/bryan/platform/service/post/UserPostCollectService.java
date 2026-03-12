@@ -93,6 +93,7 @@ public class UserPostCollectService {
                 .postTitle(post.getTitle())
                 .build();
 
+        this.fillInsert(collect);
         userPostCollectMapper.insert(collect);
 
         // 更新博文收藏数 +1
@@ -210,5 +211,17 @@ public class UserPostCollectService {
             log.warn("取消收藏失败，可能已被其他用户修改，用户ID: {}, 博文ID: {}", userId, postId);
             return false;
         }
+    }
+
+    private void fillInsert(UserPostCollect collect) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        collect.setDeleted(0);
+        collect.setVersion(0);
+        collect.setCreatedAt(now);
+        collect.setUpdatedAt(now);
+        collect.setUpdatedBy(operator.toString());
+        collect.setCreatedBy(operator.toString());
     }
 }

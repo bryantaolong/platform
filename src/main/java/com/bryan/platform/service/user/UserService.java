@@ -51,7 +51,7 @@ public class UserService {
         List<Long> roleIds = req.getRoleIds() == null
                 ? new ArrayList<>()
                 : new ArrayList<>(req.getRoleIds());
-        if (roleIds == null || roleIds.isEmpty()) {
+        if (roleIds.isEmpty()) {
             UserRole defaultRole = userRoleService.getDefaultRole();
             if (defaultRole == null) {
                 throw new BusinessException("系统未配置默认角色");
@@ -74,7 +74,6 @@ public class UserService {
                 .collect(Collectors.joining(","));
 
         LocalDateTime now = LocalDateTime.now();
-        Long operator = JwtUtils.getCurrentUserId();
 
         SysUser sysUser = SysUser.builder()
                 .username(req.getUsername())
@@ -84,15 +83,9 @@ public class UserService {
                 .roles(roleNames)
                 .status(UserStatusEnum.NORMAL)
                 .loginFailCount(0)
-                // 手动设置审计字段（插入时）
-                .deleted(0)
-                .version(0)
-                .createdAt(now)
-                .updatedAt(now)
-                .createdBy(operator.toString())
-                .updatedBy(operator.toString())
                 .passwordResetAt(now)
                 .build();
+        this.fillInsert(sysUser);
 
         int saved = userMapper.insert(sysUser);
         if (saved == 0) {
@@ -193,16 +186,24 @@ public class UserService {
      */
     public SysUser updateUser(Long userId, UserUpdateDTO dto) {
         SysUser user = this.getUserById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在: " + userId);
+        }
 
-        if (dto.getPhone() != null) user.setPhone(dto.getPhone());
-        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
 
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
-        user.setVersion(user.getVersion() + 1);
+        this.fillUpdate(user);
 
-        userMapper.update(user);
+        int rows = userMapper.update(user);
+        if (rows != 1) {
+            throw new BusinessException("更新失败，可能数据已变更");
+        }
+
         log.info("用户ID: {} 的信息更新成功", userId);
         return user;
     }
@@ -233,10 +234,7 @@ public class UserService {
         SysUser user = this.getUserById(userId);
         user.setRoles(roleNames);
 
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
-        user.setVersion(user.getVersion() + 1);
+        this.fillUpdate(user);
 
         userMapper.update(user);
         return user;
@@ -256,10 +254,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setPasswordResetAt(LocalDateTime.now());
 
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
-        user.setVersion(user.getVersion() + 1);
+        this.fillUpdate(user);
 
         userMapper.update(user);
         log.info("用户ID: {} 的密码强制修改成功", userId);
@@ -277,10 +272,7 @@ public class UserService {
         SysUser user = this.getUserById(userId);
         user.setStatus(UserStatusEnum.BANNED);
 
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
-        user.setVersion(user.getVersion() + 1);
+        this.fillUpdate(user);
 
         userMapper.update(user);
         log.info("用户ID: {} 封禁成功", userId);
@@ -298,10 +290,7 @@ public class UserService {
         SysUser user = this.getUserById(userId);
         user.setStatus(UserStatusEnum.NORMAL);
 
-        // 手动设置审计字段（更新时）
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setUpdatedBy(JwtUtils.getCurrentUserId().toString());
-        user.setVersion(user.getVersion() + 1);
+        this.fillUpdate(user);
 
         userMapper.update(user);
         log.info("用户ID: {} 解封成功", userId);
@@ -322,5 +311,27 @@ public class UserService {
         }
         log.info("用户ID: {} 删除成功 (逻辑删除)", userId);
         return userId;
+    }
+
+    private void fillInsert(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        user.setDeleted(0);
+        user.setVersion(0);
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator.toString());
+        user.setCreatedBy(operator.toString());
+
+    }
+
+    private  void fillUpdate(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        user.setVersion(user.getVersion() + 1);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator.toString());
     }
 }

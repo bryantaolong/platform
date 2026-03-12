@@ -63,12 +63,6 @@ public class PostCommentService {
                 .dislikeCount(0L)
                 .childCount(0L)
                 .status(CommentStatusEnum.NORMAL)
-                .deleted(0)
-                .version(0)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
                 .build();
 
         if (parentId == null || parentId == 0) {
@@ -98,6 +92,7 @@ public class PostCommentService {
             }
         }
 
+        this.fillInsert(comment);
         postCommentMapper.insert(comment);
 
         // 若根评论 rootId 仍为空，则修正为自身 ID
@@ -310,5 +305,17 @@ public class PostCommentService {
         }
         log.warn("评论ID: {} 删除失败，可能已被其他用户修改", commentId);
         return false;
+    }
+
+    private void fillInsert(PostComment comment) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        comment.setDeleted(0);
+        comment.setVersion(0);
+        comment.setCreatedAt(now);
+        comment.setUpdatedAt(now);
+        comment.setUpdatedBy(operator.toString());
+        comment.setCreatedBy(operator.toString());
     }
 }

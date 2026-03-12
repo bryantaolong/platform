@@ -79,13 +79,8 @@ public class UserPostLikeService {
         UserPostLike like = UserPostLike.builder()
                 .userId(userId)
                 .postId(postId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(like);
         userPostLikeMapper.insert(like);
         log.info("新增点赞记录，userId: {}, postId: {}", userId, postId);
 
@@ -156,5 +151,17 @@ public class UserPostLikeService {
 
         // 取消点赞也记录行为（可选）
         return true;
+    }
+
+    private void fillInsert(UserPostLike like) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        like.setDeleted(0);
+        like.setVersion(0);
+        like.setCreatedAt(now);
+        like.setUpdatedAt(now);
+        like.setUpdatedBy(operator.toString());
+        like.setCreatedBy(operator.toString());
     }
 }
