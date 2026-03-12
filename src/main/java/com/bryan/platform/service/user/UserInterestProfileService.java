@@ -8,11 +8,13 @@ import com.bryan.platform.mapper.post.UserPostCollectMapper;
 import com.bryan.platform.mapper.post.UserPostLikeMapper;
 import com.bryan.platform.mapper.user.UserBehaviorLogMapper;
 import com.bryan.platform.mapper.user.UserProfileInterestMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +88,8 @@ public class UserInterestProfileService {
                             .interestTag(entry.getKey())
                             .weight(entry.getValue())
                             .source("behavior_analysis")
-                            .deleted(0)
-                            .version(0)
                             .build();
+                    this.fillInsert(interest);
                     userProfileInterestMapper.insert(interest);
                 });
 
@@ -111,9 +112,8 @@ public class UserInterestProfileService {
                 .postId(postId)
                 .behaviorType(behaviorType)
                 .durationSeconds(duration)
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(behaviorLog);
         userBehaviorLogMapper.insert(behaviorLog);
 
         // 2. 立即更新用户画像（异步处理更佳，这里简化为同步）
@@ -185,5 +185,29 @@ public class UserInterestProfileService {
                 log.error("更新用户画像失败，用户ID: {}", userId, e);
             }
         }
+    }
+
+    private void fillInsert(UserProfileInterest interest) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        interest.setDeleted(0);
+        interest.setVersion(0);
+        interest.setCreatedAt(now);
+        interest.setUpdatedAt(now);
+        interest.setUpdatedBy(operator.toString());
+        interest.setCreatedBy(operator.toString());
+    }
+
+    private void fillInsert(UserBehaviorLog behaviorLog) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        behaviorLog.setDeleted(0);
+        behaviorLog.setVersion(0);
+        behaviorLog.setCreatedAt(now);
+        behaviorLog.setUpdatedAt(now);
+        behaviorLog.setUpdatedBy(operator.toString());
+        behaviorLog.setCreatedBy(operator.toString());
     }
 }

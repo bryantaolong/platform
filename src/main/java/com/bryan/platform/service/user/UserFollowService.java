@@ -5,11 +5,13 @@ import com.bryan.platform.domain.entity.user.UserFollow;
 import com.bryan.platform.domain.response.PageResult;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.user.UserFollowMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,7 @@ public class UserFollowService {
                 .followerId(followerId)
                 .followingId(followingId)
                 .build();
+        this.fillInsert(uf);
         return userFollowMapper.insert(uf);
     }
 
@@ -163,11 +166,35 @@ public class UserFollowService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int unfollowUser(Long followerId, Long followingId) {
-        // 检查是否已关注
-        if (!this.isFollowing(followerId, followingId)) {
+        // 查询关注记录
+        UserFollow follow = userFollowMapper.selectByFollowerIdAndFollowingId(followerId, followingId);
+        if (follow == null) {
             throw new BusinessException("您尚未关注该用户");
         }
 
-        return userFollowMapper.updateDeletedByFollowerIdAndFollowingId(followerId, followingId, 1);
+        int rows = userFollowMapper.updateDeletedByFollowerIdAndFollowingId(
+                followerId,
+                followingId,
+                1,
+                follow.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
+        if (rows == 0) {
+            throw new BusinessException("取关失败，请稍后重试");
+        }
+        return rows;
+    }
+
+    private void fillInsert(UserFollow uf) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        uf.setDeleted(0);
+        uf.setVersion(0);
+        uf.setCreatedAt(now);
+        uf.setUpdatedAt(now);
+        uf.setUpdatedBy(operator.toString());
+        uf.setCreatedBy(operator.toString());
     }
 }

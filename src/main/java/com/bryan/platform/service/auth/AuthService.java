@@ -70,8 +70,9 @@ public class AuthService implements UserDetailsService {
                 .email(registerRequest.getEmail())
                 .roles(defaultRole.getRoleName())
                 .status(UserStatusEnum.NORMAL)
-                .passwordResetAt(LocalDateTime.now())
                 .build();
+
+        this.fillInsert(sysUser);
 
         // 4. 插入用户数据
         int saved = userMapper.insert(sysUser);
@@ -105,12 +106,15 @@ public class AuthService implements UserDetailsService {
         }
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), sysUser.getPassword())){
+            LocalDateTime now = LocalDateTime.now();
             sysUser.setLoginFailCount(sysUser.getLoginFailCount() + 1);
+            // 手动设置审计字段（更新时）- 登录失败时使用用户自己的ID
+            this.fillUpdate(sysUser);
 
             // 如果输入密码错误次数达到限额，则锁定账号
             if(sysUser.getLoginFailCount() >= securityProperties.getLoginFailLimit()) {
                 sysUser.setStatus(UserStatusEnum.LOCKED);
-                sysUser.setLockedAt(LocalDateTime.now());
+                sysUser.setLockedAt(now);
                 userMapper.update(sysUser);
                 log.warn("用户登录失败次数过多，已锁定: {}", sysUser.getUsername());
                 throw new BusinessException("输入密码错误次数过多，账号锁定");
@@ -129,10 +133,13 @@ public class AuthService implements UserDetailsService {
         }
 
         // 3. 更新用户登录信息
-        sysUser.setLastLoginAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        sysUser.setLastLoginAt(now);
         sysUser.setLastLoginIp(HttpUtils.getClientIp());
         sysUser.setLastLoginDevice(HttpUtils.getClientOS() + " / " + HttpUtils.getClientBrowser());
         sysUser.setLoginFailCount(0); // 重置密码输入错误次数
+        // 登录成功时使用用户自己的ID作为updatedBy
+        this.fillUpdate(sysUser);
         userMapper.update(sysUser);
 
 
@@ -285,10 +292,14 @@ public class AuthService implements UserDetailsService {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException("旧密码不正确");
         }
-        
+
+        LocalDateTime now = LocalDateTime.now();
+
         // 更新密码
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPasswordResetAt(LocalDateTime.now());
+        user.setPasswordResetAt(now);
+
+        this.fillUpdate(user);
         userMapper.update(user);
         
         // 清除 Redis 中的旧 Token，强制用户重新登录
@@ -329,8 +340,30 @@ public class AuthService implements UserDetailsService {
         if (user == null) {
             throw new ResourceNotFoundException("用户状态异常，无法注销");
         }
-        userMapper.deleteById(user.getId());
+        userMapper.deleteById(user.getId(), LocalDateTime.now(), user.getId().toString());
         log.info("用户ID: {} 注销成功", user.getId());
         return user;
+    }
+
+    private void fillInsert(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        String operator = user.getUsername();
+
+        user.setDeleted(0);
+        user.setVersion(0);
+        user.setPasswordResetAt(now);
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator != null ? operator.toString() : "SYSTEM");
+        user.setCreatedBy(operator != null ? operator.toString() : "SYSTEM");
+    }
+
+    private void fillUpdate(SysUser user) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        user.setVersion(user.getVersion() + 1);
+        user.setUpdatedAt(now);
+        user.setUpdatedBy(operator.toString());
     }
 }

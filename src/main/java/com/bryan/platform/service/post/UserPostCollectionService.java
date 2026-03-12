@@ -3,6 +3,7 @@ package com.bryan.platform.service.post;
 import com.bryan.platform.domain.entity.post.UserPostCollection;
 import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.mapper.post.UserPostCollectionMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,12 +44,9 @@ public class UserPostCollectionService {
         UserPostCollection collection = UserPostCollection.builder()
                 .userId(userId)
                 .folderName(folderName)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
                 .build();
 
+        this.fillInsert(collection);
         userPostCollectionMapper.insert(collection);
         log.info("创建收藏夹成功，用户ID: {}, 文件夹名: {}, 收藏夹ID: {}", userId, folderName, collection.getId());
         return collection;
@@ -130,8 +128,8 @@ public class UserPostCollectionService {
         }
 
         existing.setFolderName(newFolderName);
-        existing.setUpdatedAt(LocalDateTime.now());
-        existing.setUpdatedBy(String.valueOf(existing.getUserId()));
+
+        this.fillUpdate(existing);
 
         int rows = userPostCollectionMapper.update(existing);
         if (rows == 0) {
@@ -159,13 +157,39 @@ public class UserPostCollectionService {
             throw new BusinessException("用户尝试删除无权限的收藏夹");
         }
 
-        int rows = userPostCollectionMapper.deleteById(collectionId);
+        int rows = userPostCollectionMapper.deleteById(
+                collectionId,
+                collection.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
         if (rows > 0) {
             log.info("删除收藏夹成功，收藏夹ID: {}", collectionId);
             return true;
         } else {
-            log.warn("删除收藏夹失败，收藏夹ID: {}，可能不存在", collectionId);
+            log.warn("删除收藏夹失败，收藏夹ID: {}，可能已被其他用户修改", collectionId);
             return false;
         }
+    }
+
+    private void fillInsert(UserPostCollection collection) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        collection.setDeleted(0);
+        collection.setVersion(0);
+        collection.setCreatedAt(now);
+        collection.setUpdatedAt(now);
+        collection.setUpdatedBy(operator.toString());
+        collection.setCreatedBy(operator.toString());
+    }
+
+    private void fillUpdate(UserPostCollection collection) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        collection.setVersion(collection.getVersion() + 1);
+        collection.setUpdatedAt(now);
+        collection.setUpdatedBy(operator.toString());
     }
 }

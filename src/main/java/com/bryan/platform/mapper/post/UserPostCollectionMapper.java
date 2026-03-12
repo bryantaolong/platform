@@ -28,5 +28,8 @@ public interface UserPostCollectionMapper {
 
     int update(UserPostCollection record);
 
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("version") Integer version,
+                   @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                   @Param("updatedBy") String updatedBy);
 }

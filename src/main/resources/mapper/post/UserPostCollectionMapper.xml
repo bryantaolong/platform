@@ -34,11 +34,12 @@
     <update id="deleteById">
         UPDATE user_post_collection
         SET deleted = 1,
-            version = #{version},
+            version = #{version} + 1,
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
           AND deleted = 0
+          AND version = #{version}
     </update>
 
     <update id="update">

@@ -2,10 +2,13 @@ package com.bryan.platform.service.user;
 
 import com.bryan.platform.domain.entity.user.UserBehaviorLog;
 import com.bryan.platform.mapper.user.UserBehaviorLogMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户行为记录服务
@@ -134,9 +137,20 @@ public class UserBehaviorService {
                 .postId(postId)
                 .behaviorType(behaviorType)
                 .durationSeconds(duration)
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(behaviorLog);
         userBehaviorLogMapper.insert(behaviorLog);
+    }
+
+    private void fillInsert(UserBehaviorLog behaviorLog) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        behaviorLog.setDeleted(0);
+        behaviorLog.setVersion(0);
+        behaviorLog.setCreatedAt(now);
+        behaviorLog.setUpdatedAt(now);
+        behaviorLog.setUpdatedBy(operator != null ? operator.toString() : "system");
+        behaviorLog.setCreatedBy(operator != null ? operator.toString() : "system");
     }
 }

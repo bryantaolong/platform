@@ -1,4 +1,4 @@
-package com.bryan.platform.common.util;
+package com.bryan.platform.util;
 
 import java.util.HashSet;
 import java.util.Set;

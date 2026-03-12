@@ -6,12 +6,14 @@ import com.bryan.platform.exception.BusinessException;
 import com.bryan.platform.exception.ResourceNotFoundException;
 import com.bryan.platform.mapper.user.UserProfileMapper;
 import com.bryan.platform.service.file.LocalFileService;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * 用户资料业务服务
@@ -35,6 +37,8 @@ public class UserProfileService {
      * @throws BusinessException 数据库插入失败
      */
     public UserProfile createUserProfile(UserProfile record) {
+        this.fillInsert(record);
+
         int inserted = userProfileMapper.insert(record);
         if (inserted <= 0) {
             throw new BusinessException("创建用户信息失败");
@@ -112,6 +116,8 @@ public class UserProfileService {
             profile.setAvatar(dto.getAvatar());
         }
 
+        this.fillUpdate(profile);
+
         int updated = userProfileMapper.update(profile);
         if (updated == 0) {
             throw new BusinessException("用户信息更新失败");
@@ -142,6 +148,9 @@ public class UserProfileService {
 
             // 3. 更新数据库
             profile.setAvatar(avatarPath);
+
+            this.fillUpdate(profile);
+
             int updated = userProfileMapper.update(profile);
             if (updated == 0) {
                 throw new BusinessException("头像更新失败");
@@ -153,5 +162,26 @@ public class UserProfileService {
             log.error("用户头像上传失败，用户ID: {}", userId, e);
             throw new BusinessException("头像上传失败: " + e.getMessage());
         }
+    }
+
+    private void fillInsert(UserProfile record) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        record.setDeleted(0);
+        record.setVersion(0);
+        record.setCreatedAt(now);
+        record.setUpdatedAt(now);
+        record.setUpdatedBy(operator.toString());
+        record.setCreatedBy(operator.toString());
+    }
+
+    private void fillUpdate(UserProfile profile) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        profile.setVersion(profile.getVersion() + 1);
+        profile.setUpdatedAt(now);
+        profile.setUpdatedBy(operator.toString());
     }
 }

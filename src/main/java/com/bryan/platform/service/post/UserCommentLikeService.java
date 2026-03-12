@@ -2,6 +2,7 @@ package com.bryan.platform.service.post;
 
 import com.bryan.platform.domain.entity.post.UserCommentLike;
 import com.bryan.platform.mapper.post.UserCommentLikeMapper;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,17 @@ public class UserCommentLikeService {
                 log.warn("用户已点赞，userId: {}, commentId: {}", userId, commentId);
                 throw new RuntimeException("已点赞该评论");
             } else {
-                int rows = userCommentLikeMapper.restoreLike(userId, commentId);
+                UserCommentLike like = userCommentLikeMapper.selectByUserIdAndCommentIdIncludeDeleted(userId, commentId);
+                if (like == null) {
+                    throw new RuntimeException("点赞记录不存在");
+                }
+                int rows = userCommentLikeMapper.restoreLike(
+                        userId,
+                        commentId,
+                        like.getVersion(),
+                        LocalDateTime.now(),
+                        JwtUtils.getCurrentUsername()
+                );
                 if (rows > 0) {
                     int updated = postCommentService.likeComment(commentId);
                     if (updated <= 0) {
@@ -61,13 +72,8 @@ public class UserCommentLikeService {
         UserCommentLike like = UserCommentLike.builder()
                 .userId(userId)
                 .commentId(commentId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(like);
         userCommentLikeMapper.insert(like);
         log.info("新增点赞记录，userId: {}, commentId: {}", userId, commentId);
 
@@ -101,9 +107,20 @@ public class UserCommentLikeService {
      */
     @Transactional
     public boolean unlikeComment(Long userId, Long commentId) {
-        int rows = userCommentLikeMapper.deleteByUserIdAndCommentId(userId, commentId);
-        if (rows <= 0) {
+        UserCommentLike like = userCommentLikeMapper.selectByUserIdAndCommentId(userId, commentId);
+        if (like == null) {
             log.warn("取消点赞失败或原本未点赞，userId: {}, commentId: {}", userId, commentId);
+            return false;
+        }
+        int rows = userCommentLikeMapper.deleteByUserIdAndCommentId(
+                userId,
+                commentId,
+                like.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
+        if (rows <= 0) {
+            log.warn("取消点赞失败，可能已被其他用户修改，userId: {}, commentId: {}", userId, commentId);
             return false;
         }
 
@@ -113,5 +130,17 @@ public class UserCommentLikeService {
             throw new RuntimeException("评论取消点赞计数更新失败");
         }
         return true;
+    }
+
+    private void fillInsert(UserCommentLike like) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        like.setDeleted(0);
+        like.setVersion(0);
+        like.setCreatedAt(now);
+        like.setUpdatedAt(now);
+        like.setUpdatedBy(operator.toString());
+        like.setCreatedBy(operator.toString());
     }
 }

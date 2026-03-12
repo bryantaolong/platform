@@ -1,6 +1,5 @@
 package com.bryan.platform.service.post;
 
-import com.bryan.platform.util.MarkdownImageUtils;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.post.PostStatusEnum;
 import com.bryan.platform.domain.response.PageResult;
@@ -10,11 +9,14 @@ import com.bryan.platform.exception.ResourceNotFoundException;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.service.file.LocalFileService;
 import com.bryan.platform.service.user.UserFollowService;
+import com.bryan.platform.util.MarkdownImageUtils;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -43,6 +45,7 @@ public class PostService {
      */
     @Transactional
     public Post createPost(Post post) {
+        this.fillInsert(post);
         postMapper.insert(post);
         log.info("创建博文成功，帖子ID: {}", post.getId());
         return post;
@@ -258,6 +261,8 @@ public class PostService {
             existingPost.setWeight(post.getWeight());
         }
 
+        this.fillUpdate(existingPost);
+
         int rows = postMapper.update(existingPost);
         if (rows == 0) {
             log.warn("更新帖子失败，乐观锁冲突，ID: {} , 数据可能已被其他用户修改", existingPost.getId());
@@ -387,5 +392,26 @@ public class PostService {
         List<Post> posts = postMapper.selectRecentPosts(limit, hours);
         log.info("查询最近发布的帖子完成，数量: {}, 时间范围: {} 小时", posts.size(), hours);
         return posts;
+    }
+
+    private void fillInsert(Post post) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        post.setDeleted(0);
+        post.setVersion(0);
+        post.setCreatedAt(now);
+        post.setUpdatedAt(now);
+        post.setUpdatedBy(operator.toString());
+        post.setCreatedBy(operator.toString());
+    }
+
+    private void fillUpdate(Post post) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        post.setVersion(post.getVersion() + 1);
+        post.setUpdatedAt(now);
+        post.setUpdatedBy(operator.toString());
     }
 }

@@ -4,6 +4,7 @@ import com.bryan.platform.domain.entity.post.UserPostLike;
 import com.bryan.platform.mapper.post.UserPostLikeMapper;
 import com.bryan.platform.service.user.UserBehaviorService;
 import com.bryan.platform.service.user.UserInterestProfileService;
+import com.bryan.platform.util.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,17 @@ public class UserPostLikeService {
                 throw new RuntimeException("已点赞该博文");
             } else {
                 // 恢复软删记录
-                int rows = userPostLikeMapper.restoreLike(userId, postId);
+                UserPostLike like = userPostLikeMapper.selectByUserIdAndPostIdIncludeDeleted(userId, postId);
+                if (like == null) {
+                    throw new RuntimeException("点赞记录不存在");
+                }
+                int rows = userPostLikeMapper.restoreLike(
+                        userId,
+                        postId,
+                        like.getVersion(),
+                        LocalDateTime.now(),
+                        JwtUtils.getCurrentUsername()
+                );
                 if (rows > 0) {
                     int updated = postService.likePost(postId);
                     if (updated <= 0) {
@@ -68,13 +79,8 @@ public class UserPostLikeService {
         UserPostLike like = UserPostLike.builder()
                 .userId(userId)
                 .postId(postId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(String.valueOf(userId))
-                .updatedBy(String.valueOf(userId))
-                .deleted(0)
-                .version(0)
                 .build();
+        this.fillInsert(like);
         userPostLikeMapper.insert(like);
         log.info("新增点赞记录，userId: {}, postId: {}", userId, postId);
 
@@ -118,10 +124,22 @@ public class UserPostLikeService {
      */
     @Transactional
     public boolean unlikePost(Long userId, Long postId) {
-        // 逻辑删除点赞记录
-        int rows = userPostLikeMapper.deleteByUserIdAndPostId(userId, postId);
-        if (rows <= 0) {
+        // 查询点赞记录
+        UserPostLike like = userPostLikeMapper.selectByUserIdAndPostId(userId, postId);
+        if (like == null) {
             log.warn("取消点赞失败或原本未点赞，userId: {}, postId: {}", userId, postId);
+            return false;
+        }
+        // 逻辑删除点赞记录
+        int rows = userPostLikeMapper.deleteByUserIdAndPostId(
+                userId,
+                postId,
+                like.getVersion(),
+                LocalDateTime.now(),
+                JwtUtils.getCurrentUsername()
+        );
+        if (rows <= 0) {
+            log.warn("取消点赞失败，可能已被其他用户修改，userId: {}, postId: {}", userId, postId);
             return false;
         }
 
@@ -133,5 +151,17 @@ public class UserPostLikeService {
 
         // 取消点赞也记录行为（可选）
         return true;
+    }
+
+    private void fillInsert(UserPostLike like) {
+        LocalDateTime now = LocalDateTime.now();
+        Long operator = JwtUtils.getCurrentUserId();
+
+        like.setDeleted(0);
+        like.setVersion(0);
+        like.setCreatedAt(now);
+        like.setUpdatedAt(now);
+        like.setUpdatedBy(operator.toString());
+        like.setCreatedBy(operator.toString());
     }
 }

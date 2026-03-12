@@ -33,12 +33,13 @@
     <update id="deleteByUserIdAndCommentId">
         UPDATE user_comment_like
         SET deleted = 1,
-            version = #{version},
+            version = #{version} + 1,
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE user_id = #{userId}
           AND comment_id = #{commentId}
           AND deleted = 0
+          AND version = #{version}
     </update>
 
     <select id="selectByUserIdAndCommentId" resultMap="BaseResultMap">
@@ -74,11 +75,18 @@
     <update id="restoreLike">
         UPDATE user_comment_like
         SET deleted = 0,
-            version = #{version},
+            version = #{version} + 1,
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE user_id = #{userId}
           AND comment_id = #{commentId}
+          AND version = #{version}
     </update>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM user_comment_like
+        WHERE id = #{id}
+    </select>
 
 </mapper>
