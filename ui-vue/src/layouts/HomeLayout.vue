@@ -6,7 +6,7 @@
         <div class="nav-left">
           <div class="logo">
             <el-icon :size="28"><Platform /></el-icon>
-            <span class="logo-text">文章平台</span>
+            <span class="logo-text">Platform</span>
           </div>
         </div>
 
@@ -86,7 +86,7 @@
     <!-- Footer -->
     <el-footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2026 文章平台. All Rights Reserved.</p>
+        <p>&copy; 2026 Platform. All Rights Reserved.</p>
         <p>
           <a href="/about">关于我们</a> | <a href="/contact">联系我们</a> | <a href="/privacy">隐私政策</a>
         </p>

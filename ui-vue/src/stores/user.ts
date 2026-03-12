@@ -19,6 +19,15 @@ export const useUserStore = defineStore('user', () => {
     return userInfo.value?.roles.includes('ROLE_MODERATOR') || false
   })
 
+  const isAuditor = computed(() => {
+    return userInfo.value?.roles.includes('ROLE_MODERATOR') || false
+  })
+
+  // 判断是否为后台管理人员（管理员或审计员）
+  const isBackendUser = computed(() => {
+    return isAdmin.value || isAuditor.value
+  })
+
   /**
    * 设置Token
    */
@@ -167,6 +176,8 @@ export const useUserStore = defineStore('user', () => {
     isAuthenticated,
     isAdmin,
     isModerator,
+    isAuditor,
+    isBackendUser,
     setToken,
     clearToken,
     login,
