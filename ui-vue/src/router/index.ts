@@ -21,6 +21,19 @@ const routes: RouteRecordRaw[] = [
                 meta: {requiresAuth: true, title: '我的关注'}
             },
             {
+                path: 'messages',
+                name: 'Messages',
+                component: () => import('@/views/message/MessageList.vue'),
+                meta: {requiresAuth: true, title: '消息中心'}
+            },
+            {
+                path: 'chat/:userId',
+                name: 'Chat',
+                component: () => import('@/views/message/ChatView.vue'),
+                meta: {requiresAuth: true, title: '聊天'},
+                props: true
+            },
+            {
                 path: 'hot',
                 name: 'HotPosts',
                 component: () => import('@/views/post/HotPosts.vue'),
