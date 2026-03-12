@@ -11,6 +11,7 @@
 - [用户管理接口](#用户管理接口)
 - [用户资料接口](#用户资料接口)
 - [关注系统接口](#关注系统接口)
+- [私信消息接口](#私信消息接口)
 - [帖子接口](#帖子接口)
 - [评论接口](#评论接口)
 - [收藏接口](#收藏接口)
@@ -37,6 +38,7 @@
 | 用户管理 | 12 | ADMIN |
 | 用户资料 | 5 | 混合 |
 | 关注系统 | 6 | 认证用户 |
+| 私信消息 | 8 | 认证用户 |
 | 帖子 | 17 | 混合 |
 | 评论 | 12 | 混合 |
 | 收藏 | 14 | 认证用户 |
@@ -130,9 +132,9 @@ interface Result<T> {
 
 ```typescript
 interface PageResult<T> {
-  list: T[];        // 数据列表
+  rows: T[];        // 数据列表
   total: number;    // 总记录数
-  page: number;     // 当前页
+  pageNum: number;  // 当前页
   pageSize: number; // 每页大小
 }
 ```
@@ -359,6 +361,38 @@ Authorization: Bearer {token}
     "followingCount": 50,
     "followerCount": 100
   }
+}
+```
+
+---
+
+## 私信消息接口
+
+**Base URL**: `/api/user-messages`
+
+> 提示：仅支持 **互相关注** 的用户之间发送私信。
+
+| 方法 | 端点 | 认证 | 描述 |
+|------|------|------|------|
+| POST | `/api/user-messages/send` | 认证 | 发送私信 |
+| GET | `/api/user-messages/history/{contactId}` | 认证 | 分页获取聊天记录 |
+| GET | `/api/user-messages/conversations` | 认证 | 分页获取会话列表 |
+| POST | `/api/user-messages/recall/{messageId}` | 认证 | 撤回消息（2分钟内） |
+| POST | `/api/user-messages/read/{contactId}` | 认证 | 标记与联系人消息为已读 |
+| GET | `/api/user-messages/unread-count` | 认证 | 获取未读总数 |
+| GET | `/api/user-messages/unread-count/{contactId}` | 认证 | 获取与联系人未读数 |
+| GET | `/api/user-messages/can-chat/{userId}` | 认证 | 是否可聊天（互相关注） |
+
+### 发送私信
+
+```http
+POST /api/user-messages/send
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "receiverId": 2,
+  "content": "hello"
 }
 ```
 

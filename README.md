@@ -82,6 +82,7 @@ src/
 * **Auth**: Secure registration and login with JWT-based stateless authentication.
 * **Profiles**: Comprehensive personal information management including avatar uploads and public profile views.
 * **Social**: Dynamic user follow/follower system with integrated profile identity (avatars/real names).
+* **Messaging**: Direct messages between mutual followers, with unread counts and recall.
 * **Role-Based Security**: Fine-grained access control (RBAC) ensuring data safety across administrative and user operations.
 
 ### 📝 Content Management
