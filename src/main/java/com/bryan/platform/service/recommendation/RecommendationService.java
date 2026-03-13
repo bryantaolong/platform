@@ -1,10 +1,11 @@
-package com.bryan.platform.service.algorithm;
+package com.bryan.platform.service.recommendation;
 
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.mapper.post.PostMapper;
 import com.bryan.platform.mapper.user.UserFollowMapper;
+import com.bryan.platform.service.algorithm.PostHotRankService;
 import com.bryan.platform.service.user.UserInterestProfileService;
 import com.bryan.platform.domain.converter.PostConverter;
 import lombok.RequiredArgsConstructor;

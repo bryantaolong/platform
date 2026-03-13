@@ -6,7 +6,7 @@
         <div class="nav-left">
           <div class="logo">
             <el-icon :size="28"><Platform /></el-icon>
-            <span class="logo-text">文章平台</span>
+            <span class="logo-text">Platform</span>
           </div>
         </div>
 
@@ -22,6 +22,10 @@
             <el-menu-item index="/hot">热门</el-menu-item>
             <el-menu-item v-if="isLoggedIn" index="/recommend">推荐</el-menu-item>
             <el-menu-item v-if="isLoggedIn" index="/following">关注</el-menu-item>
+            <el-menu-item v-if="isLoggedIn" index="/messages">
+              消息
+              <el-badge v-if="unreadCount > 0" :value="unreadCount > 99 ? '99+' : unreadCount" class="menu-badge"/>
+            </el-menu-item>
             <el-menu-item index="/post/create">写文章</el-menu-item>
             <el-menu-item @click="chatRef.open()">AI对话</el-menu-item>
           </el-menu>
@@ -86,7 +90,7 @@
     <!-- Footer -->
     <el-footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2026 文章平台. All Rights Reserved.</p>
+        <p>&copy; 2026 Platform. All Rights Reserved.</p>
         <p>
           <a href="/about">关于我们</a> | <a href="/contact">联系我们</a> | <a href="/privacy">隐私政策</a>
         </p>
@@ -96,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -110,7 +114,8 @@ import {
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { getAvatarUrl } from '@/utils/file'
-import LlmChatDialog from "@/components/llm/LlmChatDialog.vue";
+import LlmChatDialog from "@/components/llm/LlmChatDialog.vue"
+import { getUnreadCount } from "@/api/user/userMessage.ts"
 
 const route = useRoute()
 const router = useRouter()
@@ -122,14 +127,48 @@ const isAdmin = computed(() => userStore.isAdmin)
 const isModerator = computed(() => userStore.isModerator)
 
 const chatRef = ref<ComponentPublicInstance<typeof LlmChatDialog> | null>(null)
+const unreadCount = ref(0)
+let pollInterval: ReturnType<typeof setInterval> | null = null
 
 const activeMenu = computed(() => {
   if (route.path === '/') return '/'
   if (route.path.startsWith('/hot')) return '/hot'
   if (route.path.startsWith('/recommend')) return '/recommend'
   if (route.path.startsWith('/following')) return '/following'
+  if (route.path.startsWith('/messages')) return '/messages'
+  if (route.path.startsWith('/chat')) return '/messages'
   if (route.path.startsWith('/post')) return '/post/list'
   return route.path
+})
+
+const loadUnreadCount = async () => {
+  if (!userStore.isAuthenticated) return
+  try {
+    const response = await getUnreadCount()
+    if (response.code === 200) {
+      unreadCount.value = response.data
+    }
+  } catch (error) {
+    console.error('获取未读消息数失败', error)
+  }
+}
+
+const startPolling = () => {
+  if (pollInterval) clearInterval(pollInterval)
+  pollInterval = setInterval(() => {
+    loadUnreadCount()
+  }, 15000)
+}
+
+onMounted(() => {
+  if (userStore.isAuthenticated) {
+    loadUnreadCount()
+    startPolling()
+  }
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 
 const handleCommand = async (command: string) => {
@@ -243,6 +282,14 @@ const handleSearch = () => {
 .top-menu :deep(.el-menu-item.is-active) {
   border-bottom-color: var(--el-menu-active-color);
   background-color: transparent;
+}
+
+.menu-badge {
+  margin-left: 4px;
+}
+
+.menu-badge :deep(.el-badge__content) {
+  transform: translateY(-50%);
 }
 
 .top-menu :deep(.el-menu-item:not(.is-active):hover) {

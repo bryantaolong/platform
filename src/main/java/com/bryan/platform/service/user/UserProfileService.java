@@ -37,7 +37,7 @@ public class UserProfileService {
      * @throws BusinessException 数据库插入失败
      */
     public UserProfile createUserProfile(UserProfile record) {
-        this.fillInsert(record);
+        this.fillInsert(record, record.getUserId() == null ? "SYSTEM" : record.getUserId().toString());
 
         int inserted = userProfileMapper.insert(record);
         if (inserted <= 0) {
@@ -167,21 +167,27 @@ public class UserProfileService {
     private void fillInsert(UserProfile record) {
         LocalDateTime now = LocalDateTime.now();
         Long operator = JwtUtils.getCurrentUserId();
-
-        record.setDeleted(0);
-        record.setVersion(0);
-        record.setCreatedAt(now);
-        record.setUpdatedAt(now);
-        record.setUpdatedBy(operator.toString());
-        record.setCreatedBy(operator.toString());
+        this.fillInsert(record, operator == null ? "SYSTEM" : operator.toString());
     }
 
     private void fillUpdate(UserProfile profile) {
         LocalDateTime now = LocalDateTime.now();
         Long operator = JwtUtils.getCurrentUserId();
 
-        profile.setVersion(profile.getVersion() + 1);
+        Integer currentVersion = profile.getVersion();
+        profile.setVersion(currentVersion == null ? 1 : currentVersion + 1);
         profile.setUpdatedAt(now);
         profile.setUpdatedBy(operator.toString());
+    }
+
+    private void fillInsert(UserProfile record, String operator) {
+        LocalDateTime now = LocalDateTime.now();
+
+        record.setDeleted(0);
+        record.setVersion(0);
+        record.setCreatedAt(now);
+        record.setUpdatedAt(now);
+        record.setUpdatedBy(operator == null ? "SYSTEM" : operator);
+        record.setCreatedBy(operator == null ? "SYSTEM" : operator);
     }
 }

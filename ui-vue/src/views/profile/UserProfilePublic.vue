@@ -25,8 +25,9 @@
               </div>
             </div>
           </div>
-          <div class="profile-actions" v-if="showFollowButton">
+          <div class="profile-actions">
             <el-button
+                v-if="showFollowButton"
                 :type="isFollowing ? 'danger' : 'primary'"
                 :icon="Star"
                 @click="toggleFollow"
@@ -34,6 +35,15 @@
                 size="large"
             >
               {{ isFollowing ? '取消关注' : '关注' }}
+            </el-button>
+            <el-button
+                v-if="canChat"
+                type="success"
+                :icon="ChatDotRound"
+                @click="startChat"
+                size="large"
+            >
+              发消息
             </el-button>
           </div>
         </div>
@@ -126,10 +136,11 @@
 import { ref, onMounted} from 'vue'
 import { useRoute, useRouter} from 'vue-router'
 import { ElMessage} from 'element-plus'
-import { Star, View, ChatLineRound } from '@element-plus/icons-vue'
+import { Star, View, ChatLineRound, ChatDotRound } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import * as userProfileApi from '@/api/user/userProfile.ts'
 import * as userFollowApi from '@/api/user/userFollow.ts'
+import * as userMessageApi from '@/api/user/userMessage.ts'
 import * as postApi from '@/api/post/post.ts'
 import { getAvatarUrl } from '@/utils/file'
 import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
@@ -149,6 +160,7 @@ const followLoading = ref(false)
 const showFollowButton = ref(false)
 const showFollowingDialog = ref(false)
 const showFollowerDialog = ref(false)
+const canChat = ref(false)
 
 // 数据定义
 const userProfile = ref<UserProfileVO | null>(null)
@@ -198,6 +210,12 @@ const checkFollowingStatus = async () => {
     isFollowing.value = response.data
     showFollowButton.value = true
   }
+
+  // 检查是否可以聊天（互相关注）
+  const chatResponse = await userMessageApi.canChatWith(userId.value)
+  if (chatResponse.code === 200) {
+    canChat.value = chatResponse.data
+  }
 }
 
 const loadUserPosts = async () => {
@@ -242,6 +260,14 @@ const showFollowerList = async () => {
     followerUsers.value = response.data.rows
     showFollowerDialog.value = true
   }
+}
+
+const startChat = () => {
+  router.push({
+    name: 'Chat',
+    params: { userId: userId.value.toString() },
+    query: { name: userProfile.value?.username || '' }
+  })
 }
 
 const formatGender = (g?: string) => g === 'MALE' ? '男' : (g === 'FEMALE' ? '女' : '-')

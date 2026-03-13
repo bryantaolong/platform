@@ -113,7 +113,7 @@ import {
   getHotFeedForNewUser,
   getUserInterests,
   refreshUserProfile
-} from '@/api/algorithm/recommendation.ts'
+} from '@/api/recommendation/recommendation.ts'
 
 const router = useRouter()
 const userStore = useUserStore()
