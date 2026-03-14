@@ -80,28 +80,19 @@
     <select id="selectConversationList" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
         FROM user_message um
-        INNER JOIN (
-            SELECT
-                CASE
-                    WHEN sender_id = #{userId} THEN receiver_id
-                    ELSE sender_id
-                END as contact_id,
-                MAX(created_at) as last_msg_time
-            FROM user_message
-            WHERE deleted = 0
-            AND status != 1
-            AND (sender_id = #{userId} OR receiver_id = #{userId})
-            GROUP BY CASE
-                WHEN sender_id = #{userId} THEN receiver_id
-                ELSE sender_id
-            END
-        ) latest ON (
-            (um.sender_id = #{userId} AND um.receiver_id = latest.contact_id)
-            OR (um.receiver_id = #{userId} AND um.sender_id = latest.contact_id)
+        WHERE um.deleted = 0 AND um.status != 1
+        AND (um.sender_id = #{userId} OR um.receiver_id = #{userId})
+        AND um.created_at = (
+            SELECT MAX(um2.created_at)
+            FROM user_message um2
+            WHERE um2.deleted = 0 AND um2.status != 1
+            AND (
+                (um2.sender_id = #{userId} AND um2.receiver_id = 
+                    CASE WHEN um.sender_id = #{userId} THEN um.receiver_id ELSE um.sender_id END)
+                OR (um2.receiver_id = #{userId} AND um2.sender_id = 
+                    CASE WHEN um.sender_id = #{userId} THEN um.receiver_id ELSE um.sender_id END)
+            )
         )
-        AND um.created_at = latest.last_msg_time
-        AND um.deleted = 0
-        AND um.status != 1
         ORDER BY um.created_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
