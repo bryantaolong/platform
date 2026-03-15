@@ -181,6 +181,14 @@ const loadMessages = async (isLoadMore = false) => {
         await scrollToBottom()
       }
       hasMore.value = messages.value.length < response.data.total
+
+      // 从消息中提取联系人头像
+      if (!contactAvatar.value && newMessages.length > 0) {
+        const contactMsg = newMessages.find(msg => msg.senderId === contactId.value)
+        if (contactMsg?.senderAvatar) {
+          contactAvatar.value = contactMsg.senderAvatar
+        }
+      }
     }
   } catch (error) {
     ElMessage.error('加载消息失败')
