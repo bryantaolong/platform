@@ -81,9 +81,9 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, ArrowRight } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { getConversations, getUnreadCount } from '@/api/user/userMessage.ts'
+import * as userMessageApi from '@/api/user/userMessage.ts'
 import { getAvatarUrl } from '@/utils/file'
-import type { ConversationVO } from '@/models/vo/user/ConversationVO.ts'
+import type { ConversationVO } from '@/models/vo/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -101,7 +101,7 @@ const loadConversations = async () => {
 
   loading.value = true
   try {
-    const response = await getConversations(pageNum.value, pageSize.value)
+    const response = await userMessageApi.getConversations(pageNum.value, pageSize.value)
     if (response.code === 200) {
       conversations.value = response.data.rows
       total.value = response.data.total
@@ -117,7 +117,7 @@ const loadUnreadCount = async () => {
   if (!userStore.isAuthenticated) return
 
   try {
-    const response = await getUnreadCount()
+    const response = await userMessageApi.getUnreadCount()
     if (response.code === 200) {
       totalUnreadCount.value = response.data
     }

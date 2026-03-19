@@ -81,7 +81,7 @@ import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import { View, Star, ChatDotRound } from '@element-plus/icons-vue'
 import * as postApi from '@/api/post/post.ts'
-import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO'
+import type { PostSummaryVO } from '@/models/vo/post'
 import HotPosts from '@/components/post/HotPosts.vue'
 
 interface PaginationData {

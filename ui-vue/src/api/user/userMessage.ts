@@ -1,9 +1,7 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
-import type { PageResult } from '@/models/response/PageResult.ts'
-import type { UserMessageVO } from '@/models/vo/user/UserMessageVO.ts'
-import type { ConversationVO } from '@/models/vo/user/ConversationVO.ts'
-import type { SendMessageRequest } from '@/models/request/user/SendMessageRequest.ts'
+import type { Result, PageResult } from '@/models/response'
+import type { UserMessageVO, ConversationVO } from '@/models/vo/user'
+import type { SendMessageRequest } from '@/models/request/user'
 
 /**
  * 用户私信消息API

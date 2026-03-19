@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { getAvatarUrl } from '@/utils/file'
-import type { UserProfileVO } from '@/models/vo/user/UserProfileVO.ts'
+import type { UserProfileVO } from '@/models/vo/user'
 
 interface Props {
   users: UserProfileVO[]

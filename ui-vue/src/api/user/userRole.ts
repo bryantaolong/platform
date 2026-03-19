@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
-import type { UserRoleOptionVO } from '@/models/vo/user/UserRoleOptionVO.ts'
+import type { Result } from '@/models/response'
+import type { UserRoleOptionVO } from '@/models/vo/user'
 
 /**
  * 用户角色管理API

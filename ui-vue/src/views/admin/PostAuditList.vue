@@ -53,8 +53,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
 import * as postApi from '@/api/post/post.ts'
-import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
-import type { PostVO } from '@/models/vo/post/PostVO'
+import { PostStatusEnum } from '@/models/enum'
+import type { PostVO } from '@/models/vo/post'
 import { dayjs } from 'element-plus'
 
 const router = useRouter()

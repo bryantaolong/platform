@@ -347,11 +347,11 @@ import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as postApi from '@/api/post/post.ts'
 import * as postAlgorithmAdminApi from "@/api/post/postAlgorithmAdmin.ts";
-import type { PostVO } from '@/models/vo/post/PostVO'
-import { PostStatusEnum } from '@/models/enum/PostStatusEnum'
+import type { PostVO } from '@/models/vo/post'
+import { PostStatusEnum } from '@/models/enum'
 import * as postHotRankApi  from '@/api/post/postHotRank.ts'
-import type { PageResult } from '@/models/response/PageResult'
-import type {PostHotRankWeight} from "@/models/entity/algorithm/PostHotRankWeight.ts";
+import type { PageResult } from '@/models/response'
+import type {PostHotRankWeight} from "@/models/entity/algorithm";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const echarts: any = (window as any).echarts

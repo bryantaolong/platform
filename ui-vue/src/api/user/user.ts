@@ -1,11 +1,7 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
-import type { PageResult } from '@/models/response/PageResult.ts'
-import type { SysUser } from '@/models/entity/user/SysUser.ts'
-import type { UserCreateRequest } from '@/models/request/user/UserCreateRequest.ts'
-import type { UserUpdateRequest } from '@/models/request/user/UserUpdateRequest.ts'
-import type { ChangePasswordRequest } from '@/models/request/user/ChangePasswordRequest.ts'
-import type { UserSearchRequest } from '@/models/request/user/UserSearchRequest.ts'
+import type { Result, PageResult } from '@/models/response'
+import type { SysUser } from '@/models/entity/user'
+import type { UserCreateRequest, UserUpdateRequest, ChangePasswordRequest, UserSearchRequest } from '@/models/request/user'
 
 /**
  * 用户管理API

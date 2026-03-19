@@ -112,15 +112,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Promotion, MoreFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import {
-  getMessageHistory,
-  sendMessage as sendMessageApi,
-  recallMessage as recallMessageApi,
-  markAsRead,
-  canChatWith
-} from '@/api/user/userMessage.ts'
+import * as userMessageApi from '@/api/user/userMessage.ts'
 import { getAvatarUrl } from '@/utils/file'
-import type { UserMessageVO } from '@/models/vo/user/UserMessageVO.ts'
+import type { UserMessageVO } from '@/models/vo/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -152,7 +146,7 @@ const canRecall = (msg: UserMessageVO) => {
 
 const checkCanChat = async () => {
   try {
-    const response = await canChatWith(contactId.value)
+    const response = await userMessageApi.canChatWith(contactId.value)
     if (response.code === 200 && !response.data) {
       ElMessage.warning('只能与互相关注的用户发送消息')
       router.push('/messages')
@@ -171,7 +165,7 @@ const loadMessages = async (isLoadMore = false) => {
     loading.value = true
   }
   try {
-    const response = await getMessageHistory(contactId.value, pageNum.value, pageSize.value)
+    const response = await userMessageApi.getMessageHistory(contactId.value, pageNum.value, pageSize.value)
     if (response.code === 200) {
       const newMessages = response.data.rows
       if (isLoadMore) {
@@ -203,7 +197,7 @@ const sendMessage = async () => {
 
   sending.value = true
   try {
-    const response = await sendMessageApi({
+    const response = await userMessageApi.sendMessage({
       receiverId: contactId.value,
       content: content
     })
@@ -228,7 +222,7 @@ const handleRecall = async (messageId: number) => {
       type: 'warning'
     })
 
-    const response = await recallMessageApi(messageId)
+    const response = await userMessageApi.recallMessage(messageId)
     if (response.code === 200) {
       ElMessage.success('撤回成功')
       await loadMessages()
@@ -240,7 +234,7 @@ const handleRecall = async (messageId: number) => {
 
 const markMessagesAsRead = async () => {
   try {
-    await markAsRead(contactId.value)
+    await userMessageApi.markAsRead(contactId.value)
   } catch (error) {
     console.error('标记已读失败', error)
   }

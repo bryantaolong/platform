@@ -1,6 +1,6 @@
 // src/api/llmChat.ts
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
+import type { Result } from '@/models/response'
 
 /**
  * AI 聊天相关 API

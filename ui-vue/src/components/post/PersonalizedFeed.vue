@@ -107,7 +107,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { MagicStick, Refresh, User, View, ChatLineRound, Star, Loading } from '@element-plus/icons-vue'
-import type { PostVO } from '@/models/vo/post/PostVO'
+import type { PostVO } from '@/models/vo/post'
 import {
   getPersonalizedFeed,
   getHotFeedForNewUser,

@@ -211,8 +211,8 @@ import * as postApi from '@/api/post/post.ts'
 import * as userProfileApi from '@/api/user/userProfile.ts'
 import * as userFollowApi from '@/api/user/userFollow.ts'
 import { getAvatarUrl } from '@/utils/file'
-import type { PostVO } from "@/models/vo/post/PostVO";
-import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
+import type { PostVO } from '@/models/vo/post'
+import type { UserProfileVO } from '@/models/vo/user'
 import * as userPostCollectApi from "@/api/post/userPostCollect.ts";
 import CommentForm from '@/components/post/CommentForm.vue'
 import CommentList from '@/components/post/CommentList.vue'

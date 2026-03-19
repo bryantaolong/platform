@@ -1,13 +1,13 @@
 import request from '@/utils/request.ts'
-import type {Post} from '@/models/entity/post/Post.ts'
-import type {PostSummaryVO} from '@/models/vo/post/PostSummaryVO.ts'
-import type {PostVO} from '@/models/vo/post/PostVO.ts'
-import type {PostCreateRequest} from "@/models/request/post/PostCreateRequest.ts";
-import type {PostUpdateRequest} from "@/models/request/post/PostUpdateRequest.ts";
-import type {PostSearchRequest} from "@/models/request/post/PostSearchRequest.ts";
-import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
-import type {Result} from "@/models/response/Result.ts";
-import type {PageResult} from "@/models/response/PageResult.ts";
+import type {Post} from '@/models/entity/post'
+import type {PostSummaryVO} from '@/models/vo/post'
+import type {PostVO} from '@/models/vo/post'
+import type {PostCreateRequest} from "@/models/request/post";
+import type {PostUpdateRequest} from "@/models/request/post";
+import type {PostSearchRequest} from "@/models/request/post";
+import type {PostStatusEnum} from "@/models/enum";
+import type {Result} from "@/models/response";
+import type {PageResult} from "@/models/response";
 
 // Define Post API endpoints
 

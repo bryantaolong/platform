@@ -90,7 +90,7 @@ import { ChatLineRound, ArrowUpBold, Star, Delete } from '@element-plus/icons-vu
 import CommentForm from './CommentForm.vue'
 import * as commentApi from '@/api/post/postComment.ts'
 import { getAvatarUrl } from '@/utils/file'
-import type { CommentVO } from '@/models/vo/post/CommentVO'
+import type { CommentVO } from '@/models/vo/post'
 
 
 interface Props {

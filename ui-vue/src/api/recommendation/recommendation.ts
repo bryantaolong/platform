@@ -1,7 +1,6 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
-import type { PostVO } from '@/models/vo/post/PostVO.ts'
-import type { PostSummaryVO } from '@/models/vo/post/PostSummaryVO.ts'
+import type { Result } from '@/models/response'
+import type { PostVO, PostSummaryVO } from '@/models/vo/post'
 
 /**
  * 获取个性化推荐内容流

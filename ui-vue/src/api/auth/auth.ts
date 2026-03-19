@@ -1,9 +1,9 @@
 import request from '@/utils/request.ts'
-import type {Result} from '@/models/response/Result.ts'
-import type {UserVO} from '@/models/vo/user/UserVO.ts'
-import type {LoginRequest} from '@/models/request/auth/LoginRequest.ts'
-import type {RegisterRequest} from '@/models/request/auth/RegisterRequest.ts'
-import type {ChangePasswordRequest} from '@/models/request/user/ChangePasswordRequest.ts'
+import type {Result} from '@/models/response'
+import type {UserVO} from '@/models/vo/user'
+import type {LoginRequest} from '@/models/request/auth'
+import type {RegisterRequest} from '@/models/request/auth'
+import type {ChangePasswordRequest} from '@/models/request/user'
 
 /**
  * 用户认证API

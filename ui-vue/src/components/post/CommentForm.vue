@@ -40,7 +40,7 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Check, Close } from '@element-plus/icons-vue'
 import * as commentApi from '@/api/post/postComment.ts'
-import type { CommentCreateRequest } from '@/models/request/post/CommentCreateRequest'
+import type { CommentCreateRequest } from '@/models/request/post'
 
 interface Props {
   postId: number

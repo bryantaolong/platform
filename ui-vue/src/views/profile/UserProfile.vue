@@ -144,7 +144,7 @@ import * as userProfileApi from '@/api/user/userProfile.ts'
 import * as userFollowApi from '@/api/user/userFollow.ts'
 import { getAvatarUrl } from '@/utils/file'
 import { getLocationFromIp } from '@/utils/ipLocation'
-import type { UserProfileVO } from '@/models/vo/user/UserProfileVO'
+import type { UserProfileVO } from '@/models/vo/user'
 import UserList from '../../components/user/UserList.vue'
 
 import MyPosts from '@/components/user/MyPosts.vue'

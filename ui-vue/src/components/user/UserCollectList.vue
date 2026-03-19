@@ -76,7 +76,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as userPostCollectApi from '@/api/post/userPostCollect.ts'
 import * as userPostCollectionApi from '@/api/post/userPostCollection.ts'
-import type { UserPostCollection } from "@/models/entity/post/UserPostCollection.ts";
+import type { UserPostCollection } from "@/models/entity/post";
 
 
 /**

@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response/Result.ts'
-import type { Post } from '@/models/entity/post/Post.ts'
+import type { Result } from '@/models/response'
+import type { Post } from '@/models/entity/post'
 
 /**
  * PostAlgorithmAdminController API

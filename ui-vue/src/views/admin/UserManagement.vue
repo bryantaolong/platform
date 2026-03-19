@@ -64,7 +64,7 @@ import * as userApi from '@/api/user/user.ts'
 import * as userExportApi from '@/api/user/userExport.ts'
 import * as userRoleApi from '@/api/user/userRole.ts'
 import * as userProfileApi from '@/api/user/userProfile.ts'
-import type { SysUser } from '@/models/entity/user/SysUser'
+import type { SysUser } from '@/models/entity/user'
 import UserSearchForm from '@/components/admin/UserSearchForm.vue'
 import UserTable from '@/components/admin/UserTable.vue'
 import UserFormDialog from '@/components/admin/UserFormDialog.vue'
@@ -72,8 +72,8 @@ import UserDetailDialog from '@/components/admin/UserDetailDialog.vue'
 
 import type { UserFormData } from '@/components/admin/UserFormDialog.vue'
 import type { UserSearchFormData } from '@/components/admin/UserSearchForm.vue'
-import type { UserCreateRequest } from '@/models/request/user/UserCreateRequest'
-import type { UserRoleOptionVO } from '@/models/vo/user/UserRoleOptionVO.ts'
+import type { UserCreateRequest } from '@/models/request/user'
+import type { UserRoleOptionVO } from '@/models/vo/user'
 
 const loading = ref(false)
 const submitting = ref(false)

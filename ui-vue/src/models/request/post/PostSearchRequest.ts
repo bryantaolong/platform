@@ -1,5 +1,5 @@
 // src/models/request/post/PostSearchRequest.ts
-import type {PostStatusEnum} from "@/models/enum/PostStatusEnum.ts";
+import type {PostStatusEnum} from '@/models/enum';
 
 export interface PostSearchRequest {
     title?: string
