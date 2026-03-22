@@ -1,7 +1,5 @@
 # Platform
 
-[中文说明请见这里 (Chinese README here)](./README_zh.md)
-
 ## Project Overview
 
 This project is a comprehensive platform system based on Spring Boot 3, supporting user management, content publishing, social features, and data export. The platform includes user registration, login, information management, role-based access control, post management, user follow relationships, post collection, and more. The backend uses PostgreSQL as the main database and Redis for caching and distributed scenarios. JWT is used for stateless authentication and role-based authorization.
