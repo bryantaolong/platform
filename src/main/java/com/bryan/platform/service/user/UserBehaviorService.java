@@ -45,7 +45,7 @@ public class UserBehaviorService {
             return;
         }
         try {
-            recordBehavior(userId, postId, BEHAVIOR_VIEW, durationSeconds);
+            this.recordBehavior(userId, postId, BEHAVIOR_VIEW, durationSeconds);
         } catch (Exception e) {
             log.warn("记录浏览行为失败，userId: {}, postId: {}", userId, postId, e);
         }
@@ -63,7 +63,7 @@ public class UserBehaviorService {
             return;
         }
         try {
-            recordBehavior(userId, postId, BEHAVIOR_LIKE, null);
+            this.recordBehavior(userId, postId, BEHAVIOR_LIKE, null);
         } catch (Exception e) {
             log.warn("记录点赞行为失败，userId: {}, postId: {}", userId, postId, e);
         }
@@ -81,7 +81,7 @@ public class UserBehaviorService {
             return;
         }
         try {
-            recordBehavior(userId, postId, BEHAVIOR_COLLECT, null);
+            this.recordBehavior(userId, postId, BEHAVIOR_COLLECT, null);
         } catch (Exception e) {
             log.warn("记录收藏行为失败，userId: {}, postId: {}", userId, postId, e);
         }
@@ -99,7 +99,7 @@ public class UserBehaviorService {
             return;
         }
         try {
-            recordBehavior(userId, postId, BEHAVIOR_COMMENT, null);
+            this.recordBehavior(userId, postId, BEHAVIOR_COMMENT, null);
         } catch (Exception e) {
             log.warn("记录评论行为失败，userId: {}, postId: {}", userId, postId, e);
         }
@@ -117,7 +117,7 @@ public class UserBehaviorService {
             return;
         }
         try {
-            recordBehavior(userId, postId, BEHAVIOR_SHARE, null);
+            this.recordBehavior(userId, postId, BEHAVIOR_SHARE, null);
         } catch (Exception e) {
             log.warn("记录分享行为失败，userId: {}, postId: {}", userId, postId, e);
         }
@@ -150,7 +150,7 @@ public class UserBehaviorService {
         behaviorLog.setVersion(0);
         behaviorLog.setCreatedAt(now);
         behaviorLog.setUpdatedAt(now);
-        behaviorLog.setUpdatedBy(operator != null ? operator.toString() : "system");
-        behaviorLog.setCreatedBy(operator != null ? operator.toString() : "system");
+        behaviorLog.setUpdatedBy(operator.toString());
+        behaviorLog.setCreatedBy(operator.toString());
     }
 }

@@ -3,7 +3,7 @@ package com.bryan.platform.controller.post;
 import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.vo.post.PostVO;
-import com.bryan.platform.service.algorithm.PostHotRankService;
+import com.bryan.platform.service.post.PostHotRankService;
 import com.bryan.platform.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

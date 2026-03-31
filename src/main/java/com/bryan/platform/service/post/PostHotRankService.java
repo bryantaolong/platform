@@ -1,4 +1,4 @@
-package com.bryan.platform.service.algorithm;
+package com.bryan.platform.service.post;
 
 import com.bryan.platform.config.properties.PostHotRankAlgorithmProperties;
 import com.bryan.platform.domain.entity.post.Post;

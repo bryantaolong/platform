@@ -85,4 +85,4 @@ llm:
       minimax:
         key: "${MINIMAX_API_KEY:}" # 可选：MiniMax API Key
         url: "https://api.minimaxi.com/v1/chat/completions"
-        model: "MiniMax-M2.1"
+        model: "MiniMax-M2.7"

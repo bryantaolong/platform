@@ -2,9 +2,11 @@
 .agents/
 .claude/
 .codex/
+.qwen/
 
 CLAUDE.md
 AGENTS.md
+QWEN.md
 
 logs/
 uploads/
