@@ -56,7 +56,7 @@ public class LocalFileService {
         }
 
         // 验证文件内容类型（通过魔数检测）
-        String detectedContentType = detectContentType(file.getInputStream());
+        String detectedContentType = this.detectContentType(file.getInputStream());
         if (detectedContentType == null || !ALLOWED_CONTENT_TYPES.contains(detectedContentType)) {
             throw new IOException("不支持的文件类型，仅允许 PNG、JPEG、GIF、WebP 格式");
         }
@@ -102,12 +102,12 @@ public class LocalFileService {
         }
 
         // 检测PNG
-        if (bytesRead >= 8 && isMagicMatch(header, PNG_MAGIC)) {
+        if (bytesRead >= 8 && this.isMagicMatch(header, PNG_MAGIC)) {
             return "image/png";
         }
 
         // 检测JPEG
-        if (bytesRead >= 2 && isMagicMatch(header, JPEG_MAGIC)) {
+        if (bytesRead >= 2 && this.isMagicMatch(header, JPEG_MAGIC)) {
             return "image/jpeg";
         }
 

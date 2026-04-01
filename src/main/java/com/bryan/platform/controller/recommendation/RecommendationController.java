@@ -3,6 +3,7 @@ package com.bryan.platform.controller.recommendation;
 import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.post.PostSummaryVO;
 import com.bryan.platform.domain.vo.post.PostVO;
+import com.bryan.platform.service.auth.AuthService;
 import com.bryan.platform.service.recommendation.RecommendationService;
 import com.bryan.platform.service.user.UserInterestProfileService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class RecommendationController {
 
     private final RecommendationService recommendationService;
     private final UserInterestProfileService userInterestProfileService;
+    private final AuthService authService;
 
     /**
      * 获取个性化推荐内容流
@@ -44,7 +46,7 @@ public class RecommendationController {
             @RequestParam(defaultValue = "20") int pageSize) {
 
         int validPageSize = Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
-        Long userId = getCurrentUserId();
+        Long userId = authService.getCurrentUserId();
 
         log.info("获取个性化推荐，用户ID: {}, 页码: {}, 每页数量: {}", userId, page, validPageSize);
 
@@ -66,7 +68,7 @@ public class RecommendationController {
             @RequestParam(defaultValue = "20") int pageSize) {
 
         int validPageSize = Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
-        Long userId = getCurrentUserId();
+        Long userId = authService.getCurrentUserId();
 
         log.info("获取个性化推荐（摘要），用户ID: {}, 页码: {}, 每页数量: {}", userId, page, validPageSize);
 
@@ -106,7 +108,7 @@ public class RecommendationController {
     public Result<List<String>> getUserInterests(
             @RequestParam(defaultValue = "10") int limit) {
 
-        Long userId = getCurrentUserId();
+        Long userId = authService.getCurrentUserId();
         int validLimit = Math.min(Math.max(limit, 1), 20);
 
         log.info("获取用户兴趣标签，用户ID: {}, 限制: {}", userId, validLimit);
@@ -124,20 +126,11 @@ public class RecommendationController {
     @PostMapping("/profile/refresh")
     @PreAuthorize("isAuthenticated()")
     public Result<Void> refreshUserProfile() {
-        Long userId = getCurrentUserId();
+        Long userId = authService.getCurrentUserId();
 
         log.info("手动刷新用户画像，用户ID: {}", userId);
 
         userInterestProfileService.updateUserProfile(userId);
         return Result.success(null);
-    }
-
-    /**
-     * 获取当前登录用户ID
-     * 临时实现，后续可通过安全框架获取
-     */
-    private Long getCurrentUserId() {
-        // TODO: 从SecurityContext获取用户ID
-        return 1L;
     }
 }

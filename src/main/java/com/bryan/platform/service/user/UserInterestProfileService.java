@@ -65,15 +65,15 @@ public class UserInterestProfileService {
 
         // 1. 从浏览行为提取兴趣（权重最低）
         List<Long> viewedPosts = userBehaviorLogMapper.selectPostIdsByUserIdAndType(userId, "view");
-        aggregateTags(tagWeights, viewedPosts, VIEW_WEIGHT);
+        this.aggregateTags(tagWeights, viewedPosts, VIEW_WEIGHT);
 
         // 2. 从点赞行为提取兴趣
         List<Long> likedPosts = userPostLikeMapper.selectPostIdsByUserId(userId);
-        aggregateTags(tagWeights, likedPosts, LIKE_WEIGHT);
+        this.aggregateTags(tagWeights, likedPosts, LIKE_WEIGHT);
 
         // 3. 从收藏行为提取兴趣（权重较高）
         List<Long> collectedPosts = userPostCollectMapper.selectPostIdsByUserId(userId);
-        aggregateTags(tagWeights, collectedPosts, COLLECT_WEIGHT);
+        this.aggregateTags(tagWeights, collectedPosts, COLLECT_WEIGHT);
 
         // 4. 清理旧数据
         userProfileInterestMapper.deleteByUserId(userId);

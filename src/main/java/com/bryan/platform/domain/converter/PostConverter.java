@@ -88,7 +88,7 @@ public class PostConverter {
      * @param postVO 博文VO
      * @return 博文摘要VO；若入参为 null 则返回 null
      */
-    public static PostSummaryVO vo2SummaryVO(PostVO postVO) {
+    public static PostSummaryVO vo2SummaryVo(PostVO postVO) {
         if (postVO == null) {
             return null;
         }

@@ -55,9 +55,9 @@ public class RecommendationService {
      */
     public List<PostVO> getPersonalizedFeed(Long userId, int page, int pageSize) {
         // 1. 多路召回
-        List<Post> interestPosts = recallByInterest(userId);
-        List<Post> followingPosts = recallByFollowing(userId);
-        List<Post> hotPosts = recallByHot(RECALL_LIMIT_HOT);
+        List<Post> interestPosts = this.recallByInterest(userId);
+        List<Post> followingPosts = this.recallByFollowing(userId);
+        List<Post> hotPosts = this.recallByHot(RECALL_LIMIT_HOT);
 
         // 2. 合并去重
         Set<Long> seenPostIds = new HashSet<>();
@@ -69,7 +69,7 @@ public class RecommendationService {
                 .forEach(candidates::add);
 
         // 3. 个性化排序
-        List<Post> ranked = rankPosts(candidates, userId);
+        List<Post> ranked = this.rankPosts(candidates, userId);
 
         // 4. 分页返回
         int fromIndex = page * pageSize;
@@ -94,7 +94,7 @@ public class RecommendationService {
      */
     public List<PostSummaryVO> getPersonalizedFeedSummary(Long userId, int page, int pageSize) {
         return getPersonalizedFeed(userId, page, pageSize).stream()
-                .map(PostConverter::vo2SummaryVO)
+                .map(PostConverter::vo2SummaryVo)
                 .collect(Collectors.toList());
     }
 
@@ -106,7 +106,7 @@ public class RecommendationService {
      * @return 热门帖子VO列表
      */
     public List<PostVO> getHotFeedForNewUser(int page, int pageSize) {
-        List<Post> hotPosts = recallByHot(100);
+        List<Post> hotPosts = this.recallByHot(100);
         int fromIndex = page * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, hotPosts.size());
 
@@ -168,7 +168,7 @@ public class RecommendationService {
         return posts.stream()
                 .map(post -> {
                     double hotScore = hotRankService.calculateHotScore(post);
-                    double personalScore = calculatePersonalScore(post, interestSet);
+                    double personalScore = this.calculatePersonalScore(post, interestSet);
                     double finalScore = hotScore * HOT_SCORE_WEIGHT + personalScore * PERSONAL_SCORE_WEIGHT;
                     return new PostScore(post, finalScore);
                 })

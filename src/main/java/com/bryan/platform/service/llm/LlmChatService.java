@@ -90,7 +90,7 @@ public class LlmChatService {
         // 4. 构建请求体
         LlmChatRequest request = new LlmChatRequest();
         request.setModel(config.getModel());
-        request.setMessages(trimContext(context)); // 控制上下文数量
+        request.setMessages(this.trimContext(context)); // 控制上下文数量
 
         // 5. 设置请求头
         HttpHeaders headers = new HttpHeaders();
@@ -112,7 +112,7 @@ public class LlmChatService {
         context.add(assistantMsg);
 
         // 8. 将更新后的上下文保存到Redis
-        saveContextToRedis(contextKey, trimContext(context));
+        saveContextToRedis(contextKey, this.trimContext(context));
 
         return reply;
     }
