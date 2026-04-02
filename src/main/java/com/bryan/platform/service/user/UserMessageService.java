@@ -1,7 +1,6 @@
 package com.bryan.platform.service.user;
 
 import com.bryan.platform.domain.entity.user.SysUser;
-import com.bryan.platform.domain.entity.user.UserFollow;
 import com.bryan.platform.domain.entity.user.UserMessage;
 import com.bryan.platform.domain.entity.user.UserProfile;
 import com.bryan.platform.domain.vo.user.ConversationVO;
@@ -20,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -90,7 +88,7 @@ public class UserMessageService {
         }
 
         // 3. 检查是否互相关注
-        if (!isMutualFollowing(senderId, receiverId)) {
+        if (!this.isMutualFollowing(senderId, receiverId)) {
             throw new BusinessException("只能与互相关注的用户发送消息");
         }
 
@@ -127,11 +125,11 @@ public class UserMessageService {
                 currentUserId, contactId, offset, pageSize);
 
         // 获取相关用户信息
-        Map<Long, SysUser> userMap = getUserMap(currentUserId, contactId);
-        Map<Long, UserProfile> profileMap = getProfileMap(currentUserId, contactId);
+        Map<Long, SysUser> userMap = this.getUserMap(currentUserId, contactId);
+        Map<Long, UserProfile> profileMap = this.getProfileMap(currentUserId, contactId);
 
         return messages.stream()
-                .map(msg -> convertToVO(msg, userMap, profileMap))
+                .map(msg -> this.convertToVO(msg, userMap, profileMap))
                 .collect(Collectors.toList());
     }
 

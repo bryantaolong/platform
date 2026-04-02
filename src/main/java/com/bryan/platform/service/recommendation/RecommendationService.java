@@ -27,10 +27,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class RecommendationService {
 
-    private final UserInterestProfileService userProfileService;
+    private final UserInterestProfileService userInterestProfileService;
     private final UserFollowMapper userFollowMapper;
     private final PostMapper postMapper;
-    private final PostHotRankService hotRankService;
+    private final PostHotRankService postHotRankService;
 
     /**
      * 召回阶段各路返回数量
@@ -93,7 +93,7 @@ public class RecommendationService {
      * @return 推荐帖子摘要VO列表
      */
     public List<PostSummaryVO> getPersonalizedFeedSummary(Long userId, int page, int pageSize) {
-        return getPersonalizedFeed(userId, page, pageSize).stream()
+        return this.getPersonalizedFeed(userId, page, pageSize).stream()
                 .map(PostConverter::vo2SummaryVo)
                 .collect(Collectors.toList());
     }
@@ -124,7 +124,7 @@ public class RecommendationService {
      * 根据用户画像中的兴趣标签，召回包含这些标签的帖子
      */
     private List<Post> recallByInterest(Long userId) {
-        List<String> interests = userProfileService.getUserTopInterests(userId, 5);
+        List<String> interests = userInterestProfileService.getUserTopInterests(userId, 5);
         if (interests.isEmpty()) {
             log.debug("用户 {} 没有兴趣标签数据，跳过兴趣召回", userId);
             return Collections.emptyList();
@@ -162,12 +162,12 @@ public class RecommendationService {
      * 综合考虑热度分数和个性化匹配分数
      */
     private List<Post> rankPosts(List<Post> posts, Long userId) {
-        List<String> userInterests = userProfileService.getUserTopInterests(userId, 10);
+        List<String> userInterests = userInterestProfileService.getUserTopInterests(userId, 10);
         Set<String> interestSet = new HashSet<>(userInterests);
 
         return posts.stream()
                 .map(post -> {
-                    double hotScore = hotRankService.calculateHotScore(post);
+                    double hotScore = postHotRankService.calculateHotScore(post);
                     double personalScore = this.calculatePersonalScore(post, interestSet);
                     double finalScore = hotScore * HOT_SCORE_WEIGHT + personalScore * PERSONAL_SCORE_WEIGHT;
                     return new PostScore(post, finalScore);

@@ -56,7 +56,7 @@ public class LlmChatService {
      * @throws RestClientException 调用远程 API 异常
      */
     public String getChatResponse(Long userId, String userMessage) throws RestClientException {
-        return getChatResponse(userId, userMessage, null);
+        return this.getChatResponse(userId, userMessage, null);
     }
 
     /**
@@ -69,7 +69,7 @@ public class LlmChatService {
      * @throws RestClientException 调用远程 API 异常
      */
     public String getChatResponse(Long userId, String userMessage, String provider) throws RestClientException {
-        String contextKey = getContextKey(userId);
+        String contextKey = this.getContextKey(userId);
 
         // 1. 获取用户历史消息上下文（从Redis获取）
         List<Object> cachedContext = redisListService.range(contextKey, 0, -1);
@@ -112,7 +112,7 @@ public class LlmChatService {
         context.add(assistantMsg);
 
         // 8. 将更新后的上下文保存到Redis
-        saveContextToRedis(contextKey, this.trimContext(context));
+        this.saveContextToRedis(contextKey, this.trimContext(context));
 
         return reply;
     }

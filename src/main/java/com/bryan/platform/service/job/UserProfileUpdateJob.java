@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserProfileUpdateJob {
 
-    private final UserInterestProfileService userProfileService;
+    private final UserInterestProfileService userInterestProfileService;
     private final UserMapper userMapper;
 
     /**
@@ -54,7 +54,7 @@ public class UserProfileUpdateJob {
             );
 
             try {
-                userProfileService.batchUpdateProfiles(batch);
+                userInterestProfileService.batchUpdateProfiles(batch);
                 totalSuccess += batch.size();
             } catch (Exception e) {
                 log.error("批量更新用户画像失败，当前批次: {}", batch, e);
@@ -75,6 +75,6 @@ public class UserProfileUpdateJob {
      */
     public void updateSingleUserProfile(Long userId) {
         log.info("手动更新用户画像，用户ID: {}", userId);
-        userProfileService.updateUserProfile(userId);
+        userInterestProfileService.updateUserProfile(userId);
     }
 }
