@@ -352,7 +352,7 @@ public class PostService {
         }
 
         // 删除博文中引用的所有本地图片
-        deletePostImages(post.getContent());
+        this.deletePostImages(post.getContent());
 
         postMapper.deleteById(postId);
         log.info("帖子ID: {} 删除成功 (逻辑删除)", postId);

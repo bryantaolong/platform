@@ -24,7 +24,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PostHotRankAlgorithmService {
+public class HotRankAlgorithmService {
 
     private static final String ALGO_WEIGHTS_KEY = "algo:weights";
     private final PostHotRankAlgorithmMapper postHotRankAlgorithmMapper;

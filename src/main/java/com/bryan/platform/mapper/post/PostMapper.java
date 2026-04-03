@@ -72,6 +72,13 @@ public interface PostMapper {
                        @Param("tags") String tags,
                        @Param("status") PostStatusEnum status);
 
+    /**
+     * 查询所有未被删除的文章内容（用于图片清理任务）
+     *
+     * @return 所有文章的内容列表
+     */
+    List<String> selectAllPostContents();
+
     int update(Post record);
 
     int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);

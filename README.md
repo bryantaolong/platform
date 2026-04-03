@@ -28,6 +28,7 @@ src/
       domain/         # Entities, request/response objects, VO, enums, converters
       filter/         # JWT authentication filter
       handler/        # Global exception handler, PostgreSQL type handler
+      job/            # Scheduled jobs (user profile update, image cleanup, etc.)
       mapper/         # MyBatis mapper interfaces
       service/        # Service layer
       util/           # Utility classes (JWT, HTTP, etc.)

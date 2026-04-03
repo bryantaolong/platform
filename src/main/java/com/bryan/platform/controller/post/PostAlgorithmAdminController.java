@@ -5,7 +5,7 @@ import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.enums.HttpStatus;
 import com.bryan.platform.domain.response.Result;
 import com.bryan.platform.domain.vo.algorithm.PostHotRankAlgorithmVO;
-import com.bryan.platform.service.algorithm.PostHotRankAlgorithmService;
+import com.bryan.platform.service.algorithm.HotRankAlgorithmService;
 import com.bryan.platform.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostAlgorithmAdminController {
 
-    private final PostHotRankAlgorithmService postHotRankAlgorithmService;
+    private final HotRankAlgorithmService hotRankAlgorithmService;
     private final PostService postService;
 
     /**
@@ -42,7 +42,7 @@ public class PostAlgorithmAdminController {
     @GetMapping("/weights")
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<List<PostHotRankAlgorithmVO>> listWeights() {
-        List<PostHotRankAlgorithm> list = postHotRankAlgorithmService.listAll();
+        List<PostHotRankAlgorithm> list = hotRankAlgorithmService.listAll();
         List<PostHotRankAlgorithmVO> vos = list.stream()
                 .map(a -> PostHotRankAlgorithmVO.builder()
                         .id(a.getId())
@@ -66,7 +66,7 @@ public class PostAlgorithmAdminController {
     public Result<PostHotRankAlgorithmVO> updateWeight(
             @PathVariable Long id,
             @RequestParam BigDecimal metricValue) {
-        PostHotRankAlgorithm updated = postHotRankAlgorithmService.updateWeight(id, metricValue);
+        PostHotRankAlgorithm updated = hotRankAlgorithmService.updateWeight(id, metricValue);
         PostHotRankAlgorithmVO vo = PostHotRankAlgorithmVO.builder()
                 .id(updated.getId())
                 .metricKey(updated.getMetricKey())

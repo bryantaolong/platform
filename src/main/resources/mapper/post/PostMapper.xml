@@ -285,4 +285,13 @@
         ORDER BY (view_count * 0.1 + like_count * 3 + comment_count * 10) DESC
         LIMIT #{limit}
     </select>
+
+    <!-- 查询所有未被删除的文章内容（用于僵尸图片清理任务） -->
+    <select id="selectAllPostContents" resultType="string">
+        SELECT content
+        FROM post
+        WHERE deleted = 0
+          AND content IS NOT NULL
+          AND content != ''
+    </select>
 </mapper>

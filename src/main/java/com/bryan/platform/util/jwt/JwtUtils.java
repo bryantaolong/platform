@@ -1,6 +1,6 @@
 package com.bryan.platform.util.jwt;
 
-import com.bryan.platform.config.properties.JwtProperties;
+import com.bryan.platform.config.properties.auth.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

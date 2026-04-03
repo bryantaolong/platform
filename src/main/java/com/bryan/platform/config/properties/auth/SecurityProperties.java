@@ -1,4 +1,4 @@
-package com.bryan.platform.config.properties;
+package com.bryan.platform.config.properties.auth;
 
 import lombok.Getter;
 import lombok.Setter;

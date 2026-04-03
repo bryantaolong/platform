@@ -1,5 +1,6 @@
-package com.bryan.platform.service.job;
+package com.bryan.platform.job;
 
+import com.bryan.platform.config.properties.job.UserProfileUpdateJobProperties;
 import com.bryan.platform.mapper.user.UserMapper;
 import com.bryan.platform.service.user.UserInterestProfileService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 
 /**
  * 用户画像定时更新任务
- * 每天凌晨2点更新所有活跃用户的画像
+ * 定期更新所有活跃用户的兴趣画像
  *
  * @author Bryan Long
  */
@@ -22,17 +23,23 @@ public class UserProfileUpdateJob {
 
     private final UserInterestProfileService userInterestProfileService;
     private final UserMapper userMapper;
+    private final UserProfileUpdateJobProperties properties;
 
     /**
      * 批量更新所有活跃用户画像
-     * 每天凌晨2点执行
+     * 执行时间和参数可通过配置调整
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "${job.user-profile-update.cron}")
     public void updateAllUserProfiles() {
+        if (!properties.isEnabled()) {
+            log.info("用户画像更新任务已禁用，跳过执行");
+            return;
+        }
+
         log.info("开始批量更新用户画像任务");
 
-        // 1. 获取所有活跃用户ID（最近30天有登录行为的用户）
-        List<Long> activeUserIds = userMapper.selectActiveUserIds(30);
+        // 1. 获取所有活跃用户ID（最近N天有登录行为的用户）
+        List<Long> activeUserIds = userMapper.selectActiveUserIds(properties.getActiveUserDays());
 
         if (activeUserIds.isEmpty()) {
             log.info("没有活跃用户需要更新画像");
@@ -41,8 +48,8 @@ public class UserProfileUpdateJob {
 
         log.info("开始更新 {} 个活跃用户的画像", activeUserIds.size());
 
-        // 2. 分批处理，每批100人，避免内存溢出
-        int batchSize = 100;
+        // 2. 分批处理，避免内存溢出
+        int batchSize = properties.getBatchSize();
         int totalProcessed = 0;
         int totalSuccess = 0;
         int totalFailed = 0;

@@ -86,3 +86,16 @@ llm:
         key: "${MINIMAX_API_KEY:}" # 可选：MiniMax API Key
         url: "https://api.minimaxi.com/v1/chat/completions"
         model: "MiniMax-M2.7"
+
+# 任务配置
+job:
+  user-profile-update:
+    cron: "0 0 2 * * ?"          # 每天凌晨2点执行
+    enabled: true                # 是否启用
+    active-user-days: 30         # 活跃用户时间窗口（天）
+    batch-size: 100              # 批量处理大小
+  orphan-image-cleanup:
+    cron: "0 0 3 * * ?"          # 每天凌晨3点执行
+    enabled: true                # 是否启用
+    orphan-file-age-days: 7      # 清理超过7天未引用的图片
+    upload-dir: ${file.upload-dir}/post-images  # 图片上传目录

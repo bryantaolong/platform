@@ -1,6 +1,6 @@
 package com.bryan.platform.service.auth;
 
-import com.bryan.platform.config.properties.SecurityProperties;
+import com.bryan.platform.config.properties.auth.SecurityProperties;
 import com.bryan.platform.domain.entity.user.SysUser;
 import com.bryan.platform.domain.entity.user.UserRole;
 import com.bryan.platform.domain.enums.user.UserStatusEnum;
