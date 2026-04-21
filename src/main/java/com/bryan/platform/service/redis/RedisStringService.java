@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Set;
 
 /**
  * Redis 字符串 (String) 类型操作工具类。
@@ -159,6 +160,15 @@ public class RedisStringService {
         } catch (Exception e) {
             log.error("Redis decrement 操作失败，key: {}, delta: {}", key, delta, e);
             return null;
+        }
+    }
+
+    public Set<String> keys(String pattern) {
+        try {
+            return stringRedisTemplate.keys(pattern);
+        } catch (Exception e) {
+            log.error("Redis keys 操作失败，pattern: {}", pattern, e);
+            return Set.of();
         }
     }
 }

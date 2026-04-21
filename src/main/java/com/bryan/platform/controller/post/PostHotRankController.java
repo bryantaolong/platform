@@ -1,10 +1,8 @@
 package com.bryan.platform.controller.post;
 
 import com.bryan.platform.domain.response.Result;
-import com.bryan.platform.domain.entity.post.Post;
 import com.bryan.platform.domain.vo.post.PostVO;
 import com.bryan.platform.service.post.PostHotRankService;
-import com.bryan.platform.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -28,13 +25,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostHotRankController {
 
-    private static final int DEFAULT_LIMIT = 10;
-    private static final int DEFAULT_HOURS = 168;
     private static final int MAX_LIMIT = 100;
 
     private final PostHotRankService hotRankService;
-
-    private final PostService postService;
 
     /**
      * 获取热门帖子排行榜
@@ -46,34 +39,7 @@ public class PostHotRankController {
     @PreAuthorize("permitAll()")
     public Result<List<PostVO>> listHotPosts(@RequestParam(defaultValue = "10") int limit) {
         int validLimit = Math.min(Math.max(limit, 1), MAX_LIMIT);
-        List<Post> posts = postService.listRecentPosts(validLimit * 10, DEFAULT_HOURS);
-
-        List<PostVO> hotPosts = posts.stream()
-                .map(p -> {
-                    PostVO vo = PostVO.builder()
-                            .id(p.getId())
-                            .userId(p.getUserId())
-                            .title(p.getTitle())
-                            .content(p.getContent())
-                            .status(p.getStatus())
-                            .categoryId(p.getCategoryId())
-                            .tags(p.getTags())
-                            .commentAreaStatus(p.getCommentAreaStatus())
-                            .viewCount(p.getViewCount())
-                            .likeCount(p.getLikeCount())
-                            .commentCount(p.getCommentCount())
-                            .collectCount(p.getCollectCount())
-                            .shareCount(p.getShareCount())
-                            .createdAt(p.getCreatedAt())
-                            .updatedAt(p.getUpdatedAt())
-                            .hotScore(hotRankService.calculateHotScore(p))
-                            .build();
-                    return vo;
-                })
-                .sorted(Comparator.comparingDouble(PostVO::getHotScore).reversed())
-                .limit(validLimit)
-                .toList();
-
+        List<PostVO> hotPosts = hotRankService.getHotPosts(validLimit);
         log.info("热门帖子查询完成，返回数量: {}", hotPosts.size());
         return Result.success(hotPosts);
     }
