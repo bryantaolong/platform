@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PostHotRankCacheWarmUpRunner implements ApplicationRunner {
+public class PostHotRankCacheWarmUpLoader implements ApplicationRunner {
 
     private final PostHotRankService postHotRankService;
 

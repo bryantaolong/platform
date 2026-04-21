@@ -89,7 +89,7 @@ public class PostHotRankService {
     public void warmUp(List<Integer> limits) {
         for (Integer limit : limits) {
             log.info("开始预热热点帖子缓存，limit: {}", limit);
-            getHotPosts(limit);
+            this.getHotPosts(limit);
             log.info("热点帖子缓存预热完成，limit: {}", limit);
         }
     }
