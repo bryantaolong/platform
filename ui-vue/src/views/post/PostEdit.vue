@@ -109,9 +109,11 @@ import { ElMessage, ElInput } from 'element-plus'
 import * as postApi from '@/api/post/post.ts'
 import type { Post } from '@/models/entity/post'
 import type { PostUpdateRequest } from '@/models/request/post'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const formRef = ref()
 const loading = ref(false)
 const submitting = ref(false)
@@ -119,6 +121,14 @@ const uploadingImage = ref(false)
 const postId = Number(route.params.id)
 const imageInputRef = ref<HTMLInputElement>()
 const contentTextareaRef = ref<InstanceType<typeof ElInput>>()
+
+const canManagePost = (userId?: number) => {
+  if (!userId || !userStore.userInfo) {
+    return false
+  }
+
+  return userStore.userInfo.id === userId || userStore.isAdmin || userStore.isModerator
+}
 
 /* Computed property for rendered markdown content */
 const renderedContent = computed(() => {
@@ -153,6 +163,11 @@ const loadPost = async () => {
     const response = await postApi.getPostById(postId)
     if (response.code === 200) {
       const data = response.data
+      if (!canManagePost(data.userId)) {
+        ElMessage.error('您没有权限编辑这篇文章')
+        await router.replace(`/post/${postId}`)
+        return
+      }
       postForm.id = data.id
       postForm.title = data.title
       postForm.content = data.content

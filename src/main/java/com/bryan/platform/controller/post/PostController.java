@@ -304,7 +304,7 @@ public class PostController {
      * @return 更新后的博文实体或错误提示
      */
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@postSecurityService.isOwner(#id) or hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Post> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
         Post post = Post.builder()
                 .id(id)
@@ -354,7 +354,7 @@ public class PostController {
      * @return 是否删除成功
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@postSecurityService.isOwner(#id) or hasAnyRole('ADMIN', 'MODERATOR')")
     public Result<Boolean> deletePost(@PathVariable Long id) {
         boolean deleted = postService.deletePost(id);
         if (deleted) {

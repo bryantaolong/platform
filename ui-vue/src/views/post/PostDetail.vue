@@ -240,6 +240,15 @@ const summaryDialogRef = ref<InstanceType<typeof LlmSummaryPostDialog> | null>(n
 
 const isAuthenticated = computed(() => userStore.isAuthenticated)
 
+const checkCanManagePost = (postData: PostVO | null) => {
+  if (!postData || !isAuthenticated.value || !userStore.userInfo) {
+    return false
+  }
+
+  const isOwner = postData.userId === userStore.userInfo.id
+  return isOwner || userStore.isAdmin || userStore.isModerator
+}
+
 // Computed property for rendered markdown content
 const renderedContent = computed(() => {
   return marked.parse(post.value?.content || '')
@@ -272,12 +281,8 @@ const loadPost = async () => {
         await checkLikeStatus()
       }
 
-      // Check if current user can edit this post (only post owner)
-      if (isAuthenticated.value && userStore.userInfo) {
-        canEdit.value = post.value.author === userStore.userInfo.username
-      } else {
-        canEdit.value = false
-      }
+      // Check if current user can manage this post (owner or backend roles)
+      canEdit.value = checkCanManagePost(post.value)
     } else {
       ElMessage.error(response.message || '获取文章失败')
     }
@@ -311,6 +316,11 @@ const loadAuthorInfo = async (userId: number) => {
 // Check if current user is following the author
 const checkFollowingStatus = async (userId: number) => {
   if (!isAuthenticated.value) {
+    showFollowButton.value = false
+    return
+  }
+
+  if (userStore.userInfo?.id === userId) {
     showFollowButton.value = false
     return
   }
