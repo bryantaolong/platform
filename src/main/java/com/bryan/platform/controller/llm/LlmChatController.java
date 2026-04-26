@@ -85,7 +85,7 @@ public class LlmChatController {
         }
 
         // 3. 调用 AI 服务生成摘要（支持按提供商切换模型）
-        String summary = llmChatService.generatePostSummary(title, content, "moonshot");
+        String summary = llmChatService.generatePostSummary(title, content, provider);
 
         // 4. 封装结果返回
         return Collections.singletonMap("summary", summary);
