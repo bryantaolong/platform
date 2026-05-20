@@ -531,9 +531,9 @@ const loadRecommendations = async () => {
 
 | 文件 | 职责 |
 |------|------|
-| [`recommendation.ts`](../ui-vue/src/api/algorithm/recommendation.ts) | 推荐API客户端 |
-| [`PersonalizedFeed.vue`](../ui-vue/src/components/post/PersonalizedFeed.vue) | 个性化Feed组件 |
-| [`RecommendFeed.vue`](../ui-vue/src/views/post/RecommendFeed.vue) | 推荐页面 |
+| [`recommendation.ts`](../frontend/src/api/algorithm/recommendation.ts) | 推荐API客户端 |
+| [`PersonalizedFeed.vue`](../frontend/src/components/post/PersonalizedFeed.vue) | 个性化Feed组件 |
+| [`RecommendFeed.vue`](../frontend/src/views/post/RecommendFeed.vue) | 推荐页面 |
 
 ### 数据库 (SQL)
 

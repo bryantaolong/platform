@@ -75,13 +75,13 @@ llm:
     default-provider: deepseek
     providers:
       deepseek:
-        key: "${DEEPSEEK_API_KEY}" # Set your own api key as environment variable
+        key: "${DEEPSEEK_API_KEY}" # 可选：DeepSeek API Key
         url: "https://api.deepseek.com/chat/completions"
-        model: "deepseek-chat"
+        model: "deepseek-v4-flash"
       moonshot:
         key: "${MOONSHOT_API_KEY:}" # 可选：Moonshot API Key
         url: "https://api.moonshot.cn/v1/chat/completions"
-        model: "kimi-k2.5"
+        model: "kimi-k2.6"
       minimax:
         key: "${MINIMAX_API_KEY:}" # 可选：MiniMax API Key
         url: "https://api.minimaxi.com/v1/chat/completions"

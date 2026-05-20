@@ -1,0 +1,70 @@
+server:
+  port: 8080
+  mode: debug # debug | release | test
+
+database:
+  host: localhost
+  port: 5432
+  user: platform_user
+  password: "123456"
+  dbname: platform
+  sslmode: disable
+  max_open_conns: 20
+  max_idle_conns: 10
+  conn_max_lifetime_minutes: 30
+
+redis:
+  host: localhost
+  port: 6379
+  password: "123456"
+  db: 0
+
+jwt:
+  secret_key: "BryanTaoLong!@#SuperSecretKeyJwtToken27926"
+  expiration_ms: 86400000 # 24 hours
+  token_prefix: "Bearer "
+
+security:
+  login_fail_limit: 5
+  login_fail_reset_minutes: 30
+  account_lock_duration_minutes: 30
+
+cors:
+  allowed_origins: "http://localhost:5173"
+
+file:
+  upload_dir: "./uploads"
+
+async:
+  core_pool_size: 4
+  max_pool_size: 10
+  queue_capacity: 100
+
+llm:
+  api:
+    default_provider: deepseek
+    providers:
+      deepseek:
+        key: ""
+        url: "https://api.deepseek.com/chat/completions"
+        model: "deepseek-v4-flash"
+      moonshot:
+        key: ""
+        url: "https://api.moonshot.cn/v1/chat/completions"
+        model: "kimi-k2.6"
+      minimax:
+        key: ""
+        url: "https://api.minimaxi.com/v1/chat/completions"
+        model: "MiniMax-M2.7"
+
+job:
+  user_profile_update:
+    cron: "0 0 2 * * *"      # Every day at 2 AM
+    enabled: true
+    active_user_days: 30
+    batch_size: 100
+  orphan_image_cleanup:
+    cron: "0 0 3 * * *"      # Every day at 3 AM
+    enabled: true
+    orphan_file_age_days: 7
+    upload_dir: "./uploads/post-images"
