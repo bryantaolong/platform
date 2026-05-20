@@ -1,8 +1,10 @@
-# 平台系统
+# 平台系统 (Java)
 
 ## 项目简介
 
 本项目是基于 Spring Boot 3 的综合性平台系统，支持用户管理、内容发布、社交功能和数据导出等功能。平台包含用户注册、登录、信息管理、基于角色的权限控制、文章管理、用户关注关系、文章收藏等功能。后端采用 PostgreSQL 作为主数据库，Redis 用于缓存和分布式场景，支持 JWT 无状态认证和基于角色的权限控制。
+
+> **注意：** 这是 **Java** 实现分支。Go 实现请参见 [`main`](../main) 分支。
 
 ## 技术栈
 
@@ -20,38 +22,46 @@
 ## 项目结构
 
 ```
-src/
-  main/
-    java/com/bryan/platform/
-      config/         # 配置类（安全、Redis、MyBatis-Plus等）
-      controller/     # RESTful 控制器（认证、文章、用户模块）
-      domain/         # 实体、请求/响应对象、VO、枚举、转换器
-      filter/         # JWT 认证过滤器
-      handler/        # 全局异常处理、PostgreSQL 类型处理器
-      job/            # 定时任务（用户画像更新、图片清理等）
-      mapper/         # MyBatis mapper 接口
-      service/        # 业务服务层
-      util/           # 工具类（JWT、HTTP等）
-    resources/
-      application.yaml
-      application-dev.yaml
-      mapper/         # MyBatis Mapper XML 文件
-  test/
-    java/com/bryan/platform/
-      PlatformApplicationTests.java
+backend/
+├── .mvn/                  # Maven Wrapper
+├── src/
+│   ├── main/
+│   │   ├── java/com/bryan/platform/
+│   │   │   ├── config/         # 配置类（安全、Redis、MyBatis等）
+│   │   │   ├── controller/     # RESTful 控制器（认证、文章、用户模块）
+│   │   │   ├── domain/         # 实体、请求/响应对象、VO、枚举、转换器
+│   │   │   ├── filter/         # JWT 认证过滤器
+│   │   │   ├── handler/        # 全局异常处理、PostgreSQL 类型处理器
+│   │   │   ├── job/            # 定时任务（用户画像更新、图片清理等）
+│   │   │   ├── mapper/         # MyBatis mapper 接口
+│   │   │   ├── service/        # 业务服务层
+│   │   │   └── util/           # 工具类（JWT、HTTP等）
+│   │   └── resources/
+│   │       ├── application.yaml
+│   │       ├── application-dev.yaml
+│   │       └── mapper/         # MyBatis Mapper XML 文件
+│   └── test/
+│       └── java/com/bryan/platform/
+├── logs/                  # 应用日志
+├── uploads/               # 文件上传目录（头像、文章图片）
+├── mvnw / mvnw.cmd        # Maven Wrapper 脚本
+└── pom.xml                # Maven 项目配置
+frontend/                  # Vue 3 前端
+sql/                       # 数据库建表脚本
+docs/                      # 文档
 ```
 
 ## 环境要求
 
 * JDK 17+
-* Maven 3.9.9+
+* Maven 3.9.x
 * PostgreSQL 17.x
 * Redis 6.x 或更高
 
 ## 配置说明
 
-* 数据库连接、Redis 配置请在 `src/main/resources/application-dev.yaml` 中修改。
-* 日志、MyBatis 等通用配置见 `src/main/resources/application.yaml`。
+* 数据库连接、Redis 配置请在 `backend/src/main/resources/application-dev.yaml` 中修改。
+* 日志、MyBatis 等通用配置见 `backend/src/main/resources/application.yaml`。
 * 数据库建表脚本见 [`sql/create_table.sql`](sql/create_table.sql) 及相关子目录。
 
 ## 启动方式
@@ -60,17 +70,25 @@ src/
 
    ```sh
    psql -U postgres -d postgres -f sql/create_table.sql
+   psql -U postgres -d postgres -f sql/post/post.sql
+   psql -U postgres -d postgres -f sql/post/post_algorithm.sql
+   psql -U postgres -d postgres -f sql/post/post_comment.sql
+   # ... 依次执行 sql/ 子目录中的其余 SQL 文件
    ```
+
 2. 启动 Redis 服务。
-3. 使用 Maven 构建并运行项目：
+
+3. 进入 `backend/` 目录，使用 Maven 构建并运行：
 
    ```sh
+   cd backend
    ./mvnw spring-boot:run
    ```
 
    或直接运行打包后的 JAR：
 
    ```sh
+   cd backend
    mvn clean package
    java -jar target/platform-0.0.1-SNAPSHOT.jar
    ```
@@ -96,8 +114,8 @@ src/
 
 ## 其他说明
 
-* JWT 密钥建议在生产环境通过配置文件注入，避免硬编码。
-* 全局异常处理类见 [`GlobalExceptionHandler`](src/main/java/com/bryan/platform/handler/GlobalExceptionHandler.java)。
+* JWT 密钥建议在生产环境通过环境变量注入，避免硬编码。
+* 全局异常处理类见 [`GlobalExceptionHandler`](backend/src/main/java/com/bryan/platform/handler/GlobalExceptionHandler.java)。
 * 逻辑删除字段为 `deleted`：0 表示未删除，1 表示已删除。
 
 ## License

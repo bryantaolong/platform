@@ -1,8 +1,10 @@
-# Platform
+# Platform (Java)
 
 ## Project Overview
 
 This project is a comprehensive platform system based on Spring Boot 3, supporting user management, content publishing, social features, and data export. The platform includes user registration, login, information management, role-based access control, post management, user follow relationships, post collection, and more. The backend uses PostgreSQL as the main database and Redis for caching and distributed scenarios. JWT is used for stateless authentication and role-based authorization.
+
+> **Note:** This is the **Java** implementation branch. For the Go implementation, see the [`main`](../main) branch.
 
 ## Tech Stack
 
@@ -20,57 +22,73 @@ This project is a comprehensive platform system based on Spring Boot 3, supporti
 ## Project Structure
 
 ```
-src/
-  main/
-    java/com/bryan/platform/
-      config/         # Configuration classes (security, Redis, MyBatis-Plus, etc.)
-      controller/     # RESTful controllers (auth, post, user modules)
-      domain/         # Entities, request/response objects, VO, enums, converters
-      filter/         # JWT authentication filter
-      handler/        # Global exception handler, PostgreSQL type handler
-      job/            # Scheduled jobs (user profile update, image cleanup, etc.)
-      mapper/         # MyBatis mapper interfaces
-      service/        # Service layer
-      util/           # Utility classes (JWT, HTTP, etc.)
-    resources/
-      application.yaml
-      application-dev.yaml
-      mapper/         # MyBatis mapper xmls
-  test/
-    java/com/bryan/platform/
-      PlatformApplicationTests.java
+backend/
+├── .mvn/                  # Maven Wrapper
+├── src/
+│   ├── main/
+│   │   ├── java/com/bryan/platform/
+│   │   │   ├── config/         # Configuration classes (security, Redis, MyBatis, etc.)
+│   │   │   ├── controller/     # RESTful controllers (auth, post, user modules)
+│   │   │   ├── domain/         # Entities, request/response objects, VO, enums, converters
+│   │   │   ├── filter/         # JWT authentication filter
+│   │   │   ├── handler/        # Global exception handler, PostgreSQL type handler
+│   │   │   ├── job/            # Scheduled jobs (user profile update, image cleanup, etc.)
+│   │   │   ├── mapper/         # MyBatis mapper interfaces
+│   │   │   ├── service/        # Service layer
+│   │   │   └── util/           # Utility classes (JWT, HTTP, etc.)
+│   │   └── resources/
+│   │       ├── application.yaml
+│   │       ├── application-dev.yaml
+│   │       └── mapper/         # MyBatis mapper XMLs
+│   └── test/
+│       └── java/com/bryan/platform/
+├── logs/                  # Application logs
+├── uploads/               # File uploads (avatars, post-images)
+├── mvnw / mvnw.cmd        # Maven Wrapper scripts
+└── pom.xml                # Maven project config
+frontend/                  # Vue 3 frontend
+sql/                       # Database schema scripts
+docs/                      # Documentation
 ```
 
 ## Requirements
 
 * JDK 17+
-* Maven 3.9.9+
+* Maven 3.9.x
 * PostgreSQL 17.x
 * Redis 6.x or above
 
 ## Configuration
 
-* Update database and Redis settings in `src/main/resources/application-dev.yaml`.
-* General settings (logging, MyBatis, etc.) are in `src/main/resources/application.yaml`.
+* Update database and Redis settings in `backend/src/main/resources/application-dev.yaml`.
+* General settings (logging, MyBatis, etc.) are in `backend/src/main/resources/application.yaml`.
 * Database schema scripts are in [`sql/create_table.sql`](sql/create_table.sql) and related subdirectories.
 
 ## Getting Started
 
-1. Initialize the PostgreSQL database by running the schema script:
+1. Initialize the PostgreSQL database by running the schema scripts:
 
    ```sh
    psql -U postgres -d postgres -f sql/create_table.sql
+   psql -U postgres -d postgres -f sql/post/post.sql
+   psql -U postgres -d postgres -f sql/post/post_algorithm.sql
+   psql -U postgres -d postgres -f sql/post/post_comment.sql
+   # ... run remaining SQL files in sql/ subdirectories
    ```
+
 2. Start the Redis service.
-3. Build and run the project with Maven:
+
+3. Build and run from the `backend/` directory:
 
    ```sh
+   cd backend
    ./mvnw spring-boot:run
    ```
 
-   Or run the packaged jar:
+   Or run the packaged JAR:
 
    ```sh
+   cd backend
    mvn clean package
    java -jar target/platform-0.0.1-SNAPSHOT.jar
    ```
@@ -96,8 +114,8 @@ src/
 
 ## Notes
 
-* For production, inject JWT secret via configuration file instead of hardcoding.
-* Global exception handling is in [`GlobalExceptionHandler`](src/main/java/com/bryan/platform/handler/GlobalExceptionHandler.java).
+* For production, inject JWT secret via environment variables instead of hardcoding.
+* Global exception handling is in [`GlobalExceptionHandler`](backend/src/main/java/com/bryan/platform/handler/GlobalExceptionHandler.java).
 * Logical delete field is `deleted`: 0 means active, 1 means deleted.
 
 ## License
