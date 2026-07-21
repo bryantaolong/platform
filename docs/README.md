@@ -2,12 +2,13 @@
 
 [![Java 17](https://img.shields.io/badge/Java-17-blue.svg)](https://openjdk.org/projects/jdk/17/)
 [![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.0-green.svg)](https://spring.io/projects/spring-boot)
-[![Vue 3](https://img.shields.io/badge/Vue-3.0-brightgreen.svg)](https://vuejs.org/)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB.svg)](https://react.dev/)
+[![Arco Design](https://img.shields.io/badge/Arco%20Design-2.x-blue.svg)](https://arco.design/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)](https://www.postgresql.org/)
 
 ## 项目简介
 
-Platform 是一个全栈内容社交平台，采用 Spring Boot 3 后端与 Vue 3 前端技术栈。平台支持用户管理、内容发布、社交互动、智能推荐和 AI 集成等功能。
+Platform 是一个全栈内容社交平台，采用 Spring Boot 3 后端与 React 18 前端技术栈。平台支持用户管理、内容发布、社交互动、智能推荐和 AI 集成等功能。
 
 ### 核心功能
 
@@ -38,12 +39,12 @@ Platform 是一个全栈内容社交平台，采用 Spring Boot 3 后端与 Vue 
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| Vue | 3.4+ | 前端框架 |
+| React | 18.x | 前端框架 |
 | TypeScript | 5.x | 类型系统 |
-| Vite | 5.x | 构建工具 |
-| Element Plus | 2.x | UI 组件库 |
-| Pinia | 2.x | 状态管理 |
-| Vue Router | 4.x | 路由管理 |
+| Vite | 7.x | 构建工具 |
+| Arco Design | 2.x | UI 组件库 |
+| Zustand | 5.x | 状态管理 |
+| React Router | 6.x | 路由管理 |
 | Axios | 1.x | HTTP 客户端 |
 
 ## 快速开始
@@ -88,7 +89,7 @@ mvn spring-boot:run
 ### 4. 启动前端
 
 ```bash
-cd ui-vue
+cd frontend
 npm install
 npm run dev
 ```
@@ -128,14 +129,27 @@ platform/
 │   ├── application.yaml            # 主配置
 │   └── application-dev.yaml        # 开发环境配置
 │
-├── ui-vue/                         # 前端源码
+├── frontend/                       # 前端源码
 │   ├── src/
 │   │   ├── api/                    # API 接口
-│   │   ├── views/                  # 页面组件
+│   │   ├── pages/                  # 页面组件
+│   │   │   ├── auth/               # 登录/注册
+│   │   │   ├── post/               # 文章相关页面
+│   │   │   ├── message/            # 消息相关页面
+│   │   │   ├── profile/            # 个人中心页面
+│   │   │   └── admin/              # 管理后台页面
 │   │   ├── components/             # 通用组件
-│   │   ├── stores/                 # Pinia 状态管理
-│   │   ├── router/                 # 路由配置
-│   │   └── models/                 # TypeScript 类型
+│   │   │   ├── post/               # 文章组件
+│   │   │   ├── llm/                # AI 对话组件
+│   │   │   ├── user/               # 用户组件
+│   │   │   ├── profile/            # 个人中心组件
+│   │   │   └── admin/              # 管理后台组件
+│   │   ├── layouts/                # 布局组件
+│   │   ├── stores/                 # Zustand 状态管理
+│   │   ├── router/                 # 路由守卫
+│   │   ├── models/                 # TypeScript 类型
+│   │   ├── utils/                  # 工具函数
+│   │   └── styles/                 # 全局样式
 │   └── package.json
 │
 ├── sql/                            # 数据库脚本

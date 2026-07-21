@@ -46,7 +46,7 @@ backend/
 ├── uploads/               # 文件上传目录（头像、文章图片）
 ├── mvnw / mvnw.cmd        # Maven Wrapper 脚本
 └── pom.xml                # Maven 项目配置
-frontend/                  # Vue 3 前端
+frontend/                  # React 18 前端 (TypeScript + Arco Design)
 sql/                       # 数据库建表脚本
 docs/                      # 文档
 ```

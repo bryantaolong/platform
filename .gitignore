@@ -1,8 +1,2 @@
-### Custom ###
-.agents/
-AGENTS.md
-
-*.exe
-
 ### VS Code ###
 .vscode/

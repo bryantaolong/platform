@@ -46,7 +46,7 @@ backend/
 ├── uploads/               # File uploads (avatars, post-images)
 ├── mvnw / mvnw.cmd        # Maven Wrapper scripts
 └── pom.xml                # Maven project config
-frontend/                  # Vue 3 frontend
+frontend/                  # React 18 frontend (TypeScript + Arco Design)
 sql/                       # Database schema scripts
 docs/                      # Documentation
 ```

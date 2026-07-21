@@ -1,0 +1,116 @@
+.personalized-feed-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.interest-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.interest-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-item {
+  padding: 16px;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feed-item:hover {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+}
+
+.feed-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.feed-preview {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.5;
+}
+
+.feed-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 8px;
+}
+
+.feed-author {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.feed-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.loading-icon {
+  animation: rotating 1s linear infinite;
+}
+
+@keyframes rotating {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

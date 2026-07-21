@@ -1,0 +1,90 @@
+.admin-layout {
+  height: 100vh;
+}
+
+.layout-container {
+  height: 100%;
+}
+
+.layout-aside {
+  background-color: #304156;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.aside-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  border-bottom: 1px solid #2a3a4a;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.aside-menu {
+  background-color: #304156;
+}
+
+.aside-menu :deep(.arco-menu-item) {
+  color: #bfcbd9;
+}
+
+.aside-menu :deep(.arco-menu-item:hover) {
+  background-color: #263445;
+  color: #fff;
+}
+
+.aside-menu :deep(.arco-menu-item.arco-menu-selected) {
+  background-color: #263445;
+  color: #409eff;
+}
+
+.layout-main {
+  background-color: #f0f2f5;
+}
+
+.layout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  height: 60px;
+}
+
+.header-right .user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.header-right .user-info:hover {
+  background-color: #f5f7fa;
+}
+
+.username {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.layout-content {
+  padding: 24px;
+  overflow: auto;
+}
