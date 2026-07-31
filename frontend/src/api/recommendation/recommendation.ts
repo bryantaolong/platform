@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response'
+import type { ApiResponse } from '@/models/response'
 import type { PostVO, PostSummaryVO } from '@/models/vo/post'
 
 /**
@@ -10,7 +10,7 @@ import type { PostVO, PostSummaryVO } from '@/models/vo/post'
 export function getPersonalizedFeed(
   page: number = 0,
   pageSize: number = 20
-): Promise<Result<PostVO[]>> {
+): Promise<ApiResponse<PostVO[]>> {
   return request({
     url: '/api/recommendation/feed',
     method: 'GET',
@@ -26,7 +26,7 @@ export function getPersonalizedFeed(
 export function getPersonalizedFeedSummary(
   page: number = 0,
   pageSize: number = 20
-): Promise<Result<PostSummaryVO[]>> {
+): Promise<ApiResponse<PostSummaryVO[]>> {
   return request({
     url: '/api/recommendation/feed/summary',
     method: 'GET',
@@ -42,7 +42,7 @@ export function getPersonalizedFeedSummary(
 export function getHotFeedForNewUser(
   page: number = 0,
   pageSize: number = 20
-): Promise<Result<PostVO[]>> {
+): Promise<ApiResponse<PostVO[]>> {
   return request({
     url: '/api/recommendation/hot/new-user',
     method: 'GET',
@@ -56,7 +56,7 @@ export function getHotFeedForNewUser(
  */
 export function getUserInterests(
   limit: number = 10
-): Promise<Result<string[]>> {
+): Promise<ApiResponse<string[]>> {
   return request({
     url: '/api/recommendation/interests',
     method: 'GET',
@@ -67,7 +67,7 @@ export function getUserInterests(
 /**
  * 手动刷新用户画像
  */
-export function refreshUserProfile(): Promise<Result<null>> {
+export function refreshUserProfile(): Promise<ApiResponse<null>> {
   return request({
     url: '/api/recommendation/profile/refresh',
     method: 'POST'

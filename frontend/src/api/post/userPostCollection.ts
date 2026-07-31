@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response'
+import type { ApiResponse } from '@/models/response'
 import type { UserPostCollection } from "@/models/entity/post";
 
 /**
@@ -11,7 +11,7 @@ import type { UserPostCollection } from "@/models/entity/post";
 /**
  * 创建收藏夹
  */
-export function createCollection(folderName: string): Promise<Result<UserPostCollection>> {
+export function createCollection(folderName: string): Promise<ApiResponse<UserPostCollection>> {
   return request({
     url: '/api/user/post-collections',
     method: 'POST',
@@ -22,7 +22,7 @@ export function createCollection(folderName: string): Promise<Result<UserPostCol
 /**
  * 获取当前登录用户的收藏夹列表
  */
-export function listCollections(): Promise<Result<UserPostCollection[]>> {
+export function listCollections(): Promise<ApiResponse<UserPostCollection[]>> {
   return request({
     url: '/api/user/post-collections',
     method: 'GET'
@@ -32,7 +32,7 @@ export function listCollections(): Promise<Result<UserPostCollection[]>> {
 /**
  * 获取指定用户的收藏夹列表（用于在用户主页查看其收藏夹）
  */
-export function listCollectionsByUser(userId: number): Promise<Result<UserPostCollection[]>> {
+export function listCollectionsByUser(userId: number): Promise<ApiResponse<UserPostCollection[]>> {
   return request({
     url: `/api/user/post-collections/user/${userId}`,
     method: 'GET'
@@ -42,7 +42,7 @@ export function listCollectionsByUser(userId: number): Promise<Result<UserPostCo
 /**
  * 根据主键查询单个收藏夹详情
  */
-export function getCollectionById(collectionId: number): Promise<Result<UserPostCollection>> {
+export function getCollectionById(collectionId: number): Promise<ApiResponse<UserPostCollection>> {
   return request({
     url: `/api/user/post-collections/${collectionId}`,
     method: 'GET'
@@ -52,7 +52,7 @@ export function getCollectionById(collectionId: number): Promise<Result<UserPost
 /**
  * 获取当前用户收藏夹数量
  */
-export function getUserCollectionCount(): Promise<Result<number>> {
+export function getUserCollectionCount(): Promise<ApiResponse<number>> {
   return request({
     url: '/api/user/post-collections/count',
     method: 'GET'
@@ -62,7 +62,7 @@ export function getUserCollectionCount(): Promise<Result<number>> {
 /**
  * 更新收藏夹名称
  */
-export function updateCollection(collectionId: number, folderName: string): Promise<Result<UserPostCollection>> {
+export function updateCollection(collectionId: number, folderName: string): Promise<ApiResponse<UserPostCollection>> {
   return request({
     url: `/api/user/post-collections/${collectionId}`,
     method: 'PUT',
@@ -73,7 +73,7 @@ export function updateCollection(collectionId: number, folderName: string): Prom
 /**
  * 删除收藏夹
  */
-export function deleteCollection(collectionId: number): Promise<Result<boolean>> {
+export function deleteCollection(collectionId: number): Promise<ApiResponse<boolean>> {
   return request({
     url: `/api/user/post-collections/${collectionId}`,
     method: 'DELETE'

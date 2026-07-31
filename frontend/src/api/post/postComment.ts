@@ -1,10 +1,10 @@
 import request from '@/utils/request.ts'
 import type { CommentVO } from '@/models/vo/post'
 import type { CommentCreateRequest } from '@/models/request/post'
-import type { Result, PageResult } from '@/models/response'
+import type { ApiResponse, PageResponse } from '@/models/response'
 
 // Create a comment
-export function createComment(data: CommentCreateRequest): Promise<Result<CommentVO>> {
+export function createComment(data: CommentCreateRequest): Promise<ApiResponse<CommentVO>> {
     return request({
         url: '/api/comments',
         method: 'POST',
@@ -13,7 +13,7 @@ export function createComment(data: CommentCreateRequest): Promise<Result<Commen
 }
 
 // 根据帖子 ID 查询全部评论列表（平铺）
-export function listCommentsByPostId(postId: number): Promise<Result<CommentVO[]>> {
+export function listCommentsByPostId(postId: number): Promise<ApiResponse<CommentVO[]>> {
     return request({
         url: `/api/comments/post/${postId}`,
         method: 'GET'
@@ -21,7 +21,7 @@ export function listCommentsByPostId(postId: number): Promise<Result<CommentVO[]
 }
 
 // 分页查询指定帖子的评论
-export function listCommentsByPostIdPage(postId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<CommentVO>>> {
+export function listCommentsByPostIdPage(postId: number, pageNum: number, pageSize: number): Promise<ApiResponse<PageResponse<CommentVO>>> {
     return request({
         url: `/api/comments/post/${postId}/page`,
         method: 'GET',
@@ -33,7 +33,7 @@ export function listCommentsByPostIdPage(postId: number, pageNum: number, pageSi
 }
 
 // 获取指定帖子的评论树（含父子层级）
-export function getCommentTree(postId: number): Promise<Result<CommentVO[]>> {
+export function getCommentTree(postId: number): Promise<ApiResponse<CommentVO[]>> {
     return request({
         url: `/api/comments/post/${postId}/tree`,
         method: 'GET'
@@ -41,7 +41,7 @@ export function getCommentTree(postId: number): Promise<Result<CommentVO[]>> {
 }
 
 // 查询某条评论的直接回复列表
-export function listRepliesByCommentId(commentId: number): Promise<Result<CommentVO[]>> {
+export function listRepliesByCommentId(commentId: number): Promise<ApiResponse<CommentVO[]>> {
     return request({
         url: `/api/comments/${commentId}/replies`,
         method: 'GET'
@@ -49,7 +49,7 @@ export function listRepliesByCommentId(commentId: number): Promise<Result<Commen
 }
 
 // 查询热门评论（按点赞数倒序）
-export function listHotComments(postId: number, limit: number): Promise<Result<CommentVO[]>> {
+export function listHotComments(postId: number, limit: number): Promise<ApiResponse<CommentVO[]>> {
     return request({
         url: `/api/comments/post/${postId}/hot`,
         method: 'GET',
@@ -60,7 +60,7 @@ export function listHotComments(postId: number, limit: number): Promise<Result<C
 }
 
 // 查询最新评论（按创建时间倒序）
-export function listLatestComments(postId: number, limit: number): Promise<Result<CommentVO[]>> {
+export function listLatestComments(postId: number, limit: number): Promise<ApiResponse<CommentVO[]>> {
     return request({
         url: `/api/comments/post/${postId}/latest`,
         method: 'GET',
@@ -71,7 +71,7 @@ export function listLatestComments(postId: number, limit: number): Promise<Resul
 }
 
 // 根据主键查询单条评论
-export function getCommentById(id: number): Promise<Result<CommentVO>> {
+export function getCommentById(id: number): Promise<ApiResponse<CommentVO>> {
     return request({
         url: `/api/comments/${id}`,
         method: 'GET'
@@ -79,7 +79,7 @@ export function getCommentById(id: number): Promise<Result<CommentVO>> {
 }
 
 // 删除评论（逻辑删除）
-export function deleteComment(id: number): Promise<Result<boolean>> {
+export function deleteComment(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/comments/${id}`,
         method: 'DELETE'
@@ -87,7 +87,7 @@ export function deleteComment(id: number): Promise<Result<boolean>> {
 }
 
 // 点赞评论
-export function likeComment(id: number): Promise<Result<boolean>> {
+export function likeComment(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/comments/${id}/like`,
         method: 'POST'
@@ -95,7 +95,7 @@ export function likeComment(id: number): Promise<Result<boolean>> {
 }
 
 // 取消点赞评论
-export function unlikeComment(id: number): Promise<Result<boolean>> {
+export function unlikeComment(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/comments/${id}/unlike`,
         method: 'POST'
@@ -103,7 +103,7 @@ export function unlikeComment(id: number): Promise<Result<boolean>> {
 }
 
 // 查询当前用户对某条评论的点赞状态
-export function checkLikeStatus(id: number): Promise<Result<boolean>> {
+export function checkLikeStatus(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/comments/${id}/like/status`,
         method: 'GET'

@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response'
+import type { ApiResponse } from '@/models/response'
 import type { Post } from '@/models/entity/post'
 
 /**
@@ -11,7 +11,7 @@ import type { Post } from '@/models/entity/post'
 /**
  * 查询全部算法权重配置
  */
-export function listWeights(): Promise<Result<{ id: number; metricKey: string; metricValue: number; description?: string }[]>> {
+export function listWeights(): Promise<ApiResponse<{ id: number; metricKey: string; metricValue: number; description?: string }[]>> {
   return request({
     url: '/api/admin/post-algorithm/weights',
     method: 'GET'
@@ -32,7 +32,7 @@ export function updateWeight(id: number, metricValue: number) {
 /**
  * 管理员设置博文权重（用于人工置顶与排序干预）
  */
-export function updatePostWeight(postId: number, weight: number): Promise<Result<Post>> {
+export function updatePostWeight(postId: number, weight: number): Promise<ApiResponse<Post>> {
   return request({
     url: `/api/admin/post-algorithm/posts/${postId}/weight`,
     method: 'PUT',
@@ -43,7 +43,7 @@ export function updatePostWeight(postId: number, weight: number): Promise<Result
 /**
  * 管理员置顶博文
  */
-export function pinPost(postId: number): Promise<Result<Post>> {
+export function pinPost(postId: number): Promise<ApiResponse<Post>> {
   return request({
     url: `/api/admin/post-algorithm/posts/${postId}/pin`,
     method: 'PUT'
@@ -53,7 +53,7 @@ export function pinPost(postId: number): Promise<Result<Post>> {
 /**
  * 管理员取消博文置顶
  */
-export function unpinPost(postId: number): Promise<Result<Post>> {
+export function unpinPost(postId: number): Promise<ApiResponse<Post>> {
   return request({
     url: `/api/admin/post-algorithm/posts/${postId}/unpin`,
     method: 'PUT'

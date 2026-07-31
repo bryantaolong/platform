@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response'
+import type { ApiResponse } from '@/models/response'
 import type { UserRoleOptionVO } from '@/models/vo/user'
 
 /**
@@ -9,6 +9,6 @@ import type { UserRoleOptionVO } from '@/models/vo/user'
 /**
  * 获取全部角色下拉选项
  */
-export function listRoles(): Promise<Result<UserRoleOptionVO[]>> {
+export function listRoles(): Promise<ApiResponse<UserRoleOptionVO[]>> {
   return request.get('/api/user-roles')
 }

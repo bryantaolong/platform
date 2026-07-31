@@ -13,26 +13,27 @@ src/
 │   ├── request/  # 请求类型
 │   ├── response/ # 响应类型
 │   └── vo/       # 视图对象类型
-├── router/       # Vue Router
-├── stores/       # Pinia存储
+├── router/       # Vue Router 路由配置
+├── stores/       # Pinia 状态管理
 ├── utils/        # 工具函数
-└── views/        # 页面组件
+└── pages/        # 页面组件
 ```
 
 ### 1.2 组件最佳实践
-- 使用组合式 API 和`<script setup>`
-- 为 props 和数据定义 TypeScript 接口
-- 将可复用逻辑提取到组合式函数中
+- 使用 Vue 3 SFC（`<script setup lang="ts">`）
+- 使用 Composition API（`ref`、`reactive`、`computed`、`watch`、`onMounted`）
+- 为 props 定义 TypeScript 接口（`defineProps<{...}>()`）
+- 将可复用逻辑提取到 composables 中
 - 保持组件专注于单一职责
 
 ## 2. 命名约定
 
-- **组件**：PascalCase（例如：`PostDetail.vue`、`UserList.vue`）
-- **组合式函数/工具函数**：camelCase（例如：`useUserStore`、`formatDate`）
+- **组件**：PascalCase（例如：`PostDetail.tsx`、`UserList.tsx`）
+- **自定义 hooks/工具函数**：camelCase（例如：`useUserStore`、`formatDate`）
 - **常量**：UPPER_SNAKE_CASE（例如：`API_BASE_URL`）
 - **CSS类**：kebab-case（例如：`post-detail-container`、`user-avatar`）
 - **`/api`下的接口方法导出**：逐一对接口进行`export function`导出
-    
+
     **示例：**
     ```typescript
     /**
@@ -54,7 +55,7 @@ src/
 ### 4.3 访问控制
 - 在进行需要认证的 API 调用前，检查`userStore.isAuthenticated`
 - 为尝试执行受保护操作的未认证用户显示登录提示
-- 使用路由守卫进行页面级访问控制
+- 使用路由守卫（`beforeEach`）进行页面级访问控制
 
 ---
 

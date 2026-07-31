@@ -1,10 +1,10 @@
 import request from '@/utils/request.ts'
-import type { Result, PageResult } from '@/models/response'
+import type { ApiResponse, PageResponse } from '@/models/response'
 
 // User post collect API endpoints
 
 // 收藏博文
-export function collectPost(postId: number, collectionId?: number): Promise<Result<any>> {
+export function collectPost(postId: number, collectionId?: number): Promise<ApiResponse<any>> {
     return request({
         url: '/api/user/post-collects',
         method: 'POST',
@@ -16,7 +16,7 @@ export function collectPost(postId: number, collectionId?: number): Promise<Resu
 }
 
 // 分页查询指定用户的收藏列表
-export function listUserCollectsByUser(userId: number, pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> {
+export function listUserCollectsByUser(userId: number, pageNum: number, pageSize: number, collectionId?: number): Promise<ApiResponse<PageResponse<any>>> {
     return request({
         url: `/api/user/post-collects/user/${userId}`,
         method: 'GET',
@@ -29,7 +29,7 @@ export function listUserCollectsByUser(userId: number, pageNum: number, pageSize
 }
 
 // 获取当前登录用户的收藏列表（可按 collectionId 筛选）
-export function listUserCollects(pageNum: number, pageSize: number, collectionId?: number): Promise<Result<PageResult<any>>> {
+export function listUserCollects(pageNum: number, pageSize: number, collectionId?: number): Promise<ApiResponse<PageResponse<any>>> {
     return request({
         url: '/api/user/post-collects',
         method: 'GET',
@@ -42,7 +42,7 @@ export function listUserCollects(pageNum: number, pageSize: number, collectionId
 }
 
 // 分页查询当前用户指定收藏夹的收藏
-export function listUserCollectsByCollection(collectionId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<any>>> {
+export function listUserCollectsByCollection(collectionId: number, pageNum: number, pageSize: number): Promise<ApiResponse<PageResponse<any>>> {
     return request({
         url: `/api/user/post-collects/collection/${collectionId}`,
         method: 'GET',
@@ -54,7 +54,7 @@ export function listUserCollectsByCollection(collectionId: number, pageNum: numb
 }
 
 // 检查当前用户是否已收藏指定博文
-export function checkCollectStatus(postId: number): Promise<Result<boolean>> {
+export function checkCollectStatus(postId: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/user/post-collects/${postId}/status`,
         method: 'GET'
@@ -62,7 +62,7 @@ export function checkCollectStatus(postId: number): Promise<Result<boolean>> {
 }
 
 // 获取当前用户收藏总数
-export function getUserCollectCount(): Promise<Result<number>> {
+export function getUserCollectCount(): Promise<ApiResponse<number>> {
     return request({
         url: '/api/user/post-collects/count',
         method: 'GET'
@@ -70,7 +70,7 @@ export function getUserCollectCount(): Promise<Result<number>> {
 }
 
 // 取消收藏博文
-export function cancelCollectPost(postId: number): Promise<Result<boolean>> {
+export function cancelCollectPost(postId: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/user/post-collects/${postId}`,
         method: 'DELETE'

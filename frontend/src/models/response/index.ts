@@ -1,2 +1,2 @@
-export { type Result } from './Result.ts'
-export { type PageResult } from './PageResult.ts'
+export { type ApiResponse } from './ApiResponse.ts'
+export { type PageResponse } from './PageResponse.ts'

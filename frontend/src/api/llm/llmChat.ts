@@ -1,6 +1,6 @@
 // src/api/llmChat.ts
 import request from '@/utils/request.ts'
-import type { Result } from '@/models/response'
+import type { ApiResponse } from '@/models/response'
 
 /**
  * AI 聊天相关 API
@@ -19,7 +19,7 @@ export function sendChatMessage(message: string, provider?: string): Promise<{ r
 /**
  * 清空当前用户的聊天上下文
  */
-export function clearChatContext(): Promise<Result<string>> {
+export function clearChatContext(): Promise<ApiResponse<string>> {
   return request.post('/api/llm/chat/clear')
 }
 

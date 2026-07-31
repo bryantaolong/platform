@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { Result, PageResult } from '@/models/response'
+import type { ApiResponse, PageResponse } from '@/models/response'
 import type { UserMessageVO, ConversationVO } from '@/models/vo/user'
 import type { SendMessageRequest } from '@/models/request/user'
 
@@ -10,7 +10,7 @@ import type { SendMessageRequest } from '@/models/request/user'
 /**
  * 发送私信
  */
-export function sendMessage(data: SendMessageRequest): Promise<Result<number>> {
+export function sendMessage(data: SendMessageRequest): Promise<ApiResponse<number>> {
   return request.post('/api/user-messages/send', data)
 }
 
@@ -21,7 +21,7 @@ export function getMessageHistory(
   contactId: number,
   pageNum = 1,
   pageSize = 20
-): Promise<Result<PageResult<UserMessageVO>>> {
+): Promise<ApiResponse<PageResponse<UserMessageVO>>> {
   return request.get(`/api/user-messages/history/${contactId}`, {
     params: { pageNum, pageSize }
   })
@@ -33,7 +33,7 @@ export function getMessageHistory(
 export function getConversations(
   pageNum = 1,
   pageSize = 20
-): Promise<Result<PageResult<ConversationVO>>> {
+): Promise<ApiResponse<PageResponse<ConversationVO>>> {
   return request.get('/api/user-messages/conversations', {
     params: { pageNum, pageSize }
   })
@@ -42,34 +42,34 @@ export function getConversations(
 /**
  * 撤回消息
  */
-export function recallMessage(messageId: number): Promise<Result<boolean>> {
+export function recallMessage(messageId: number): Promise<ApiResponse<boolean>> {
   return request.post(`/api/user-messages/recall/${messageId}`)
 }
 
 /**
  * 标记与某用户的所有消息为已读
  */
-export function markAsRead(contactId: number): Promise<Result<boolean>> {
+export function markAsRead(contactId: number): Promise<ApiResponse<boolean>> {
   return request.post(`/api/user-messages/read/${contactId}`)
 }
 
 /**
  * 获取未读消息总数
  */
-export function getUnreadCount(): Promise<Result<number>> {
+export function getUnreadCount(): Promise<ApiResponse<number>> {
   return request.get('/api/user-messages/unread-count')
 }
 
 /**
  * 获取与某联系人的未读消息数
  */
-export function getUnreadCountWithContact(contactId: number): Promise<Result<number>> {
+export function getUnreadCountWithContact(contactId: number): Promise<ApiResponse<number>> {
   return request.get(`/api/user-messages/unread-count/${contactId}`)
 }
 
 /**
  * 检查是否可以与某用户聊天（互相关注）
  */
-export function canChatWith(userId: number): Promise<Result<boolean>> {
+export function canChatWith(userId: number): Promise<ApiResponse<boolean>> {
   return request.get(`/api/user-messages/can-chat/${userId}`)
 }

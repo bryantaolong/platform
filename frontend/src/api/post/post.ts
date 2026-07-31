@@ -6,13 +6,13 @@ import type {PostCreateRequest} from "@/models/request/post";
 import type {PostUpdateRequest} from "@/models/request/post";
 import type {PostSearchRequest} from "@/models/request/post";
 import type {PostStatusEnum} from "@/models/enum";
-import type {Result} from "@/models/response";
-import type {PageResult} from "@/models/response";
+import type {ApiResponse} from "@/models/response";
+import type {PageResponse} from "@/models/response";
 
 // Define Post API endpoints
 
 // 创建博文（提交审核）
-export function createPost(data: PostCreateRequest): Promise<Result<Post>> {
+export function createPost(data: PostCreateRequest): Promise<ApiResponse<Post>> {
     return request({
         url: '/api/posts',
         method: 'POST',
@@ -21,7 +21,7 @@ export function createPost(data: PostCreateRequest): Promise<Result<Post>> {
 }
 
 // 保存博文草稿
-export function savePostDraft(data: PostCreateRequest): Promise<Result<Post>> {
+export function savePostDraft(data: PostCreateRequest): Promise<ApiResponse<Post>> {
     return request({
         url: '/api/posts/draft',
         method: 'POST',
@@ -30,7 +30,7 @@ export function savePostDraft(data: PostCreateRequest): Promise<Result<Post>> {
 }
 
 // 上传博文图片
-export function uploadPostImage(formData: FormData): Promise<Result<{ url: string }>> {
+export function uploadPostImage(formData: FormData): Promise<ApiResponse<{ url: string }>> {
     return request({
         url: '/api/posts/upload/image',
         method: 'POST',
@@ -42,7 +42,7 @@ export function uploadPostImage(formData: FormData): Promise<Result<{ url: strin
 }
 
 // 管理员分页查询所有博文（含草稿/已删除）
-export function listAllPosts(pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+export function listAllPosts(pageNum: number, pageSize: number): Promise<ApiResponse<PageResponse<PostVO>>> {
     return request({
         url: '/api/posts/all',
         method: 'GET',
@@ -57,7 +57,7 @@ export function listAllPosts(pageNum: number, pageSize: number): Promise<Result<
 export function listAllPublishedPosts(
     pageNum: number,
     pageSize: number
-): Promise<Result<PageResult<PostSummaryVO>>> {
+): Promise<ApiResponse<PageResponse<PostSummaryVO>>> {
     return request({
         url: '/api/posts/published',
         method: 'GET',
@@ -69,7 +69,7 @@ export function listAllPublishedPosts(
 export function listFollowedUsersPosts(
     pageNum: number,
     pageSize: number
-): Promise<Result<PageResult<PostSummaryVO>>> {
+): Promise<ApiResponse<PageResponse<PostSummaryVO>>> {
     return request({
         url: '/api/posts/following',
         method: 'GET',
@@ -78,7 +78,7 @@ export function listFollowedUsersPosts(
 }
 
 // 查询指定用户的全部博文（含草稿、已删除）
-export function listAllPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+export function listAllPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<ApiResponse<PageResponse<PostVO>>> {
     return request({
         url: `/api/posts/${userId}/all`,
         method: 'GET',
@@ -90,7 +90,7 @@ export function listAllPostsByUserId(userId: number, pageNum: number, pageSize: 
 }
 
 // 查询指定用户已发布的博文
-export function listPublishedPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<Result<PageResult<PostVO>>> {
+export function listPublishedPostsByUserId(userId: number, pageNum: number, pageSize: number): Promise<ApiResponse<PageResponse<PostVO>>> {
     return request({
         url: `/api/posts/${userId}/published`,
         method: 'GET',
@@ -102,7 +102,7 @@ export function listPublishedPostsByUserId(userId: number, pageNum: number, page
 }
 
 // 根据主键查询单条博文
-export function getPostById(id: number): Promise<Result<PostVO>> {
+export function getPostById(id: number): Promise<ApiResponse<PostVO>> {
     return request({
         url: `/api/posts/${id}`,
         method: 'GET'
@@ -114,7 +114,7 @@ export function listPostsByTitle(
     title: string,
     pageNum: number,
     pageSize: number
-): Promise<Result<PageResult<PostVO>>> {
+): Promise<ApiResponse<PageResponse<PostVO>>> {
     return request({
         url: '/api/posts/title',
         method: 'POST',
@@ -131,7 +131,7 @@ export function queryPosts(
     req: PostSearchRequest,
     pageNum: number,
     pageSize: number
-): Promise<Result<PageResult<PostVO>>> {
+): Promise<ApiResponse<PageResponse<PostVO>>> {
     return request({
         url: '/api/posts/admin/query',
         method: 'POST',
@@ -144,7 +144,7 @@ export function queryPosts(
 }
 
 // 更新博文
-export function updatePost(id: number, data: PostUpdateRequest): Promise<Result<Post>> {
+export function updatePost(id: number, data: PostUpdateRequest): Promise<ApiResponse<Post>> {
     return request({
         url: `/api/posts/${id}`,
         method: 'PUT',
@@ -153,7 +153,7 @@ export function updatePost(id: number, data: PostUpdateRequest): Promise<Result<
 }
 
 // 管理员修改博文状态
-export function updatePostStatus(id: number, status: PostStatusEnum): Promise<Result<Post>> {
+export function updatePostStatus(id: number, status: PostStatusEnum): Promise<ApiResponse<Post>> {
     return request({
         url: `/api/posts/status/${id}`,
         method: 'PUT',
@@ -162,7 +162,7 @@ export function updatePostStatus(id: number, status: PostStatusEnum): Promise<Re
 }
 
 // 删除博文（逻辑删除）
-export function deletePost(id: number): Promise<Result<boolean>> {
+export function deletePost(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/posts/${id}`,
         method: 'DELETE'
@@ -170,7 +170,7 @@ export function deletePost(id: number): Promise<Result<boolean>> {
 }
 
 // 点赞博文
-export function likePost(id: number): Promise<Result<boolean>> {
+export function likePost(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/posts/${id}/like`,
         method: 'POST'
@@ -178,7 +178,7 @@ export function likePost(id: number): Promise<Result<boolean>> {
 }
 
 // 取消点赞博文
-export function unlikePost(id: number): Promise<Result<boolean>> {
+export function unlikePost(id: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/posts/${id}/unlike`,
         method: 'POST'
@@ -186,7 +186,7 @@ export function unlikePost(id: number): Promise<Result<boolean>> {
 }
 
 // 查询当前用户对某条博文的点赞状态
-export function checkLikeStatus(postId: number): Promise<Result<boolean>> {
+export function checkLikeStatus(postId: number): Promise<ApiResponse<boolean>> {
     return request({
         url: `/api/posts/${postId}/like/status`,
         method: 'GET'
