@@ -1,2 +1,9 @@
 ### VS Code ###
 .vscode/
+
+### Binaries ###
+*.exe
+*.bin
+*.dll
+*.so
+*.dylib
