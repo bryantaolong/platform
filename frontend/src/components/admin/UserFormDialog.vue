@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { Modal, Form, Input, Select } from '@arco-design/web-vue';
-import type { UserRoleOptionVO } from '@/models/vo/user';
+import type { UserRoleOptionVO } from '@/types';
 
 interface Props {
   visible: boolean

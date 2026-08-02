@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
-import type { UserPostCollection } from "@/models/entity/post";
+import type { ApiResponse } from '@/types/response'
+import type { UserPostCollection } from '@/types'
 
 /**
  * UserPostCollection API

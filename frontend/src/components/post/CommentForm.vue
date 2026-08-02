@@ -4,7 +4,7 @@ import { Form, Input, Button, Message } from '@arco-design/web-vue';
 import { IconCheck, IconClose } from '@arco-design/web-vue/es/icon';
 import type { FormInstance } from '@arco-design/web-vue';
 import * as commentApi from '@/api/post/postComment';
-import type { CommentCreateRequest } from '@/models/request/post';
+import type { CommentCreateRequest } from '@/types';
 
 interface Props {
   postId: number;

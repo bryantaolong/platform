@@ -1,7 +1,6 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse, PageResponse } from '@/models/response'
-import type { SysUser } from '@/models/entity/user'
-import type { UserCreateRequest, UserUpdateRequest, ChangePasswordRequest, UserSearchRequest } from '@/models/request/user'
+import type { ApiResponse, PageResponse } from '@/types/response'
+import type { SysUser, UserCreateRequest, UserUpdateRequest, UserSearchRequest, ChangePasswordRequest } from '@/types'
 
 /**
  * 用户管理API

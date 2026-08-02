@@ -1,9 +1,6 @@
 import request from '@/utils/request.ts'
-import type {ApiResponse} from '@/models/response'
-import type {UserVO} from '@/models/vo/user'
-import type {LoginRequest} from '@/models/request/auth'
-import type {RegisterRequest} from '@/models/request/auth'
-import type {ChangePasswordRequest} from '@/models/request/user'
+import type { ApiResponse } from '@/types/response'
+import type { UserVO, LoginRequest, RegisterRequest, ChangePasswordRequest } from '@/types'
 
 /**
  * 用户认证API

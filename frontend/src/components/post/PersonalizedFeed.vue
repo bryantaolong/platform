@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { Button, Tag, Skeleton, Empty } from '@arco-design/web-vue';
 import { IconMosaic, IconRefresh, IconUser, IconEye, IconMessage, IconStar, IconLoading } from '@arco-design/web-vue/es/icon';
 import { useUserStore } from '@/stores/user';
-import type { PostVO } from '@/models/vo/post';
+import type { PostVO } from '@/types';
 import {
   getPersonalizedFeed,
   getHotFeedForNewUser,

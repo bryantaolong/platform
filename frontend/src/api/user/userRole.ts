@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
-import type { UserRoleOptionVO } from '@/models/vo/user'
+import type { ApiResponse } from '@/types/response'
+import type { UserRoleOptionVO } from '@/types'
 
 /**
  * 用户角色管理API

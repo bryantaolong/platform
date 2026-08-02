@@ -13,7 +13,7 @@ import {
 } from '@arco-design/web-vue';
 import * as userPostCollectApi from '@/api/post/userPostCollect';
 import * as userPostCollectionApi from '@/api/post/userPostCollection';
-import type { UserPostCollection } from '@/models/entity/post';
+import type { UserPostCollection } from '@/types';
 
 interface Props {
   userId?: number;

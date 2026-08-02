@@ -3,7 +3,7 @@ import { ref, onMounted, defineExpose } from 'vue';
 import { Radio, Button, Empty, Spin } from '@arco-design/web-vue';
 import { IconMessage, IconArrowUp, IconStar, IconDelete } from '@arco-design/web-vue/es/icon';
 import * as commentApi from '@/api/post/postComment';
-import type { CommentVO } from '@/models/vo/post';
+import type { CommentVO } from '@/types';
 import CommentItem from './CommentItem.vue';
 
 interface Props {

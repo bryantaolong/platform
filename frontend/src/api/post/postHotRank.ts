@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
+import type { ApiResponse } from '@/types/response'
 
 /**
  * 获取热门帖子排行榜

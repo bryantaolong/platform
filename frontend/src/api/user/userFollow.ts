@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse, PageResponse } from '@/models/response'
-import type { UserProfileVO } from '@/models/vo/user'
+import type { ApiResponse, PageResponse } from '@/types/response'
+import type { UserProfileVO } from '@/types'
 
 /**
  * 用户关注API

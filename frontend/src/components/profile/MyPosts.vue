@@ -5,8 +5,7 @@ import { Card, Empty, Tag, Select, Pagination } from '@arco-design/web-vue';
 import { IconEye, IconMessage, IconStar } from '@arco-design/web-vue/es/icon';
 import { useUserStore } from '@/stores/user';
 import * as postApi from '@/api/post/post';
-import type { PostVO } from '@/models/vo/post';
-import { PostStatusEnum } from '@/models/enum';
+import type { PostVO, PostStatusEnum } from '@/types';
 import { formatDate } from '@/utils/date';
 
 interface Props {

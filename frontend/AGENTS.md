@@ -8,15 +8,16 @@ src/
 ├── api/          # API调用
 ├── components/   # 可复用组件
 ├── layouts/      # 布局组件
-├── models/       # TypeScript类型
+├── types/        # TypeScript类型
 │   ├── entity/   # 后端实体类型
 │   ├── request/  # 请求类型
 │   ├── response/ # 响应类型
-│   └── vo/       # 视图对象类型
+│   ├── vo/       # 视图对象类型
+│   └── enum/     # 枚举类型
 ├── router/       # Vue Router 路由配置
 ├── stores/       # Pinia 状态管理
 ├── utils/        # 工具函数
-└── pages/        # 页面组件
+└── views/        # 页面组件
 ```
 
 ### 1.2 组件最佳实践

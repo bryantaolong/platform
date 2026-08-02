@@ -1,7 +1,7 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
-import type { UserUpdateRequest } from '@/models/request/user'
-import type { UserProfileVO } from '@/models/vo/user'
+import type { ApiResponse } from '@/types/response'
+import type { UserUpdateRequest } from '@/types'
+import type { UserProfileVO } from '@/types'
 
 /**
  * 用户资料 API

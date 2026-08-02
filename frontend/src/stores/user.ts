@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import type { UserVO, UserProfileVO } from '@/models/vo/user'
+import type { UserVO } from '@/types'
+import type { UserProfileVO } from '@/types'
 import * as authApi from '@/api/auth/auth'
 import * as userProfileApi from '@/api/user/userProfile'
 import { ref, computed } from 'vue'

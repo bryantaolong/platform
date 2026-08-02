@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse, PageResponse } from '@/models/response'
+import type { ApiResponse, PageResponse } from '@/types/response'
 
 // User post collect API endpoints
 

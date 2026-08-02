@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Skeleton, Empty, Select } from '@arco-design/web-vue';
 import { IconFire, IconSun, IconEye, IconMessage, IconStar } from '@arco-design/web-vue/es/icon';
-import type { PostVO } from '@/models/vo/post';
+import type { PostVO } from '@/types';
 import * as postHotRankApi from '@/api/post/postHotRank.ts';
 
 const router = useRouter();

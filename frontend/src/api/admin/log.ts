@@ -1,5 +1,5 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
+import type { ApiResponse } from '@/types/response'
 
 /**
  * 系统日志监控 API

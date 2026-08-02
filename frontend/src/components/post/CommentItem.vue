@@ -5,7 +5,7 @@ import { IconMessage, IconArrowUp, IconStar, IconDelete } from '@arco-design/web
 import CommentForm from './CommentForm.vue';
 import * as commentApi from '@/api/post/postComment';
 import { getAvatarUrl } from '@/utils/file';
-import type { CommentVO } from '@/models/vo/post';
+import type { CommentVO } from '@/types';
 
 interface Props {
   comment: CommentVO;

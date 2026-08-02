@@ -1,6 +1,6 @@
 import request from '@/utils/request.ts'
-import type { ApiResponse } from '@/models/response'
-import type { PostVO, PostSummaryVO } from '@/models/vo/post'
+import type { ApiResponse } from '@/types/response'
+import type { PostVO, PostSummaryVO } from '@/types'
 
 /**
  * 获取个性化推荐内容流

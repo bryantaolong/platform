@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Space, Button, Table, Dropdown, Pagination } from '@arco-design/web-vue';
 import { IconEdit, IconEye, IconLock, IconUnlock, IconDelete, IconArrowDown } from '@arco-design/web-vue/es/icon';
-import type { SysUser } from '@/models/entity/user';
+import type { SysUser } from '@/types';
 import { formatDateTime, getStatusTag, getRoleTag } from './helper';
 
 interface Props {

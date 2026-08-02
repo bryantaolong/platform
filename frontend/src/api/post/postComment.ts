@@ -1,7 +1,6 @@
 import request from '@/utils/request.ts'
-import type { CommentVO } from '@/models/vo/post'
-import type { CommentCreateRequest } from '@/models/request/post'
-import type { ApiResponse, PageResponse } from '@/models/response'
+import type { ApiResponse, PageResponse } from '@/types/response'
+import type { CommentVO, CommentCreateRequest } from '@/types'
 
 // Create a comment
 export function createComment(data: CommentCreateRequest): Promise<ApiResponse<CommentVO>> {

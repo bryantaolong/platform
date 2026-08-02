@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 import { Card, vatar, Empty } from '@arco-design/web-vue';
 import { getAvatarUrl } from '@/utils/file';
-import type { UserProfileVO } from '@/models/vo/user';
+import type { UserProfileVO } from '@/types';
 
 interface Props {
   users: UserProfileVO[];
