@@ -1,4 +1,4 @@
-# Platform (Java)
+# Platform
 
 ## Project Overview
 
